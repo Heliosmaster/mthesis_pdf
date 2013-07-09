@@ -1,4 +1,10 @@
-\chapter{Partial assigment of rows and columns}
+\chapter{Iterative methods for sparse matrix partitioning}
+\section{Localview}
+\section{Globalview}
+\section{SBDview}
+\section{Extension of SBDview}
+\section{Hot restart}
+
 
 In the last section we discussed a somewhat fine-grained method for assigning nonzeros to either $A_r$ and $A_c$, as we make $N$ independent choices (one for each nonzero) and reuse some of the partitioning information (namely, whether a row or a column is cut or uncut).
 
@@ -181,6 +187,3 @@ Therefore, as an example, the generating scheme \verb|pa-sorted-w-mix-alt-row|, 
 \end{center}
 \caption{Directed graph that represents the family of heuristics used (any path from START to END). Dummy nodes (the ones without any label) were added in order to reduce the number of edges and ease legibility.} \label{fig:digraph}
 \end{figure}
-
-
-

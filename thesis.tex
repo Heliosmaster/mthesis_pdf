@@ -1,17 +1,22 @@
+% arara: pdflatex: {options: '-file-line-error-style'}
+% arara: biber
+% arara: pdflatex
+% arara: pdflatex
 \documentclass[a4paper,utf8]{report}
 \usepackage{fullpage}
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[babel]{csquotes}
-\usepackage[backref,hyperref,sorting=none]{biblatex}
+\usepackage[backend=biber,backref,hyperref,sorting=none]{biblatex}
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{mathtools}
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{enumerate}
-\usepackage[boxed]{algorithm}
-\usepackage{algorithmic}
+\usepackage{algpseudocode}
+\usepackage[boxed,chapter]{algorithm}
+\usepackage{algorithmicx}
 \usepackage[pdftex]{hyperref}
 \usepackage{tikz}
 %\usepackage{natbib}
@@ -54,14 +59,11 @@
 
 \pagenumbering{arabic}
 
-AA\cite{mondriaan}
-
-B\cite{mediumgrain}
 \include{introduction}
-
-\include{local_assignment}
-\include{hot_restart}
-\include{independent_set}
+%\include{methods}
+%\include{independent_set}
+%\include{experimental_results}
+%\include{conclusions}
 
 \printbibliography[heading=bibintoc]
 
