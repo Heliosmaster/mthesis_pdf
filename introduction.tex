@@ -163,9 +163,11 @@ where $\varepsilon$, similarly as before, represents the allowed imbalance.
 
 Now, given a partition $(V_0,\dots,V_{p-1})$ of the graph $G$, we say that the edge $e=(i,j)$ is \emph{cut} if $i \in V_k, j \in V_l$, with $k \neq l$; otherwise, it is said to be \emph{uncut}. Previously, we claimed that communication during the parallel matrix-vector multiplication can be avoided if a row/column is uncut, and here the goal is the same: we want to minimize the \emph{cutsize}, i.e. the number of edges cut.
 
-However, despite all the similarities between the matrix partitioning problem and the graph partitioning one, it has been shown \cite{hypergraph_model} that this cut-edge metric is not an accurate representation of the communication volume. In \cite{hypergraph_model} it is shown that a more correct way of modeling the matrix partitioning problem is through the concept of hypergraph partitioning.
+However, despite all the similarities between the matrix partitioning problem and the graph partitioning one, it has been shown \cite{hypergraph_model}\cite{zoltan_worth-it},  that this cut-edge metric is not an accurate representation of the communication volume. Additional criticism \cite{hendrickson_emperor} comes from the fact that the graph partitioning approach can only handle square symmetric matrices. It was also shown \cite{hendrickson_kolda} that these disadvantages hold for all application of graph partitioning in parallel computing, and not only our problem of matrix partitioning for sparse matrix-vector multiplication. 
 
-A hypergraph, is simply a generalization of a graph: we do not consider edges that connect two nodes, but rather \emph{hyperedges}, which are subsets of nodes. Apart from considering only non-empty hyperedges, note that there is no other restriction on a cardinality of a hyperedge.
+In \cite{hypergraph_model} it is shown that a more correct way of modeling the matrix partitioning problem is through the concept of hypergraph partitioning.
+
+A hypergraph is simply a generalization of a graph: we do not consider edges that connect two nodes, but rather \emph{hyperedges}, which are subsets of nodes. Apart from considering only non-empty hyperedges, note that there is no other restriction on a cardinality of a hyperedge.
 
 Hypergraphs, and in particular the hypergraph partitioning problem are already well known in literature: they have a natural application in the designing of integrated circuits (VLSI), in finding efficient storage of large databases on disks, and data mining \cite{vlsi}, as well as urban transportation design and study of propositional logic \cite{papa_hypergraph}.
 
@@ -229,11 +231,28 @@ On a higher level, one of the benefits of this decomposition model is easy to un
 
 \section{Earlier work}
 
-\section{Medium-grain model}
+As hypergraph partitioning has a wide variety of applications, it has been extensively studied in literature.
 
-Row-net, column-net and fine-grain are not the only possible decomposition models used to translate the matrix partitioning problems to a hypergraph partitioning one. An interesting model recently proposed by D. Pelt and R.H. Bisseling \cite{mediumgrain}, called \textbf{medium-grain}, is a further exploitation of 2-dimensional partioning, and it has produced good results. 
+In the previous section, we already mentioned the row-net and column-net models \cite{hypergraph_model}, and a more fine-grained approach, \cite{hypergraph_finegrain}. In \cite{hypergraph_revisiting} Uçar and Aykanat first employ an elementary 1-dimensional hypergraph model, and then transform it in several ways to hypergraph models suitable for symmetric and unsymmetric partitionings; these models include also the input and output vectors, and therefore a few extra vertices are added.
 
-As it is the base of our work described in the next chapters, an entire section is dedicated to its introduction.
+A different 2-dimensional approach is given by the \emph{coarse-grain} method \cite{hypergraph_coarsegrain}, in two phases: first it applies the column-net hypergraph model and obtains a row partitioning of the matrix in $p$ parts, then it performs  a multi-constraint column partitioning in $q$ parts, yielding a final 2-D cartesian partitioning in $p \times q$ parts. 
 
+Alternatively, Vastenhouw and Bisseling proposed a 2-dimensional recursive method for data distribution \cite{mondriaan}. 
 
+An interesting model recently proposed by Pelt and Bisseling \cite{mediumgrain}, called \textbf{medium-grain}, is a further exploitation of 2-dimensional partioning, and it has produced good results. As this model is at the base of our work, a more detailed explanation will be given in Section \ref{sec:mediumgrain}.
 
+Also, the matrix structure has to be taken into account to devise specifically targeted methods: while initially devised for structurally symmetric matrices \cite{hypergraph_model}, the hypergraph-based approach was shown to be efficient also in case of rectangular matrices, by Pinar et al.\cite{pinar1996}, for the partitioning of rectangular Linear Programming matrices.
+
+Hu, Maguire and Blake present in \cite{hu2000} an algorithm for nonsymmetric matrices that performs row and column permutations, getting a bordered block diagonal form and then trying to assign matrix rows such that the number of cut columns is minimized.
+
+In general, as there is such a wide variety of different methods and model, it might be difficult to choose the best one, given a matrix to partition. {\c{C}}ataly{\"u}rek, Aykanat, and U{\c{c}}ar propose a partitioning recipe \cite{catalyurek_recipe} that chooses a partitioning method according to some matrix characteristics.
+
+There also available a modest number of software partitioners that implements some of the methods and models just discussed, along with other: among the sequential ones we have PaToH (a multilevel Partitioning Tool for Hypergraphs) \cite{patoh}, hMetis \cite{hmetis} (specifically tageted at partitioning hypergraphs for VLSI design), Mondriaan \cite{mondriaan} (more specifically designed to solve the matrix partitioning problem), MONET (Matrix Ordering for minimal NET-cut)\cite{hu2000}, while among the parallel ones we have Zoltan-PHG (Parallel Hypergraph Partitioner) \cite{parallel_hypergraph}.
+
+All of these partitioners produce very different results, with respect to both solution quality and execution time, despite having at the core the same method for finding good initial solutions, namely the Kernighan-Lin method \cite{kernighan_lin}, with the optimizations of Fiduccia-Mattheyses \cite{fiduccia}. This method (often handily abbreviated with KLFM from the initials of the authors involved), originally designed for bipartitioning graphs, is a local search heuristic: given a partitioning that obeys the balance constraint \eqref{eq:balance}, applies a series of small changes to find improvement in the quality solution.
+
+To solve large instances, all these partitioners use a multi-level method: the large problem is progressively coarsened until a smaller instance is obtained, then the problem is solved on this small instance and the solution is gradually uncoarsened, with a refinement at each step to improve the solution quality.
+
+Finally, these existing software partitioners are all based on \emph{recursive bisection}: instead of partitioning the hypergraph directly into the desired number of parts, they operate a sequence of bisection of the partitions. This is a good semplification in the sense that efforts on finding methods for good bipartitioning can be re-employed, and also because splitting a hypergraph in just two parts is much easier; but there is also a major flaw that, using this recursive bisection, we might not be able to reach the same quality of a solution with direct splitting into the desired number of parts.
+
+\section{Medium-grain model} \label{sec:mediumgrain}
