@@ -4,7 +4,7 @@ Matrices are one of the most important mathematical objects, as they can be used
 
 In most real-world computations, the systems considered are usually of very large size and involve \textbf{sparse} matrices, because the variables at hand are usually connected to a limited number of others (for example, a very large graph in which each node has just a handful of incident edges); therefore, the matrices involved have the vast majority of entries equal to 0.
 
-More formally, let us consider a matrix of size $m \times n$ with $N$ nonzeros. We say that the matrix is sparse if $ N \ll mn $.
+More formally, let us consider a matrix of size $m \times n$ with $N$ nonzeros. We say that the matrix is sparse if $ N \ll mn $. Without loss of generality, we assume that each row and column has at least one nonzero (otherwise those rows and columns can easily be removed from the problem).
 
 One of the most fundamental operations performed in these real-world computations is the sparse matrix-vector multiplication: in which we compute
 
@@ -217,7 +217,7 @@ Our modified balance constraint is as follows:
 
 The \textbf{row-net} model is very similar the one just described (as can be guessed from the name): it is exactly the symmetrical of the colum-net model, in the sense that now rows are hyperedges and columns are vertices of the hypergraph. The reasoning just described applies also to this model, with the little modification that now the weight of a vertex is the number of nonzeros in that column.
 
-We see how the column-net model and row-net model have the advantage of fully assigning a row (or a column) to a processor; this has the advantage of eliminating completely one source of communication in our parallel sparse matrix-vector multiplication algorithm (respectively, the fan-in and fan-out). However, this advantage can easily become a weakness, because now the partitioning is forcedly 1-dimensional, and this is usually a too-strong restriction.
+We see how the column-net model and row-net model have the advantage of fully assigning a row (or a column) to a processor; this has the advantage of eliminating completely one source of communication in our parallel sparse matrix-vector multiplication algorithm (respectively, the fan-in and fan-out). However, this advantage can easily become a weakness, because now the partitioning is forcedly 1-dimensional, and this is usually too-strong of a restriction.
 
 Now, as last example of possible decomposition of a matrix into a hypergraph, and as a partial address to the drawbacks of the previous two models, we will describe a 2-dimensional approach, the so-called \emph{fine-grain} model \cite{hypergraph_finegrain}.
 
@@ -231,37 +231,38 @@ On a higher level, one of the benefits of this decomposition model is easy to un
 
 \section{Earlier work}
 
-As hypergraph partitioning has a wide variety of applications, it has been extensively studied in literature.
+The hypergraph partitioning problem has a wide variety of applications and therefore there is a somewhat extended literature available; for this reason, it is convenient to translate a instance of our matrix partitioning problem to it in the best possible way. 
 
-In the previous section, we already mentioned the row-net and column-net models \cite{hypergraph_model}, and a more fine-grained approach, \cite{hypergraph_finegrain}. In \cite{hypergraph_revisiting} Uçar and Aykanat first employ an elementary 1-dimensional hypergraph model, and then transform it in several ways to hypergraph models suitable for symmetric and unsymmetric partitionings; these models include also the input and output vectors, and therefore a few extra vertices are added.
+Among the models which are used to perform this translation, we already mentioned row-net and column-net \cite{hypergraph_model}, proposed in 1999, and a more recent fine-grained approach \cite{hypergraph_finegrain}, proposed in 2001. New models are relatively rare, and only recently Pelt and Bisseling proposed a interesting new one \cite{mediumgrain}, the \textbf{medium-grain} model. As this model is at the very base of our work, a more detailed explanation will be given in Section \ref{sec:mediumgrain}.
 
-A different 2-dimensional approach is given by the \emph{coarse-grain} method \cite{hypergraph_coarsegrain}, in two phases: first it applies the column-net hypergraph model and obtains a row partitioning of the matrix in $p$ parts, then it performs  a multi-constraint column partitioning in $q$ parts, yielding a final 2-D cartesian partitioning in $p \times q$ parts. 
+In addition to these models, there has been some research effort towards the creation of more complicated methods, which often comprise several stages.
 
-Alternatively, Vastenhouw and Bisseling proposed a 2-dimensional recursive method for data distribution \cite{mondriaan}. 
+For example, in \cite{hypergraph_revisiting} Uçar and Aykanat first employ an elementary 1-dimensional hypergraph model, and then they transform it in several ways to different hypergraph models suitable for both symmetric and unsymmetric matrix partitionings; it is important to note that these models also include the input and output vectors, and therefore a few extra vertices are added to the hypergraph.
 
-An interesting model recently proposed by Pelt and Bisseling \cite{mediumgrain}, called \textbf{medium-grain}, is a further exploitation of 2-dimensional partioning, and it has produced good results. As this model is at the base of our work, a more detailed explanation will be given in Section \ref{sec:mediumgrain}.
+A different 2-dimensional approach is given by the \emph{coarse-grain} method \cite{hypergraph_coarsegrain}: first the column-net hypergraph model is used, obtaining a row partitioning of the matrix in $p$ parts, then a multi-constraint column partitioning in $q$ parts is performed, yielding a final 2-D cartesian partitioning in $p \times q$ parts. 
 
-Also, the matrix structure has to be taken into account to devise specifically targeted methods: while initially devised for structurally symmetric matrices \cite{hypergraph_model}, the hypergraph-based approach was shown to be efficient also in case of rectangular matrices, by Pinar et al.\cite{pinar1996}, for the partitioning of rectangular Linear Programming matrices.
+Moreover, Vastenhouw and Bisseling proposed a 2-dimensional recursive method for data distribution \cite{mondriaan}; this greedy method splits recursively a rectangular matrix into 2 parts.
+At each step of the recursion, there is the choice on the direction to be taken in the next step: two different strategies are proposed, alternating splitting directions or simply trying to split both vertically and horizontally and taking greedily the best of the two.
 
-Hu, Maguire and Blake present in \cite{hu2000} an algorithm for nonsymmetric matrices that performs row and column permutations, getting a bordered block diagonal form and then trying to assign matrix rows such that the number of cut columns is minimized.
+Beside this general purpose models and methods, it is also possible to take into account the structure of the matrix to be partitioned: the hypergraph-based approach was indeed initially devised for structurally symmetric matrices \cite{hypergraph_model}, and only later it was shown to be efficient also in case of rectangular matrices \cite{pinar1996}. Moreover, Hu, Maguire and Blake present in \cite{hu2000} an algorithm for nonsymmetric matrices that performs row and column permutations, getting a bordered block diagonal form and then trying to assign matrix rows such that the number of cut columns is minimized.
 
 In general, as there is such a wide variety of different methods and model, it might be difficult to choose the best one, given a matrix to partition. {\c{C}}ataly{\"u}rek, Aykanat, and U{\c{c}}ar propose a partitioning recipe \cite{catalyurek_recipe} that chooses a partitioning method according to some matrix characteristics.
 
-There also available a modest number of software partitioners that implements some of the methods and models just discussed, along with other: among the sequential ones we have PaToH (a multilevel Partitioning Tool for Hypergraphs) \cite{patoh}, hMetis \cite{hmetis} (specifically tageted at partitioning hypergraphs for VLSI design), Mondriaan \cite{mondriaan} (more specifically designed to solve the matrix partitioning problem), MONET (Matrix Ordering for minimal NET-cut)\cite{hu2000}, while among the parallel ones we have Zoltan-PHG (Parallel Hypergraph Partitioner) \cite{parallel_hypergraph}.
+Regarding the actual implementations of the just discussed models, methods and algorithms, there are a few existing software partitioners available. Among the sequential ones we have PaToH (a multilevel Partitioning Tool for Hypergraphs) \cite{patoh}, hMetis \cite{hmetis} (specifically tageted at partitioning hypergraphs for VLSI design), Mondriaan \cite{mondriaan} (among the ones here described, this is the one more specifically designed to solve the matrix partitioning problem), MONET (Matrix Ordering for minimal NET-cut)\cite{hu2000}. Zoltan-PHG (Parallel Hypergraph Partitioner) \cite{parallel_hypergraph} performs instead matrix partitioning in parallel; the relative scarcity of parallel software partitioners is to be explained by the fact that this field is relatively new, and therefore most of the research efforts have been directed toward a sequential approach.
 
-All of these partitioners produce very different results, with respect to both solution quality and execution time, despite having at the core the same method for finding good initial solutions, namely the Kernighan-Lin method \cite{kernighan_lin}, with the optimizations of Fiduccia-Mattheyses \cite{fiduccia}. This method (often handily abbreviated with KLFM from the initials of the authors involved), originally designed for bipartitioning graphs, is a local search heuristic: given a partitioning that obeys the balance constraint \eqref{eq:balance}, applies a series of small changes to find improvement in the quality solution.
+The partitioners just mentioned produce very different results, with respect to both solution quality and execution time, despite having at the core the same method for finding good initial solutions. The method employed is the well-known Kernighan-Lin \cite{kernighan_lin} method, with the optimizations of Fiduccia-Mattheyses \cite{fiduccia}. This local search heuristic was originally designed for bipartitioning graphs and, given a partitioning that obeys the balance constraint \eqref{eq:balance}, it applies a series of small changes to find improvement in the quality solution.
 
 To solve large instances, all these partitioners use a multi-level method: the large problem is progressively coarsened until a smaller instance is obtained, then the problem is solved on this small instance and the solution is gradually uncoarsened, with a refinement at each step to improve the solution quality.
 
-Finally, these existing software partitioners are all based on \emph{recursive bisection}: instead of partitioning the hypergraph directly into the desired number of parts, they operate a sequence of bisection of the partitions. This is a good semplification in the sense that efforts on finding methods for good bipartitioning can be re-employed, and also because splitting a hypergraph in just two parts is much easier; but there is also a major flaw that, using this recursive bisection, we might not be able to reach the same quality of a solution with direct splitting into the desired number of parts.
+Finally, these existing software partitioners are all based on \emph{recursive bisection}: instead of partitioning the hypergraph directly into the desired number of parts, they operate a sequence of bisection of the partitions. This is a good semplification in the sense that it just suffices to find very good algorithms for bipartitioning, and also because splitting a hypergraph in just two parts is much easier; there is however one major flaw with this approach: using this recursive bisection  we might not be able to reach the same quality of a solution with direct splitting into the desired number of parts.
 
 \section{Medium-grain model} \label{sec:mediumgrain}
 
-All of the possible ways of translating the matrix partitioning problem into the hypergraph partitioning one have different advantages and drawbacks: the 1-dimensional ones, row-net and colum-net, eliminate completely one source of communication but are somewhat too restricting; fine-grain, on the contrary, does not provide any kind of restriction on the partitioning, but resulting in too large to manage hypergraph.
+All of the possible ways of translating the matrix partitioning problem into the hypergraph partitioning one have different advantages and drawbacks: the 1-dimensional ones, row-net and colum-net, eliminate completely one source of communication but are somewhat too restricting; fine-grain, on the contrary, does not provide any kind of limitation on the choices for the partitioning, but the resulting hypergraph is very often too big to manage.
 
-We will now describe a model proposed by Pelt and Bisseling \cite{mediumgrain} which can be described as a sort of middle ground between these two kinds of models: the resulting partitioning is 2-dimensional by design (thus avoiding the restriction of the row-net and column-net), but it still imposes clusters of nonzeros from the same rows and columns to be assigned to same processor, thus avoiding the main disadvantage of the fine-grain.
+A new model has recently been proposed by Pelt and Bisseling \cite{mediumgrain}, which can be described as a sort of middle ground between the 1-dimensional ones and fine-grain. The resulting partitioning is 2-dimensional by design (thus avoiding the limitations of the row-net and column-net models), but it still imposes that clusters of nonzeros from the same rows and columns are assigned to same processor, thus reducing the size of the final hypergraph, avoiding the main disadvantage of the fine-grain model.
 
-The key of this model lies in splitting our original matrix $A$ in two parts, $A_r$ and $A_c$, i.e. we have that $A_r + A_c = A$; then we proceed to construct the auxiliary block-matrix $B$, of size $(m+n) \times (m+n)$, as:
+The key of the medium-grain model lies into the splitting of our original matrix $A$ in two parts, $A_r$ and $A_c$, such that $A_r + A_c = A$. Then, we proceed to construct the auxiliary block-matrix $B$, of size $(m+n) \times (m+n)$, defined as
 
 \begin{align}
 	B:=	\begin{bmatrix}
@@ -271,7 +272,7 @@ The key of this model lies in splitting our original matrix $A$ in two parts, $A
 	\label{eq:Bmatrix}
 \end{align}
 
-where $I_n$ and $I_m$ denote, respectively, the identity matrices of size $n$ and $m$. Then the final hypergraph is obtained by applying the row-net model to this matrix $B$. 
+where $I_n$ and $I_m$ denote, respectively, the identity matrices of size $n$ and $m$. The final hypergraph is finally obtained by applying the row-net model to this matrix $B$. 
 
 Figure \ref{fig:mediumgrain-1} illustrates this process for a $3 \times 6$ rectangular matrix $A$.
 
@@ -282,9 +283,7 @@ Figure \ref{fig:mediumgrain-1} illustrates this process for a $3 \times 6$ recta
 	\label{fig:mediumgrain-1}
 \end{figure}
 
-After we apply the row-net model and obtain a partitioning of the hypergraph, we only consider the parts of $B$ which corresponded to $A_r$ and $A_c$ and we assemble back the original matrix $A$, with a new partitioning.
-
-Figure \ref{fig:mediumgrain-2} illustrates this process of translating the hypergraph partitioning into a partitioning of our original matrix $A$.
+After we apply the row-net model and obtain a partitioning of the hypergraph, it is immediate to retrieve a partitioning of our matrix $A$, as depicted in Figure \ref{fig:mediumgrain-2}. 
 
 \begin{figure}[h]
 	\centering
@@ -293,14 +292,18 @@ Figure \ref{fig:mediumgrain-2} illustrates this process of translating the hyper
 	\label{fig:mediumgrain-2}
 \end{figure}
 
-Because we are partitioning the matrix $B$ with the row-net models, we can understand the meaning of $A_c$ and $A_r$. The first is left as-is, while the second is transposed; then, when partitioning 1-dimensionally such that the columns are kept together, we see that elements within the same column of $A_c$ are kept together, while elements in the same row of $A_r$ (a column of $A_r^T$) are kept together. The resulting partitioning is then fully 2-dimensional because we have clusters of nonzeros: rows for $A_r$ and columns for $A_c$ (hence the subscripts).
+The usefulness of $A_c$ and $A_r$ is clear if we consider that we use the row-net model. The first is left as-is, while the second is transposed; then, when partitioning 1-dimensionally such that the columns are kept together, we see that we are effectively keeping together elements within the same columns of $A_c$ and $A_r^T$. The resulting partitioning is fully 2-dimensional, because we have clusters of nonzeros: rows for $A_r$ and columns for $A_c$ (hence the subscripts).
 
-The diagonal elements of $B$ are used only to compute the communication volume: to understand this, consider the $k$-column of $A$. The corresponding nonzeros can be found in the part related to $A_c$ (i.e. $b_{n+j,k}$, for $1 \leq j \leq m$) and related to $A_r^T$ (i.e. $b_{k,n+j}$, $1 \leq j \leq m$). If both these parts are nonempty, i.e. the $k$-th column of $A$ was not fully assigned to either $A_r$ or $A_c$, we need to be careful when partitioning, because if they get assigned to different processors we have indeed communication in Algorithm \ref{alg:matvec}.
+The diagonal elements of $B$ are used only to compute the communication volume. Let us consider the $k$-th column of $A$; the corresponding nonzeros can be found in the $k$-th column of $A_c$  and in the $k$-th row of $A_r^T$. If both these parts are nonempty, i.e. the $k$-th column of $A$ was not fully assigned to either $A_r$ or $A_c$, we need to be careful when we compute the communication volume of a given partitioning: if these parts are to different processors, communication is needed in Algorithm \ref{alg:matvec}.
 
-Therefore the diagonal nonzero $B_{k,k}$, which is assigned to the same processor as the part belonging to $A_c$, but it placed in the same row as the part belonging to $A_r$, serves exactly the purpose of keeping track of the partitioning, such that the computation of the communication volume is correct \cite[Th.~3.1]{mediumgrain}. Note that implementation-wise there is no need to have the complete diagonal of $B$: we put a nonzero if and only if the corresponding row of $A_r^T$ and column of $A_c$ are nonempty.
+Therefore the diagonal nonzero $B_{k,k}$, assigned by the row-net model to the same processor as the $k$-th column of $A_c$, that belongs to same row of $B$ as the $k$-th row of $A_r$, has the purpose of ensuring a correct computation of the communication volume \cite[Th.~3.1]{mediumgrain}. Note that, implementation-wise, there is no need to have the complete diagonal of $B$: we put a nonzero if and only if the corresponding row of $A_r^T$ and column of $A_c$ are both nonempty.
 
-Experimental results, performed with both the Mondriaan software partitioner \cite{mondriaan} and PaToH \cite{patoh} seemed to confirm that this model has indeed some advantages to column-net, row-net and fine-grain, both for partitioning time and solution quality.
+Experimental results, performed with both the Mondriaan and PaToH seems to confirm that this model has indeed some advantages with respect to column-net, row-net and fine-grain, both regarding partitioning time and solution quality.
 
-Because of these good results, it is interesting to investigate further the properties of this model, in two possible directions.
+Because of these good results, it is interesting to investigate further the properties of this model, following two possible directions.
 
-First of all, as the outcome of the medium-grain model depends consistently on the intial split of $A$ into $A_r$ and $A_c$, therefore it is interesting to investigate the quality of the algorithm originally proposed in \cite{mondriaan}; secondly, we will try to develop a fully iterative method that employs the medium-grain model, where a full multi-level partitioning is performed at each iteration and computational time is traded for solution quality.
+First of all, as the outcome of the medium-grain model depends remarkably on the initial split of $A$ into $A_r$ and $A_c$, it is interesting to investigate the quality of the algorithm originally proposed in \cite{mondriaan} to achieve this initial partitioning; secondly, we will try to develop a fully iterative method that employs the medium-grain model, where a full multi-level partitioning is performed at each iteration and computational time is traded for solution quality.
+
+Both these research directions share a very important part: we just need to develop efficient methods to compute $A_r$ or $A_c$, either from scratch or starting from an already existing partitioning (later in the work we will talk, respectively, about \emph{partition-oblivious} and \emph{partition-aware} algorithms). 
+
+To this extent, Chapters \ref{chap:methods} and \ref{chap:independent_set} describe several of these different methods, whereas in Chapter \ref{chap:experimental_results} we discuss their implementation and the experimental results with respect the two mentioned research directions.
