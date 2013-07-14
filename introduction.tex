@@ -256,3 +256,51 @@ To solve large instances, all these partitioners use a multi-level method: the l
 Finally, these existing software partitioners are all based on \emph{recursive bisection}: instead of partitioning the hypergraph directly into the desired number of parts, they operate a sequence of bisection of the partitions. This is a good semplification in the sense that efforts on finding methods for good bipartitioning can be re-employed, and also because splitting a hypergraph in just two parts is much easier; but there is also a major flaw that, using this recursive bisection, we might not be able to reach the same quality of a solution with direct splitting into the desired number of parts.
 
 \section{Medium-grain model} \label{sec:mediumgrain}
+
+All of the possible ways of translating the matrix partitioning problem into the hypergraph partitioning one have different advantages and drawbacks: the 1-dimensional ones, row-net and colum-net, eliminate completely one source of communication but are somewhat too restricting; fine-grain, on the contrary, does not provide any kind of restriction on the partitioning, but resulting in too large to manage hypergraph.
+
+We will now describe a model proposed by Pelt and Bisseling \cite{mediumgrain} which can be described as a sort of middle ground between these two kinds of models: the resulting partitioning is 2-dimensional by design (thus avoiding the restriction of the row-net and column-net), but it still imposes clusters of nonzeros from the same rows and columns to be assigned to same processor, thus avoiding the main disadvantage of the fine-grain.
+
+The key of this model lies in splitting our original matrix $A$ in two parts, $A_r$ and $A_c$, i.e. we have that $A_r + A_c = A$; then we proceed to construct the auxiliary block-matrix $B$, of size $(m+n) \times (m+n)$, as:
+
+\begin{align}
+	B:=	\begin{bmatrix}
+		I_n & A_r^T \\
+		A_c & I_m
+	\end{bmatrix},
+	\label{eq:Bmatrix}
+\end{align}
+
+where $I_n$ and $I_m$ denote, respectively, the identity matrices of size $n$ and $m$. Then the final hypergraph is obtained by applying the row-net model to this matrix $B$. 
+
+Figure \ref{fig:mediumgrain-1} illustrates this process for a $3 \times 6$ rectangular matrix $A$.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics{img/mg-1}
+	\caption{Construction of the hypergraph according to the medium-grain model.}
+	\label{fig:mediumgrain-1}
+\end{figure}
+
+After we apply the row-net model and obtain a partitioning of the hypergraph, we only consider the parts of $B$ which corresponded to $A_r$ and $A_c$ and we assemble back the original matrix $A$, with a new partitioning.
+
+Figure \ref{fig:mediumgrain-2} illustrates this process of translating the hypergraph partitioning into a partitioning of our original matrix $A$.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics{img/mg-2}
+	\caption{Process of obtaining a matrix partitioning starting from a partitioning of the hypergraph following the medium-grain model. In this case $p=2$.}
+	\label{fig:mediumgrain-2}
+\end{figure}
+
+Because we are partitioning the matrix $B$ with the row-net models, we can understand the meaning of $A_c$ and $A_r$. The first is left as-is, while the second is transposed; then, when partitioning 1-dimensionally such that the columns are kept together, we see that elements within the same column of $A_c$ are kept together, while elements in the same row of $A_r$ (a column of $A_r^T$) are kept together. The resulting partitioning is then fully 2-dimensional because we have clusters of nonzeros: rows for $A_r$ and columns for $A_c$ (hence the subscripts).
+
+The diagonal elements of $B$ are used only to compute the communication volume: to understand this, consider the $k$-column of $A$. The corresponding nonzeros can be found in the part related to $A_c$ (i.e. $b_{n+j,k}$, for $1 \leq j \leq m$) and related to $A_r^T$ (i.e. $b_{k,n+j}$, $1 \leq j \leq m$). If both these parts are nonempty, i.e. the $k$-th column of $A$ was not fully assigned to either $A_r$ or $A_c$, we need to be careful when partitioning, because if they get assigned to different processors we have indeed communication in Algorithm \ref{alg:matvec}.
+
+Therefore the diagonal nonzero $B_{k,k}$, which is assigned to the same processor as the part belonging to $A_c$, but it placed in the same row as the part belonging to $A_r$, serves exactly the purpose of keeping track of the partitioning, such that the computation of the communication volume is correct \cite[Th.~3.1]{mediumgrain}. Note that implementation-wise there is no need to have the complete diagonal of $B$: we put a nonzero if and only if the corresponding row of $A_r^T$ and column of $A_c$ are nonempty.
+
+Experimental results, performed with both the Mondriaan software partitioner \cite{mondriaan} and PaToH \cite{patoh} seemed to confirm that this model has indeed some advantages to column-net, row-net and fine-grain, both for partitioning time and solution quality.
+
+Because of these good results, it is interesting to investigate further the properties of this model, in two possible directions.
+
+First of all, as the outcome of the medium-grain model depends consistently on the intial split of $A$ into $A_r$ and $A_c$, therefore it is interesting to investigate the quality of the algorithm originally proposed in \cite{mondriaan}; secondly, we will try to develop a fully iterative method that employs the medium-grain model, where a full multi-level partitioning is performed at each iteration and computational time is traded for solution quality.
