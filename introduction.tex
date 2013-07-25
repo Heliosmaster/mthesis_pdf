@@ -29,12 +29,18 @@ It is a very important goal then to be able to perform such computations in the 
 
 To describe an efficient way of performing parallel sparse matrix-vector multiplications, we follow the approach described in \cite{BSP}: before the actual computation takes place, the sparse matrix is distributed among the $p$ processors, creating a \textbf{partitioning} of the set of the nonzeros: $A$ is split into $A_0,\dots,A_{p-1}$ disjoint subsets. Moreover, also the input vector $v$ and the output vector $u$ are distributed among the $p$ processors (note that their distribution might not necessarily, and usually it is not, the same).
 
-Figure \ref{fig:partition} shows an example of such a distribution, in which a $5 \times 5$ matrix $A$ with 13 nonzeros and the two vectors $u$ and $v$ are split up among two processors, 0 and 1 (denoted, respectively, by the gray and the black color).
+Figure \ref{fig:partition} shows a possible partitioning of a $9 \times 9$ matrix with 18 nonzeros. As the the actual values of the nonzeros are not important, we only show the sparsity pattern (a colored cell means that there is a nonzero in that position). The two colors denote, respectively, the two resulting subsets of nonzeros. 
 
 \begin{figure}[h]
 	\centering
-	\includegraphics{img/partition}
-	\caption{Example of a possible distribution among 2 processors of a 5x5 matrix, and the input and output vectors, as taken from \cite[Fig. 4.3]{BSP}.}
+%\includegraphics{img/partition}
+\begin{tikzpicture}[scale=0.5]
+			\foreach \x / \y in {1/1,1/3,2/2,4/5,4/4,7/3,8/5,6/7,9/1} { \fill[red!90,opacity=.8] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+			\foreach \x / \y in {1/2,2/3,3/6,3/9,6/6,5/1,7/8,8/7,9/2} { \fill[blue!60!cyan,opacity=.9] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+			\draw[semithick] (0,-9) grid (9,0);
+			\draw[thick] (0,-9) rectangle (9,0);
+		\end{tikzpicture}
+		\caption{Example of a distribution among two processors of a $9 \times 9$ matrix with 18 nonzeros. Only the sparsity patterns is considered.}
 	\label{fig:partition}
 \end{figure}
 
@@ -81,12 +87,43 @@ After this distribution, every processor has to compute its local contribution t
 
 In reality there is also a fourth phase, in which each processor sums up all the contributions received in phase (2) for all of its owned components of $u$; this is a very small sum with negligible computational cost and for this reason it has been omitted from the algorithm. 
 
-Figure \ref{fig:communication} shows an example of the communication involved in supersteps (0) and (2): the fan-out is represented by the vertical arrows, while the fan-in is represented by the horizontal arrows. 
+Note that we assume that all of the nonzero values are all represented with the same amount of bits. Doing so, we can focus excusively on the coordinates of the nonzeros, omitting completely their values, as it does not the cost of a parallel sparse matrix-vector multiplication.
+
+Figure \ref{fig:communication} shows an example of the communication involved in supersteps (0) and (2), with the example partitioning shoed in Figure \ref{fig:partition}: the vertical arrows represent the fan out, while the horizontal arrows represent the fan in; the color of an arrow indicates which processor is sending data. 
 
 \begin{figure}[h]
 	\centering
-	\includegraphics{img/communication}
-	\caption{Communication involved following Algorithm \ref{alg:matvec} for a matrix distributed as in Figure \ref{fig:partition}. Vertical arrows represent step (0) while horizontal ones represent step (2).}
+\begin{tikzpicture}[font=\LARGE,scale=0.5]
+	\foreach \x / \y in {1/1,1/3,2/2,4/5,4/4,7/3,8/5,6/7,9/1} { \fill[red!90,opacity=.8] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+	\foreach \x / \y in {1/2,2/3,3/6,3/9,6/6,5/1,7/8,8/7,9/2} { \fill[blue!60!cyan,opacity=.9] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+
+	\draw[semithick] (0,-9) grid (9,0);
+	\draw[thick] (0,-9) rectangle (9,0);
+	
+	\foreach \x in {2,4,5,7} { \fill[red!90,opacity=.8] ({\x-1},4) rectangle +(1,-1);}
+	\foreach \x in {1,3,6,8,9} { \fill[blue!60!cyan,opacity=.9] ({\x-1},4) rectangle +(1,-1);}
+
+	\foreach \x in {1,3} { \draw[line width=2pt,blue!60!cyan,opacity=.9,->,>=latex] ({\x-0.5},2.8) -- ({\x-0.5},0.2);}
+	\foreach \x in {2,7} { \draw[line width=2pt,red!90,opacity=.8,->,>=latex] ({\x-0.5},2.8) -- ({\x-0.5},0.2);}
+%	\draw[->,very thick,>=latex] ({7-0.5},1.8) -- ({7-0.5},{-7+0.2});
+	\draw[semithick] (0,3) grid (9,4);
+	\draw[thick] (0,3) rectangle (9,4);
+	
+	\foreach \x in {2,4,6,7,9} { \fill[red!90,opacity=.8] (-4,{-\x+1}) rectangle +(1,-1);}
+	\foreach \x in {1,3,5,8} { \fill[blue!60!cyan,opacity=.9] (-4,{-\x+1}) rectangle +(1,-1);}
+
+	\foreach \x in {1,8} { \draw[line width=2pt,red!90,opacity=.8,->,>=latex] (-0.2,{-\x+0.5}) -- (-2.8,{-\x+0.5});}
+	\foreach \x in {2,6,7,9} { \draw[line width=2pt,blue!60!cyan,opacity=.9,->,>=latex] (-0.2,{-\x+0.5}) -- (-2.8,{-\x+0.5});}
+	\draw[semithick] (-4,-9) grid (-3,0);
+	\draw[thick] (-4,-9) rectangle (-3,0);
+	\node at (-3.5,-10) {$u$};
+	\node at (10,3.5) {$v$};
+	\node at (10,-10) {$A$};
+\end{tikzpicture}
+
+
+%	\includegraphics{img/communication}
+\caption{Communication for the sparse parallel matrix-vector multiplication with a matrix partitioned as in Figure \ref{fig:partition}. Vertical arrows represent step (0) while horizontal ones represent step (2). The color of an arrow denotes which processor is sending their data for that row/column.}
 	\label{fig:communication}
 \end{figure}
 
@@ -119,6 +156,7 @@ It is reasonable, after all, that the problem of finding an efficient way of per
 				\fill[opacity=.8] ({2*\column + mod(\row,2)}, -\row) rectangle +(1,-1);
 			}
 		};
+		\draw[semithick] (0,-6) grid (6,0);
 	\end{tikzpicture}
 	\caption{Example matrix with checkered sparsity pattern. Black boxes represent the nonzeros.} \label{fig:checkered_matrix}
 \end{figure}
@@ -139,7 +177,8 @@ Two possible partitioning of this matrix into two sets are given in Figure \ref{
 					\fill[opacity=.7,red] ({2*\column + mod(\row,2)}, -\row) rectangle +(1,-1);
 				}
 			};
-			\draw[thick] (0,0) rectangle (6,-6);
+			\draw[semithick] (0,-6) grid (6,0);
+		\draw[thick] (0,0) rectangle (6,-6);
 		\end{tikzpicture} \label{fig:checkered_a}
 	}\hspace{1cm}
 	\subfigure[Every row and column is split and causes communication during fan-in and fan-out.]{
@@ -149,7 +188,8 @@ Two possible partitioning of this matrix into two sets are given in Figure \ref{
 			\foreach \index in {0,1, ..., 3} {\fill[opacity=.7,red] (\index, -2-\index) rectangle +(1,-1);};
 			\foreach \index in {0,1} {\fill[opacity=.7,blue] (\index, -4-\index) rectangle +(1,-1);};
 			\foreach \index in {0,1} {\fill[opacity=.7,blue] (4+\index, -\index) rectangle +(1,-1);};
-			\draw[thick] (0,0) rectangle (6,-6);
+			\draw[semithick] (0,-6) grid (6,0);
+		\draw[thick] (0,0) rectangle (6,-6);
 		\end{tikzpicture} \label{fig:checkered_b}
 	}
 	\caption{Different partitionings of the matrix from Figure \ref{fig:checkered_matrix}. Red and blue squares represent nonzeros assigned to the two different processors.} \label{fig:checkered_partitions}
