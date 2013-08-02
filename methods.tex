@@ -78,17 +78,17 @@ Then the partition-aware version of this heuristic is given in Algorithm \ref{al
 
 \section{Assignment of blocks of nonzeros} \label{sec:sbd}
 
-Instead of assigning nonzeros individually as in Section \ref{sec:localview}, we can take a more coarse-grained approach and trying to assign at the same time a greater amount of nonzeros to either $A_r$ or $A_c$. In particular, we will discuss how to exploit the Separated Block Diagonals (SBD) form of the partitioned matrix $A$ and introduce a further iteration of this concept, discussing the Separated Block Diagonal of order 2 (SBD2) form of the matrix.
+Instead of assigning nonzeros individually as in Section \ref{sec:localview}, we can take a more coarse-grained approach and trying to assign at the same time a greater amount of nonzeros to either $A_r$ or $A_c$. In particular, we will discuss how to exploit the Separated Block Diagonals (SBD) form of the partitioned matrix $A$ and introduce a further iteration of this concept, discussing the Separated Block Diagonal of order 2 (SBD2) form of the matrix. Moreover, the heuristics described in this section are only partition-aware, and take as input a partitioned matrix.
 
-As throughout this section the permutation of matrices will be fundamental, we adopt a simplified notation: given an index vector $I$ and one for the columns $J$, we denote as $A(I,J)$ the submatrix of $A$ with only the rows in $I$ and only the columns in $J$, in the order that they appear in the vectors). If $I_1$ and $I_2$ are both ordered vector of indices, with $(I_1,I_2)$ we denote the simple concatenation of these vectors.
+As throughout this section the permutations of matrices will be fundamental, we adopt a simplified notation: given an index vector $I$ and one for the columns $J$, we denote as $A(I,J)$ the submatrix of $A$ with only the rows in $I$ and only the columns in $J$, in the order that they appear in the vectors), such that $A([1,\dots,m],[1 \dots n] = A$. Furthermore, if $I_1$ and $I_2$ are both ordered vector of indices, with $(I_1,I_2)$ we denote the simple concatenation of these vectors.
 
 \subsection{Using the Separated Block Diagonal form of $A$}
 
-The SBD form of a bipartitioned matrix \cite{yzelman_cache} is defined as follows: given a matrix $A$ whose nonzeros are either assigned to processor 0 or 1, we compute the vectors $R_0$ and $R_2$ of the indices of the rows fully assigned, respectively, to processor 0 and processor 1, and the vector $R_1$ of the indices of the rows partially assigned to both of the processors; similarly, we compute $C_0$, $C_2$ and $C_1$ for the columns. Note that when creating these vectors, their inner ordering is not important but usually the increasing order is kept.
+The SBD form of a bipartitioned matrix \cite{yzelman_cache} is defined as follows: given a matrix $A$ whose nonzeros are either assigned to processor 0 or 1, we compute the vectors $R_0$ and $R_2$ of the indices of the rows fully assigned, respectively, to processor 0 and processor 1, and the vector $R_1$ of the indices of the rows partially assigned to both of the processors; similarly, we compute $C_0$, $C_2$ and $C_1$ for the columns. Note that, when creating these vectors, their inner ordering is not important; usually, the ascending order is kept.
 
-Then, we obtain the final index vector for the rows as $I = (R_0,R_1,R_2)$ and for the columns as $J = (C_0,C_1,C_2)$. With these quantities, we can finally compute SBD form of the matrix $A$ as $A(I,J)$. 
+Then, we obtain the final index vector for the rows as $I = (R_0,R_1,R_2)$ and for the columns as $J = (C_0,C_1,C_2)$. With these quantities, we can finally compute the SBD form of the matrix $A$ as $A(I,J)$. 
 
-An example of this permutation is shown in Figure \ref{fig:sbd}.
+An example of the procedure for obtaining this form is shown in Figure \ref{fig:sbd}.
 
 \begin{figure}[h]
 	\centering
@@ -141,7 +141,7 @@ An example of this permutation is shown in Figure \ref{fig:sbd}.
 		\draw[ultra thick] ({17+0},-3) -- ({17+9},-3);
 		\draw[ultra thick] ({17+0},-6) -- ({17+9},-6);
 	\end{tikzpicture}
-	\caption{Example of SBD form of a partitioned matrix. On the left the original matrix is shown whereas on the right we have the permuted SBD form. On the top/left sides of the matrices it is shown whether that row is completely red or blue or it is mixed (purple), whereas on the bottom/right sides the indices of the columns/rows are explicitly given.} \label{fig:sbd}
+	\caption{Example process to obtain the SBD form of a partitioned matrix. On the left the original matrix is shown, whereas on the right we have the permuted SBD form. On the top/left sides of the matrices the color of the circle denotes whether that row/column is completely red or blue or it is mixed (purple), whereas on the bottom/right sides the indices of the columns/rows are explicitly given.} \label{fig:sbd}
 \end{figure}
 
 More explicitly, if we denote as $m_i := |R_i|$, $n_i := |C_i|$, with $i=0,1,2$, we have that the SBD form is the resulting block matrix:
@@ -166,23 +166,22 @@ where
 	\item $\dot{A}_{11}$ of size $m_1 \times n_1$, has nonzeros with cut rows and columns.
 \end{itemize}
 
-Note that $m_i$ and $n_i$ can be extremely different, also from matrix to matrix, along with the amount of nonzeros in each block: for example, if the sparsity pattern of the matrix allows a ``perfect'' partitioning such that there is no communication, all blocks are empty except of $\dot{A}_{00}$ and $\dot{A}_{22}$; conversely, if the matrix has a very dense (or complicated) pattern and/or the partitioning is far from the optimal, we might have such blocks almost empty and the central block $\dot{A}_{11}$ with the majority of nonzeros. An example of this difference is shown in Figure \ref{fig:sbd-2}.
+Note that the size of each part along with amount of contained nonzero can greatly vary, also from matrix to matrix: for example, if the sparsity pattern of the matrix allows a ``perfect'' partitioning such that there is no communication, all blocks are empty except of $\dot{A}_{00}$ and $\dot{A}_{22}$; conversely, if the matrix has a very dense (or complicated) pattern and/or the partitioning is far from the optimal, such blocks might be almost empty and $\dot{A}_{11}$ will have the majority of nonzeros. An example of this difference is shown in Figure \ref{fig:sbd-2}.
 
 \begin{figure}[h]
 	\centering
-	\subfigure[\texttt{impcol\_b}]{ \includegraphics[scale=0.4]{img/impcol_b.pdf} \label{fig:impcol_b}} \hspace{1cm}
-	\subfigure[\texttt{cage7}]{ \includegraphics[scale=0.4]{img/cage6.pdf} \label{fig:cage6} }
-	\caption{Example of SBD forms of partitioning of the matrices \texttt{impcol\_b} and \texttt{cage6}. Each part of $\dot{A}$ has been colored differently. In the first matrix there are no cut rows, and therefore $\dot{A}_{10}=\dot{A}_{11} =\dot{A}_{12} = \varnothing$. The images were produced with MATLAB.} \label{fig:sbd-2}
+	\subfigure[\texttt{impcol\_b}]{ \includegraphics[scale=0.5]{img/impcol_b.pdf} \label{fig:impcol_b}} \hspace{1cm}
+	\subfigure[\texttt{cage6}]{ \includegraphics[scale=0.5]{img/cage6.pdf} \label{fig:cage6} }
+	\caption{Example of SBD forms of partitioning of the matrices \texttt{impcol\_b}\cite{matrixmarket} and \texttt{cage6}\cite{ufl}. Each part of $\dot{A}$ has been colored differently. In the first matrix there are no cut rows, and therefore $\dot{A}_{10}=\dot{A}_{11} =\dot{A}_{12} = \varnothing$. The images were produced with MATLAB.} \label{fig:sbd-2}
 \end{figure}
 
-
-By computing the Separated Block Diagonal form of a matrix, we are able to explicitly see an underlying structure of the matrix, and the properties of each block can be used to adapt the assignment of its nonzeros. More in particular, the blocks $\dot{A}_{00}$ and $\dot{A}_{22}$ have nonzeros with uncut rows and columns and therefore we ideally want to keep some of the information that these nonzeros fit conveniently together; of course, we still have to assign them to $A_r$ and $A_c$ and, as mentioned earlier, we can't do both, and a convenient thing is to base our choice on the sizes of such blocks. For example, if $m_0 < n_0$, in the block $\dot{A}_{00}$ we have that the columns are (on average) longer than the rows: therefore if we assign the nonzeros of this block to $A_c$ we are, on principle, getting away with more.
+By computing the Separated Block Diagonal form of a matrix, we are able to explicitly see the underlying structure of the partitioning of a matrix, and the properties of each block can be used to adapt the assignment of its nonzeros. More specifically, the blocks $\dot{A}_{00}$ and $\dot{A}_{22}$ have nonzeros with uncut rows and columns and therefore are more suited to be assigned together; of course, we still have to decide between $A_r$ and $A_c$ and, as mentioned earlier, it is impossible to do both: a convenient thing is to base our choice on the sizes of such blocks. For example, if $m_0 < n_0$, in the block $\dot{A}_{00}$ we have that the columns are (on average) longer than the rows: if we assign the nonzeros of this block to $A_c$ we are, on principle, making sure that more things will stay uncut.
 
 For the block with uncut rows ($\dot{A}_{01}$, $\dot{A}_{21}$) and cut columns, the choice is easy: we assign them to $A_r$ and keep their rows uncut. Similarly, we assign the nonzeros of $\dot{A}_{10}$ and $\dot{A}_{12}$ to $A_c$, keeping their column uncut. 
 
-For the middle block $\dot{A}_{11}$, whose nonzeros have cut rows and cut columns, we can't exploit any underlying structure: a possible way is to employ one of the other heuristics described in this chapter only considering this submatrix. Our choice is to go with Algorithm \ref{alg:localview-po} presented in Section \ref{sec:localview} (note that we cannot exploit the partition-aware variant of this algorithm because all of the nonzeros have cut rows and columns).
+For the middle block $\dot{A}_{11}$, whose nonzeros have cut rows and cut columns, we can't exploit any underlying structure: a possible way is to employ one of the other heuristics described in this chapter only considering this submatrix. Our choice is to go with Algorithm \ref{alg:localview-po} presented in Section \ref{sec:localview} (note that we cannot exploit the partition-aware variant of it, because all of the nonzeros have cut rows and columns).
 
-The heuristic that employs the SBD structure of a matrix is described in Algorithm \ref{alg:sbdview}.
+The heuristic that employs the SBD structure of a matrix is described explicitly in Algorithm \ref{alg:sbdview}.
 
 \begin{algorithm}[h]
 	\begin{algorithmic}
@@ -205,7 +204,7 @@ The heuristic that employs the SBD structure of a matrix is described in Algorit
 		\Else
 		\State Assign nonzeros of $\dot{A}_{22}$ to $A_c$
 		\EndIf
-		\State
+		\State Assign nonzeros of $\dot{A}_{11}$ to $A_r$ or $A_c$ following Algorithm \ref{alg:localview-po}
 		\State Assign nonzeros of $\dot{A}_{10}$ to $A_c$
 		\State Assign nonzeros of $\dot{A}_{12}$ to $A_c$
 		\State Assign nonzeros of $\dot{A}_{01}$ to $A_r$
@@ -214,11 +213,11 @@ The heuristic that employs the SBD structure of a matrix is described in Algorit
 	\caption{Assignment of the nonzeros based on the SBD form of the partitioned matrix $A$.} \label{alg:sbdview}
 \end{algorithm}
 
-Note that, as mentioned in Chapter \ref{chap:introduction}, the matrix is usually split by means of recursive bipartitionings: it is then sufficient to keep track of the order of these recursions to have an implicit ordering which can be easily used to compute the SBD form of a matrix \cite{yzelman_cache}.
+Note that, as mentioned in Chapter \ref{chap:introduction}, the matrix is usually split by means of recursive bipartitionings: it is then sufficient to keep track of the order of these recursions to have an implicit ordering which can be easily used to compute the SBD form of a matrix \cite{yzelman_cache}, instead of computing this form from scratch as we described earlier.
 
 \subsection{Using the Separated Block Diagonal form of order 2 of $A$}
 
-The SBD2 form of a partitioned matrix $A$ is an extension of the SBD form: given a partitioned matrix $A$, we compute the Separate Block Diagonal form of $A$ of order 2 as shown in Algorithm \ref{alg:sbd2}. 
+The proposed SBD2 form of a partitioned matrix $A$ is an extension of the SBD form: given a partitioned matrix $A$, we compute the Separate Block Diagonal form of $A$ of order 2 by separating, in $\dot{A}_{10}$ and $\dot{A}_{20}$ the empty and non-empty columns, and in $\dot{A}_{01}$ and $\dot{A}_{02}$ the empty and non-empty rows. Then all the other blocks, except the central one, are permuted and split up accordingly. This procedure is better shown in Algorithm \ref{alg:sbd2}. 
 
 \begin{algorithm}[h]
 	\begin{algorithmic}
@@ -234,9 +233,24 @@ The SBD2 form of a partitioned matrix $A$ is an extension of the SBD form: given
 		\State $\ddot{A} := A(I,J)$.
 	\end{algorithmic}
 	\caption{Algorithm to obtain SBD2 form of a matrix $A$.} \label{alg:sbd2}
-\end{algorithm}
+\end{algorithm} 
 
-The main idea of this form is to compute a matrix with even more structure, as $\ddot{A}$ is a tridiagonal matrix with $ 5 \times 5$ blocks.
+The resulting final matrix is a block tridiagonal matrix $\ddot{A}$:
+
+\begin{align}
+	\ddot{A} := \begin{bmatrix}
+		\ddot{A}_{00} & \ddot{A}_{01} & & & \\
+		\ddot{A}_{10} & \ddot{A}_{11} & \ddot{A}_{12} & & \\
+		& \ddot{A}_{21} & \ddot{A}_{22} & \ddot{A}_{23} & \\
+		& & \ddot{A}_{32} & \ddot{A}_{33} & \ddot{A}_{34} \\
+		& & & \ddot{A}_{43} & \ddot{A}_{44} \\
+	\end{bmatrix},
+	\label{eq:sbd2}
+\end{align}
+
+where each submatrix $\ddot{A}_{pq}$ is of size $m_p \times n_q$.
+
+Figure \ref{fig:sbd2} shows the process of obtaining this matrix $\ddot{A}$ starting from the SBD matrix $\dot{A}$ obtained in Figure \ref{fig:sbd}.
 
 \begin{figure}[h]
 	\centering
@@ -301,17 +315,73 @@ The main idea of this form is to compute a matrix with even more structure, as $
 		\draw[ultra thick] ({19+0},-2) -- ({19+9},-2);
 		\draw[ultra thick] ({19+0},-7) -- ({19+9},-7);
 	\end{tikzpicture}
-	\caption{SBD2 form obtained starting from the SBD form of Figure \ref{fig:sbd}.}
+	\caption{SBD2 form obtained starting from the SBD form of Figure \ref{fig:sbd}.} \label{fig:sbd2}
 \end{figure}
 
+To better understand the interesting properties of the newly created parts of the matrix, let us introduce the concept of \emph{neighbor}: given the nonzero $a_{ij}$ we say that $a_{kl}$ is a neighbor if $k = i \vee l = j$; in other words, neighbors of a given nonzero are the ones that lie in the same row or in the same column.
+
+Now, let us consider, for sake of brevity, just the top-left corner of $\ddot{A}$: nonzeros in $\ddot{A}_{00}$ are uncut in the rows and columns and whose neighbors are uncut also in the other, non-shared, dimension. Similarly, nonzeros in $\ddot{A}_{01}$ don't have any neighbor (w.r.t. their row) with cut columns but have neighbors (w.r.t their column) with cut rows. And similarly, with the roles of rows and columns reversed, for $\ddot{A}_{10}$. This exact same reasoning applies also for the bottom-right corner, with the appropriate adaptation of indices.
+
+These properties are interesting because, now, nonzeros in $\ddot{A}_{00}$ and $\ddot{A}_{44}$ can be entirely removed from the original partitioning problem: they constitute a subset of the nonzeros that can be \emph{perfectly} partitioned, without causing any communication. The size of these parts, and more generally of all of the blocks of $\ddot{A}$, is again highly dependant on the structure of the matrix, as it is shown in Figure \ref{fig:sbd2-2}.
+
+\begin{figure}[h]
+	\centering
+	\subfigure[\texttt{impcol\_b}]{ \includegraphics[scale=0.5]{img/sbd2_impcol_b.pdf} \label{fig:sbd2_impcol_b}}\hspace{1cm} 
+	\subfigure[\texttt{cage6}]{ \includegraphics[scale=0.5]{img/sbd2_cage6.pdf} \label{fig:sbd2_cage6} }
+	\subfigure[\texttt{sherman1}]{ \includegraphics[scale=0.5]{img/sbd2_sherman1.pdf} \label{fig:sbd2_sherman1}} 
+	\caption{Example of SBD2 forms of three different matrices. Similarly as in Figure \ref{fig:sbd-2}, each part of $\ddot{A}$ has been given a color (note that since there are more parts than color used, some colors are repeated even though the parts are not related in any way).	We can see in \ref{fig:sbd2_impcol_b} that the second and fourth columns are empty, and therefore not shown in the image. We can also see the difference in structure between \ref{fig:sbd2_cage6} and \ref{fig:sbd2_sherman1}: the former one comes from DNA electrophoresis problem \cite{ufl}, while the latter is an oil reservoir simulation challenge matrix \cite{matrixmarket}. We can see that with the \texttt{sherman1} matrix, the corner parts are predominant because it is a finite element matrix, with a strongly diagonal pattern: it makes sense that most of these nonzeros are ``independent'' from each other. }  \label{fig:sbd2-2}
+\end{figure}
+
+Other than the corner blocks, for which we already argued that the matrix partitioning problem is easy, this structure enables us to assign more specifically nonzeros to either $A_r$ or $A_c$: it is convenient to assign $\ddot{A}_{01}$ and $\ddot{A}_{43}$ to $A_r$, as these nonzeros can be fully assigned to one processor without having the columns cut, and similarly we can assign $\ddot{A}_{10}$ and $\ddot{A}_{34}$ to $A_c$; for the other blocks, we can repeat the reasoning of the last section.
+
+This heuristic that exploits the SBD2 form of the matrix $A$ is given explicitly in Algorithm \ref{alg:sbd2}.
+
+\begin{algorithm}[h]
+	\begin{algorithmic}
+		\Require{partitioned matrix $A$}
+		\Ensure{$A_r$, $A_c$}
+		\State
+		\State $\ddot{A}:=$ SBD2 form of the partitioned matrix $A$
+		\State $m_i := $ number of rows of $\ddot{A}_{i*}$
+		\State $n_i := $ number of columns of $\ddot{A}_{*i}$
+		\State
+		\State Assign nonzeros of $\ddot{A}_{00}$ to $A_r$
+		\State Assign nonzeros of $\ddot{A}_{01}$ to $A_r$
+		\State Assign nonzeros of $\ddot{A}_{10}$ to $A_c$
+		\If{$m_1 < n_1$}
+		\State Assign nonzeros of $\ddot{A}_{11}$ to $A_c$
+		\Else
+		\State Assign nonzeros of $\ddot{A}_{11}$ to $A_r$
+		\EndIf
+		\State Assign nonzeros of $\ddot{A}_{12}$ to $A_r$
+		\State Assign nonzeros of $\ddot{A}_{21}$ to $A_c$
+		\State Assign nonzeros of $\ddot{A}_{22}$ to $A_r$ or $A_c$ following Algorithm \ref{alg:localview-po}
+		\State Assign nonzeros of $\ddot{A}_{23}$ to $A_c$
+		\State Assign nonzeros of $\ddot{A}_{32}$ to $A_r$
+		\If{$m_3 < n_3$}
+		\State Assign nonzeros of $\ddot{A}_{33}$ to $A_c$
+		\Else
+		\State Assign nonzeros of $\ddot{A}_{33}$ to $A_r$
+		\EndIf
+		\State Assign nonzeros of $\ddot{A}_{34}$ to $A_c$
+		\State Assign nonzeros of $\ddot{A}_{43}$ to $A_r$
+		\State Assign nonzeros of $\ddot{A}_{44}$ to $A_c$
+\end{algorithmic}
+\end{algorithm}
+
+Note that, in this case, the SBD2 form has to be computed from scratch from the SBD form, because it uses further information that it is not employed during the normal partitioning.
 
 
 \section{Maximizing empty rows of $B$} \label{sec:globalview}
 
-At the beginning of this chapter we mentioned how it is convenient to have full rows assigned to $A_r$ and full columns assigned to $A_c$, in order to avoid communication; a good strategy to produce good $A_r$ and $A_c$ could then be to maximize such full assignments.
+In this section, instead of describing a generating scheme that takes as input the matrix $A$ and produces as output $A_r$ and $A_c$, we will introduce an improvement scheme, which operates on already existing $A_r$ and $A_c$ and tries to refine them such that the upper bound on the communication volume is lowered.
 
-The proposed heuristic does substantially this: instead of a generating scheme, it is more of an improvement scheme and, given $A_r$ and $A_c$, it tries to move around nonzeros in order to obtain full rows assigned to $A_r$ and full columns to $A_c$, by considering nonzeros that belong to rows and columns that are both cut. If we change the assignment of those nonzeros, we are sure to not increase the communication volume, while there is still the possibility of decreasing it. 
+At the beginning of this chapter, we mentioned how it is convenient to have full rows assigned to $A_r$ and full columns assigned to $A_c$, in order to avoid communication; a good strategy to produce good $A_r$ and $A_c$, could then be to maximize such full assignments. The proposed heuristic does substantially this, by trying to swap the assignment of nonzeros from $A_r$ to $A_c$ and viceversa, trying to obtain that full rows are assigned to $A_r$ and full columns are assigned to $A_c$. In order to obtain both of these things with a unique algorithm, it is convenient to reason in terms of the matrix $B$ as in \eqref{eq:Bmatrix}. If we maximize the number of empty rows of $B$, we are effectively emptying rows of $A_r^T$ (i.e. emptying columns of $A_r$, therefore fully assigning nonzeros in them to $A_c$) and of $A_c$, thus assigning full rows to $A_r$.
 
-To have a unique formulation that can obtain full rows assigned to $A_r$ and full columns to $A_c$, it is convenient to reason in terms of the resulting matrix $B$, obtained following the medium-grain model. If we maximize the number of empty rows of $B$, we are effectively emptying rows of $A_r^T$ (which means emptying columns of $A_r$) and of $A_c$. 
+This improvement heuristic falls into the category of \emph{local search} algorithms: we start from a configuration (an assignment of nonzeros to $A_r$ and $A_c$) and perform a search on the neighborhood, defined as the set of configurations which differ only by the assignment of a single nonzero. By performing this small swap, we can easily fall in a local optima situation: a few nonozeros (depending on the structure of the matrix) are continuously swapped between $A_r$ and $A_c$. 
+
+We can add a little hill-climbing capability to our heuristic by adding a little buffer: we pre-determine a maximum amount of worsening allowed and after this threshold is reached we start only to consider strictly improving solution. In order to have a meaningful threshold, it might be convenient to have it relative to the amount of rows/columns of $B$, or to its nonzeros. The higher this threshold is, the more capability we have of escaping local optima, but at the cost of slowing down considerably the improvement (even potentially arresting it) of our solution.
+
+For the choice of the neighbor configuration to consider, it is convenient to consider the row of $B$ with the diagonal element (which correspond to not fully assigned rows/columns of $A$) with the minimum amount of nonzeros: our immediate goal, which in reality spans over a few moves of our local search, is to fully assign the nonzeros of this row of $B$; we consider the minimum because each time we swap we might slightly worsen the solution.
 
 \section{Partial assignment of rows and columns} \label{sec:hot_restart}
