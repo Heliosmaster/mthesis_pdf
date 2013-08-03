@@ -378,10 +378,43 @@ In this section, instead of describing a generating scheme that takes as input t
 
 At the beginning of this chapter, we mentioned how it is convenient to have full rows assigned to $A_r$ and full columns assigned to $A_c$, in order to avoid communication; a good strategy to produce good $A_r$ and $A_c$, could then be to maximize such full assignments. The proposed heuristic does substantially this, by trying to swap the assignment of nonzeros from $A_r$ to $A_c$ and viceversa, trying to obtain that full rows are assigned to $A_r$ and full columns are assigned to $A_c$. In order to obtain both of these things with a unique algorithm, it is convenient to reason in terms of the matrix $B$ as in \eqref{eq:Bmatrix}. If we maximize the number of empty rows of $B$, we are effectively emptying rows of $A_r^T$ (i.e. emptying columns of $A_r$, therefore fully assigning nonzeros in them to $A_c$) and of $A_c$, thus assigning full rows to $A_r$.
 
-This improvement heuristic falls into the category of \emph{local search} algorithms: we start from a configuration (an assignment of nonzeros to $A_r$ and $A_c$) and perform a search on the neighborhood, defined as the set of configurations which differ only by the assignment of a single nonzero. By performing this small swap, we can easily fall in a local optima situation: a few nonozeros (depending on the structure of the matrix) are continuously swapped between $A_r$ and $A_c$. 
+This improvement heuristic falls into the category of \emph{local search} algorithms: we start from a configuration (an assignment of nonzeros to $A_r$ and $A_c$) and perform a search on the neighborhood, defined as the set of configurations which differ only by the assignment of a single nonzero. By performing this small swap, we can easily fall in a local optimum situation: a few nonozeros (depending on the structure of the matrix) are continuously swapped between $A_r$ and $A_c$. 
 
-We can add a little hill-climbing capability to our heuristic by adding a little buffer: we pre-determine a maximum amount of worsening allowed and after this threshold is reached we start only to consider strictly improving solution. In order to have a meaningful threshold, it might be convenient to have it relative to the amount of rows/columns of $B$, or to its nonzeros. The higher this threshold is, the more capability we have of escaping local optima, but at the cost of slowing down considerably the improvement (even potentially arresting it) of our solution.
+We can add a little hill-climbing capability to our heuristic by adding a little buffer: we pre-determine $l_{max}$, the maximum amount of worsening allowed, and, after this threshold is reached, we start considering only strictly improving solution. In order to have a meaningful threshold, it might be convenient to have it relative to the amount of rows/columns of $B$, or to its nonzeros. The higher this threshold is, the more capability we have of escaping local optima, but at the cost of slowing down considerably the improvement (even potentially arresting it) of our solution.
 
 For the choice of the neighbor configuration to consider, it is convenient to consider the row of $B$ with the diagonal element (which correspond to not fully assigned rows/columns of $A$) with the minimum amount of nonzeros: our immediate goal, which in reality spans over a few moves of our local search, is to fully assign the nonzeros of this row of $B$; we consider the minimum because each time we swap we might slightly worsen the solution.
+
+A more explicit overview on this local search improvement scheme is described in Algorithm \ref{alg:globalview}:
+
+\begin{algorithm}[h]
+	\begin{algorithmic}
+		\Require{$A_r$, $A_c$, $l_{max}$, $iter_{max}$}
+		\Ensure{$A_r'$, $A_c'$}
+		\State $l := 0$
+		\State Compute $B$ following the medium-grain model
+		\For{$it=1,\dots,iter_{max}$}
+		\State $\displaystyle i := \argmin_{k \in \{1,\dots,m+n\}\text{ s.t. }B(k,k) \neq 0} nz(k)$
+		\ForAll{$j \neq i$ such that $B(i,j) \neq 0$}
+		\If{$B(j,j) \neq 0$} 
+		\State $B(i,j) = 0$
+		\State $B(j,i) = 1$
+		\Else
+			\If{$l < l_{max}$}
+			\State $B(i,j) = 0$
+			\State $B(j,i) = 1$
+			\State $l = l+1$
+			\EndIf
+		\EndIf
+		\EndFor
+		\If{$nz(B(i)) = 1$}
+		\State $B(i,i) = 0$
+		\State $l = l-1$
+		\EndIf
+		\EndFor
+	\State $A_r' := B([1,\dots,n],[n+1,\dots,n+m])^T$
+	\State $A_c' := B([n+1,\dots,m+n],[1,\dots,n])$	
+	\end{algorithmic}
+	\caption{Local search refinement of $A_r$ and $A_c$} \label{alg:globalview}
+\end{algorithm}
 
 \section{Partial assignment of rows and columns} \label{sec:hot_restart}
