@@ -37,7 +37,7 @@ Figure \ref{fig:partition} shows a possible partitioning of a $9 \times 9$ matri
 	\begin{tikzpicture}[scale=0.5]
 		\foreach \x / \y in {1/1,1/3,2/2,4/5,4/4,7/3,8/5,6/7,9/1} { \fill[red!90,opacity=.8] ({\y-1},{-\x+1}) rectangle +(1,-1);}
 		\foreach \x / \y in {1/2,2/3,3/6,3/9,6/6,5/1,7/8,8/7,9/2} { \fill[blue!60!cyan,opacity=.9] ({\y-1},{-\x+1}) rectangle +(1,-1);}
-		\draw[semithick] (0,-9) grid (9,0);
+%		\draw[semithick] (0,-9) grid (9,0);
 		\draw[thick] (0,-9) rectangle (9,0);
 	\end{tikzpicture}
 	\caption{Example of a distribution among two processors of a $9 \times 9$ matrix with 18 nonzeros. Only the sparsity patterns is considered.}
@@ -97,7 +97,7 @@ Figure \ref{fig:communication} shows an example of the communication involved in
 		\foreach \x / \y in {1/1,1/3,2/2,4/5,4/4,7/3,8/5,6/7,9/1} { \fill[red!90,opacity=.8] ({\y-1},{-\x+1}) rectangle +(1,-1);}
 		\foreach \x / \y in {1/2,2/3,3/6,3/9,6/6,5/1,7/8,8/7,9/2} { \fill[blue!60!cyan,opacity=.9] ({\y-1},{-\x+1}) rectangle +(1,-1);}
 
-		\draw[semithick] (0,-9) grid (9,0);
+%		\draw[semithick] (0,-9) grid (9,0);
 		\draw[thick] (0,-9) rectangle (9,0);
 
 		\foreach \x in {2,4,5,7} { \fill[red!90,opacity=.8] ({\x-1},4) rectangle +(1,-1);}
@@ -106,7 +106,7 @@ Figure \ref{fig:communication} shows an example of the communication involved in
 		\foreach \x in {1,3} { \draw[line width=2pt,blue!60!cyan,opacity=.9,->,>=latex] ({\x-0.5},2.8) -- ({\x-0.5},0.2);}
 		\foreach \x in {2,7} { \draw[line width=2pt,red!90,opacity=.8,->,>=latex] ({\x-0.5},2.8) -- ({\x-0.5},0.2);}
 %	\draw[->,very thick,>=latex] ({7-0.5},1.8) -- ({7-0.5},{-7+0.2});
-		\draw[semithick] (0,3) grid (9,4);
+%		\draw[semithick] (0,3) grid (9,4);
 		\draw[thick] (0,3) rectangle (9,4);
 
 		\foreach \x in {2,4,6,7,9} { \fill[red!90,opacity=.8] (-4,{-\x+1}) rectangle +(1,-1);}
@@ -114,7 +114,7 @@ Figure \ref{fig:communication} shows an example of the communication involved in
 
 		\foreach \x in {1,8} { \draw[line width=2pt,red!90,opacity=.8,->,>=latex] (-0.2,{-\x+0.5}) -- (-2.8,{-\x+0.5});}
 		\foreach \x in {2,6,7,9} { \draw[line width=2pt,blue!60!cyan,opacity=.9,->,>=latex] (-0.2,{-\x+0.5}) -- (-2.8,{-\x+0.5});}
-		\draw[semithick] (-4,-9) grid (-3,0);
+%		\draw[semithick] (-4,-9) grid (-3,0);
 		\draw[thick] (-4,-9) rectangle (-3,0);
 		\node at (-3.5,-10) {$u$};
 		\node at (10,3.5) {$v$};
@@ -156,7 +156,7 @@ It is reasonable, after all, that the problem of finding an efficient way of per
 				\fill[opacity=.8] ({2*\column + mod(\row,2)}, -\row) rectangle +(1,-1);
 			}
 		};
-		\draw[semithick] (0,-6) grid (6,0);
+%		\draw[semithick] (0,-6) grid (6,0);
 	\end{tikzpicture}
 	\caption{Example matrix with checkered sparsity pattern. Black boxes represent the nonzeros.} \label{fig:checkered_matrix}
 \end{figure}
@@ -177,7 +177,7 @@ Two possible partitioning of this matrix into two sets are given in Figure \ref{
 					\fill[opacity=.7,red] ({2*\column + mod(\row,2)}, -\row) rectangle +(1,-1);
 				}
 			};
-			\draw[semithick] (0,-6) grid (6,0);
+%			\draw[semithick] (0,-6) grid (6,0);
 			\draw[thick] (0,0) rectangle (6,-6);
 		\end{tikzpicture} \label{fig:checkered_a}
 	}\hspace{1cm}
@@ -188,7 +188,7 @@ Two possible partitioning of this matrix into two sets are given in Figure \ref{
 			\foreach \index in {0,1, ..., 3} {\fill[opacity=.7,red] (\index, -2-\index) rectangle +(1,-1);};
 			\foreach \index in {0,1} {\fill[opacity=.7,blue] (\index, -4-\index) rectangle +(1,-1);};
 			\foreach \index in {0,1} {\fill[opacity=.7,blue] (4+\index, -\index) rectangle +(1,-1);};
-			\draw[semithick] (0,-6) grid (6,0);
+%			\draw[semithick] (0,-6) grid (6,0);
 			\draw[thick] (0,0) rectangle (6,-6);
 		\end{tikzpicture} \label{fig:checkered_b}
 	}
@@ -345,18 +345,18 @@ Figure \ref{fig:mediumgrain-1} illustrates this process for a $3 \times 6$ recta
 	\begin{tikzpicture}[scale=0.25,font=\large]
 	\foreach \x / \y in {1/1,1/3,2/2,4/5,4/4,3/11,4/9,6/7,1/10,2/7} { \fill[purple!90,opacity=.8] ({\y-1},{-\x+1}) rectangle +(1,-1);}
 	\foreach \x / \y in {1/2,2/3,3/6,3/9,6/6,5/1,5/12,6/10,2/11,2/8} { \fill[yellow!60!cyan,opacity=.9] ({\y-1},{-\x+1}) rectangle +(1,-1);}
-	\draw[semithick] (0,-6) grid (12,0);
+%	\draw[semithick] (0,-6) grid (12,0);
 	\draw[thick] (0,-6) rectangle (12,0);
 	\node at (6,-7) {$A$};
 
 	\foreach \x / \y in {1/1,1/3,2/2,4/5,4/4,3/11,4/9,6/7,1/10,2/7}{ \fill[purple!90,opacity=.8] ({18+\y-1},{-6-\x+1}) rectangle +(1,-1);}
 	\node at (24,-13) {$A_r$};
-	\draw[semithick] (18,{-6-6}) grid ({18+12},-6);
+%	\draw[semithick] (18,{-6-6}) grid ({18+12},-6);
 	\draw[thick] (18,{-6-6}) rectangle ({18+12},-6);
 
 	\foreach \x / \y in  {1/2,2/3,3/6,3/9,6/6,5/1,5/12,6/10,2/11,2/8} { \fill[yellow!60!cyan,opacity=.9] ({18+\y-1},{6-\x+1}) rectangle +(1,-1);}
 	\node at (24,-1) {$A_c$};
-	\draw[semithick] (18,{-6+6}) grid ({18+12},6);
+%	\draw[semithick] (18,{-6+6}) grid ({18+12},6);
 	\draw[thick] (18,{-6+6}) rectangle ({18+12},6);
 
 
@@ -367,7 +367,7 @@ Figure \ref{fig:mediumgrain-1} illustrates this process for a $3 \times 6$ recta
 	\foreach \x in {1,2,3,9,10,11} { \fill[gray!10!black,opacity=.9] ({36+\x-1},{6-\x+1}) rectangle +(1,-1);}
 	\foreach \x in {1,2,3,6} { \fill[gray!10!black,opacity=.9] ({48+\x-1},{-6-\x+1}) rectangle +(1,-1);}
 
-	\draw[very thin,help lines] (36,-12) grid (54,6);
+	% \draw[very thin,help lines] (36,-12) grid (54,6);
 	\draw[thick] (36,-12) rectangle (54,6);
 	\draw[ultra thick] (48,-12) -- (48,6);
 	\draw[ultra thick] (36,-6) -- (54,-6);
@@ -402,7 +402,7 @@ After we apply the row-net model and obtain a partitioning of the hypergraph, it
 	\foreach \x / \y in {2/2,4/5,4/4,4/9,3/11}{ \fill[myblue] ({42+\y-1},{-\x+1}) rectangle +(1,-1);}
 	\foreach \x / \y in {1/2,2/3,3/6,3/9,6/6,5/1,5/12,6/10,2/11,2/8} { \fill[myred] ({42+\y-1},{-\x+1}) rectangle +(1,-1);}
 	\foreach \x / \y in   {2/3,6/6,6/10,2/11,2/8} { \fill[myblue] ({42+\y-1},{-\x+1}) rectangle +(1,-1);}
-	\draw[semithick] (42,-6) grid +(12,6);
+	%\draw[semithick] (42,-6) grid +(12,6);
 	\draw[thick] (42,-6) rectangle +(12,6);
 
 	\node at (48,-7) {$A$};
@@ -411,13 +411,13 @@ After we apply the row-net model and obtain a partitioning of the hypergraph, it
 	\foreach \x / \y in {2/2,4/5,4/4,4/9,3/11}{ \fill[myblue] ({24+\y-1},{-6-\x+1}) rectangle +(1,-1);}
 
 	\node at (30,-13) {$A_r$};
-	\draw[semithick] (24,{-6-6}) grid +(12,6);
+	%\draw[semithick] (24,{-6-6}) grid +(12,6);
 	\draw[thick] (24,{-6-6}) rectangle +(12,6);
 
 	\foreach \x / \y in {1/2,2/3,3/6,3/9,6/6,5/1,5/12,6/10,2/11,2/8} { \fill[myred] ({24+\y-1},{6-\x+1}) rectangle +(1,-1);}
 	\foreach \x / \y in   {2/3,6/6,6/10,2/11,2/8} { \fill[myblue] ({24+\y-1},{6-\x+1}) rectangle +(1,-1);}
 	\node at (30,-1) {$A_c$};
-	\draw[semithick] (24,{-6+6}) grid +(12,6);
+	%\draw[semithick] (24,{-6+6}) grid +(12,6);
 	\draw[thick] (24,{-6+6}) rectangle +(12,6);
 
 	\foreach \x / \y in {1/1,1/3,6/7,1/10,2/7}{ \fill[myred] ({0+\y-1},{-6-\x+1}) rectangle +(1,-1);}
@@ -434,7 +434,7 @@ After we apply the row-net model and obtain a partitioning of the hypergraph, it
 	\foreach \x in {1,3} { \fill[myred] ({12+\x-1},{-6-\x+1}) rectangle +(1,-1);}
 	\foreach \x in {2,6} { \fill[myblue] ({12+\x-1},{-6-\x+1}) rectangle +(1,-1);}
 
-	\draw[very thin,help lines] (0,-12) grid +(18,18);
+	%\draw[very thin,help lines] (0,-12) grid +(18,18);
 	\draw[thick] (0,-12) rectangle +(18,18);
 	\draw[ultra thick] (12,-12) -- +(0,18);
 	\draw[ultra thick] (0,-6) -- +(18,0);

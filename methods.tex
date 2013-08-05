@@ -28,6 +28,7 @@ The partition-oblivious version of this heuristic is given in Algorithm \ref{alg
 		\Else
 		\State $w \gets$ random value between $c$ and $r$
 		\EndIf
+		\State $A_r := A_c := \varnothing$
 		\ForAll{$a_{ij} \in A$}
 		\If{$nz(i)<nz(j)$}
 		\State assign $a_{ij}$ to $A_r$
@@ -57,6 +58,7 @@ Then the partition-aware version of this heuristic is given in Algorithm \ref{al
 		\Else
 		\State $w \gets$ random value between $c$ and $r$
 		\EndIf
+		\State $A_r := A_c := \varnothing$
 		\ForAll{$a_{ij} \in A$}
 		\If{row $i$ is uncut and column $j$ is cut}
 		\State assign $a_{ij}$ to $A_r$
@@ -193,7 +195,7 @@ The heuristic that employs the SBD structure of a matrix is described explicitly
 		\State $m_2 := |\{ i : \text{ row } i \text{ is fully assigned to processor 1 } \}|$
 		\State $n_0 := |\{ j : \text{ column } j \text{ is fully assigned to processor 0 } \}|$
 		\State $n_2 := |\{ j : \text{ column } j \text{ is fully assigned to processor 1 } \}|$
-		\State
+		\State $A_r := A_c := \varnothing$
 		\If{$m_0 < n_0$}
 		\State Assign nonzeros of $\dot{A}_{00}$ to $A_r$
 		\Else
@@ -254,12 +256,12 @@ Figure \ref{fig:sbd2} shows the process of obtaining this matrix $\ddot{A}$ star
 
 \begin{figure}[h]
 	\centering
-\begin{tikzpicture}[scale=0.5]
-	\tikzstyle{myred}=[red!90,opacity=.8]
-	\tikzstyle{myblue}=[blue!60!cyan,opacity=.9]
-	\tikzstyle{mypurple}=[purple!80!blue,opacity=.9]
-	\tikzstyle{myarrow}=[line width=1.3pt,>=latex,->]
-			\foreach \x / \y in {4/4,4/6,5/5,7/8,7/7,8/8,6/9,9/4} { \fill[myred] ({0+\y-1},{-\x+1}) rectangle +(1,-1);}
+	\begin{tikzpicture}[scale=0.5]
+		\tikzstyle{myred}=[red!90,opacity=.8]
+		\tikzstyle{myblue}=[blue!60!cyan,opacity=.9]
+		\tikzstyle{mypurple}=[purple!80!blue,opacity=.9]
+		\tikzstyle{myarrow}=[line width=1.3pt,>=latex,->]
+		\foreach \x / \y in {4/4,4/6,5/5,7/8,7/7,8/8,6/9,9/4} { \fill[myred] ({0+\y-1},{-\x+1}) rectangle +(1,-1);}
 		\foreach \x / \y in {1/1,1/3,2/4,3/2,4/5,5/6,6/1} { \fill[myblue] ({0+\y-1},{-\x+1}) rectangle +(1,-1);}
 
 %		\draw[help lines] (0,-9) grid ({0+9},0);
@@ -273,7 +275,7 @@ Figure \ref{fig:sbd2} shows the process of obtaining this matrix $\ddot{A}$ star
 		\node at (11,-1.5) {$R_0$};
 		\node at (11,-4.5) {$R_1$};
 		\node at (11,-7.5) {$R_2$};
-		
+
 		\draw[very thick] ({0+0},-9) rectangle ({0+9},0);
 
 		\draw[ultra thick] ({0+3},0) -- ({0+3},-9);
@@ -290,7 +292,7 @@ Figure \ref{fig:sbd2} shows the process of obtaining this matrix $\ddot{A}$ star
 %		\draw[help lines] (19,-9) grid ({19+9},0);
 		\foreach \x / \y in {2/0,6/1,4/2,0/3,1/4,5/5,8/6,3/7,7/8} {\node at ({19+9.5},{-\y-.5}) {\x};}
 		\foreach \x / \y in {7/0,8/1,5/2,0/3,1/4,2/5,6/6,3/7,4/8} {\node at ({19+\y+.5},-9.5) {\x};}
-	
+
 		\node at ({19+1},-10.7) {$C_{00}$};
 		\node at ({19+2.5},-10.7) {$C_{01}$};
 		\node at ({19+4.5},-10.7) {$C_{1}$};
@@ -302,7 +304,7 @@ Figure \ref{fig:sbd2} shows the process of obtaining this matrix $\ddot{A}$ star
 		\node at ({19+11},-4.5) {$R_{1}$};
 		\node at ({19+11},-6.5) {$R_{20}$};
 		\node at ({19+11},-8) {$R_{21}$};
-		
+
 		\draw[very thick] ({19+0},-9) rectangle ({19+9},0);
 
 		\draw[ultra thick] ({19+3},0) -- ({19+3},-9);
@@ -344,7 +346,7 @@ This heuristic that exploits the SBD2 form of the matrix $A$ is given explicitly
 		\State $\ddot{A}:=$ SBD2 form of the partitioned matrix $A$
 		\State $m_i := $ number of rows of $\ddot{A}_{i*}$
 		\State $n_i := $ number of columns of $\ddot{A}_{*i}$
-		\State
+		\State $A_r := A_c := \varnothing$
 		\State Assign nonzeros of $\ddot{A}_{00}$ to $A_r$
 		\State Assign nonzeros of $\ddot{A}_{01}$ to $A_r$
 		\State Assign nonzeros of $\ddot{A}_{10}$ to $A_c$
@@ -366,7 +368,8 @@ This heuristic that exploits the SBD2 form of the matrix $A$ is given explicitly
 		\State Assign nonzeros of $\ddot{A}_{34}$ to $A_c$
 		\State Assign nonzeros of $\ddot{A}_{43}$ to $A_r$
 		\State Assign nonzeros of $\ddot{A}_{44}$ to $A_c$
-\end{algorithmic}
+	\end{algorithmic}
+	\caption{Assignment of the nonzeros of $A$ based on the SBD2 form of the matrix.}
 \end{algorithm}
 
 Note that, in this case, the SBD2 form has to be computed from scratch from the SBD form, because it uses further information that it is not employed during the normal partitioning.
@@ -399,11 +402,11 @@ A more explicit overview on this local search improvement scheme is described in
 		\State $B(i,j) = 0$
 		\State $B(j,i) = 1$
 		\Else
-			\If{$l < l_{max}$}
-			\State $B(i,j) = 0$
-			\State $B(j,i) = 1$
-			\State $l = l+1$
-			\EndIf
+		\If{$l < l_{max}$}
+		\State $B(i,j) = 0$
+		\State $B(j,i) = 1$
+		\State $l = l+1$
+		\EndIf
 		\EndIf
 		\EndFor
 		\If{$nz(B(i)) = 1$}
@@ -411,10 +414,199 @@ A more explicit overview on this local search improvement scheme is described in
 		\State $l = l-1$
 		\EndIf
 		\EndFor
-	\State $A_r' := B([1,\dots,n],[n+1,\dots,n+m])^T$
-	\State $A_c' := B([n+1,\dots,m+n],[1,\dots,n])$	
+		\State $A_r' := B([1,\dots,n],[n+1,\dots,n+m])^T$
+		\State $A_c' := B([n+1,\dots,m+n],[1,\dots,n])$	
 	\end{algorithmic}
 	\caption{Local search refinement of $A_r$ and $A_c$} \label{alg:globalview}
 \end{algorithm}
 
+As this is a scheme that relies on existing $A_r$ and $A_c$ and aims at improving them, we still need to choose how to generate these parts in the first place. If we can rely on an existing partitioning, a simple choice could be to take as $A_r$ and $A_c$ the subsets of nonzeros assigned, respectively, to processor 0 and 1; otherwise, if our goal is to produce $A_r$ and $A_c$ for the initial partitioning, the simplest choice is to randomly assign each nonzero to either $A_r$ or $A_c$. These initial solutions, however, are fast to generate but not particularly efficient, and are therefore meaningful only if our improvement scheme is fast enough; otherwise, we can always rely on one of the other heuristics described in this chapter.
+
 \section{Partial assignment of rows and columns} \label{sec:hot_restart}
+
+In Section \ref{sec:localview} we discussed how to assign each nonzero independently, whereas on Section \ref{sec:sbd} we examined the possibility of exploiting a little the structure of the matrix, in order to assign more nonzeros at once. Keeping this direction, there is some other structure of $A$ that can lead to a better assignment: partial assignment of rows and columns.
+
+The main idea behind this heuristic is that, every time we assign a nonzero to $A_r$, we know that it is convenient that also all the other nonzeros in the same row to be assigned to it; conversely, if a nonzero is assigned to $A_c$, all the nonzeros in its column should stick with it. Therefore, we ideally want to keep together rows and columns as much as possible; but, as already discussed, there is always the problem that a nonzero cannot be assigned to both $A_r$ and $A_c$, we can only reason in term of partial assigment of the row/column. 
+
+Throughout this section we will stop distinguishing between rows and columns of a matrix and reason in term of \textbf{indices} in the set $\{0,\dots,m+n-1\}$: following the natural ordering, the $m$ rows are mapped to $0,\dots,m-1$ and the $n$ columns to $m,\dots,m+n-1$.
+
+This simplification of terms is due to the fact that the core of this heuristic lies in the computation of a \textbf{priority vector} $v$, which is none other than a permutation of the indices $0,\dots,m+n-1$, where they appear in order of decreasing priority: in this sense, the priority is to be intended as the probability of the nonzeros of that index to be together in a good partitioning.
+
+The assignment of nonzeros is done by ``painting'' them with an imaginary color, which corresponds either to $A_r$ or $A_c$: we iterate through our priority vector backwards (i.e. starting from the index with the lowest priority) and assign all of its nonzeros to go together: if the index corresponds to a row, then we assign all of its nonzeros to $A_r$, otherwise we assign them to $A_c$. Because each nonzero has both a row and a column, we have that it is represented twice in our priority vector; the second time it is considered, we re-assign it by ``painting it over'' (hence the name of the algorithm).
+
+A more explicit formulation of this procedure is given in Algorithm \ref{alg:overpainting}.
+
+\begin{algorithm}[h]
+	\begin{algorithmic}
+		\Require{Priority vector $v$, matrix $A$}
+		\Ensure{$A_r$, $A_c$}
+		\State $A_r := A_c: = \varnothing$
+		\For{$i=m+n-1,\dots,0$}
+		\If{$v_i < m$}
+		\State Add the nonzeros of the row $i$ to $A_r$
+		\Else
+		\State Add the nonzeros of the column $i$ to $A_c$
+		\EndIf
+		\EndFor
+	\end{algorithmic}
+	\caption{Overpainting algorithm} \label{alg:overpainting}
+\end{algorithm}
+
+It is possible also to give an alternative formulation for this algorithm in which we iterate forward through $v$, as described in Algorithm \ref{alg:overpainting-2}:
+
+\begin{algorithm}[h]
+	\begin{algorithmic}
+		\Require{Priority vector $v$, matrix $A$}
+		\Ensure{$A_r$, $A_c$}
+		\State $A_r := A_c: = \varnothing$
+		\For{$i=0,\dots,m+n-1$}
+		\If{$v_i < m$}
+		\State Add the unmarked nonzeros of the row $i$ of $A$ to $A_r$
+		\Else
+		\State Add the unmarked nonzeros of the column $i$ of $A$ to $A_c$
+		\EndIf
+		\State Mark nonzeros of index $i$ as ``evaluated''
+		\EndFor
+	\end{algorithmic}
+	\caption{Alternative formulation of Algorithm \ref{alg:overpainting}.} \label{alg:overpainting-2}
+\end{algorithm}
+
+In this formulation, every assignment to $A_r$ and $A_c$ is final, but we have the added complexity of checking which nonzeros of the considered index are still to be assigned, and only work with them.
+
+Lastly, another different formulation is possible: we consider individually each nonzero $a_{ij}$ and see whether in $v$ we have $i < j$ (where the $<$ symbol is to be intended as ``$i$ precedes $j$'' and not as the comparison of the values) or the other way around; in the first case, the row has more priority and we assign $a_{ij}$ to $A_r$, otherwise we assign it to $A_c$. Note that, since we have to perform $N$ lookups on the vector $v$, this is a more expensive formulation of the same algorithm.
+
+A very important thing to observe is that in any case this overpainting algorithm is completely deterministic: $A_r$ and $A_c$ are uniquely determined by the ordering of the indices in $v$. Therefore, the heuristic part of this algorithm lies entirely in the choice of this priority vector, and, for this reason, we will focus on it in the next subsection. 
+
+\subsection{Computation of the priority vector $v$}
+
+Because the quality of $A_r$ and $A_c$ (and consequently of the final partitioning) depends entirely on the choice of $v$, it is important to take a structured approach and explore a wide variety of possibilities for it.
+
+In this section, we proceed and define several \emph{generating schemes}, and their input determines whether the overpainting algorithm is used to obtain a better initial partitioning or a fully iterative scheme. In general, we try to come up with schemes that can be used for either purpose. 
+
+Each one of the generating scheme can be summarized in three main steps:
+
+\begin{enumerate}
+	\item usage of previous partitioning
+	\item sorting;
+	\item internal ordering of indices.
+\end{enumerate}
+
+Now, we give a more detailed explanation of each of those steps. The terms in verbatim are the shortcut we use to refer to such strategy/variant.
+
+\begin{itemize}
+	\item \textbf{usage of previous partitioning}: if we are considering \emph{partition aware generating schemes}, we divide the set of uncut indices (i.e. indices which correspond to uncut rows or columns) from the  cut indices. We consider the simple concatenation of uncut indices and cut indices, in this order, and the next steps are performed on each of these parts. If, instead, we are considering a \emph{partition oblivious scheme}, the subsequent operations are performed in the set $\{0,\dots,m+n-1\}$.
+
+	\item \textbf{sorting}: we can either keep the set from the previous step untouched (therefore preserving the natural order of indices) or perform a sorting with respect to the number of nonzeros. Usually, we sort in ascending order, as a short row/column is more likely to fit completely in a good partitioning, because it does not cause many cut columns/rows.
+
+In addition, we can refine a bit our sorting: we could move the indices which have only one nonzero to the back, because no matter our assignment of such nonzero, that index will not be cut: therefore, it is best to try and keep also the other dimension uncut. Borrowing a term from typography, where the occurences of a single line that starts a paragraph is alone at a bottom of a page is to be avoided, we adopt the term \emph{widow} to describe such indices with only one nonzero.
+
+\item \textbf{internal ordering}: as the last step, we want to finalize our vector $v$ by deciding more precisely the position of each index. The strategies considered are the following:
+
+	\begin{itemize}
+		\item \textbf{concatenation}: we put either all the rows before all the columns, or all the columns before all the rows;
+		\item \textbf{mixing}: we can mix rows and columns in two main ways: alternation and spread. Suppose we have twice as many columns than rows: in the first case we have 
+			$$(c,r,c,r,c,r,\dots,c,r,c,c,c,\dots,c,c,c),$$
+			
+			whereas with the second one we get 
+			
+			$$(c,c,r,c,c,r,\dots,c,c,r),$$
+			
+			where with $c$ we denote a generic column and with $r$ a generic row. To obtain a more even distribution, we always start with the greater dimension;
+		\item \textbf{random} (only in case of no sorting): we randomize the ordering of the indices;
+		\item \textbf{simple} (only in case of sorting): we let the sorting decide completely the ordering, and the vector is left as is.
+\end{itemize}
+\end{itemize}
+
+As the complete description of a generating scheme can easily become lengthy, we use a simplified notation and adopt the following abbreviations:
+
+\begin{itemize}
+	\item \verb|PO|: partition oblivious
+	\item \verb|PA|: partition aware
+	\item \verb|sorted| and \verb|unsorted|: sorting w.r.t. the number of nonzeros is performed or not
+	\item \verb|w| and \verb|nw|: all the indices with only 1 nonzero are moved to the back or not
+	\item \verb|simple|: the sorted vector is left as-is
+	\item \verb|concat|: rows and columns are concatenated
+	\item \verb|row|: the concatenation is done rows-columns
+	\item \verb|col|: the concatenation is done columns-rows
+	\item \verb|mix|: mixing of the rows and columns is enforced
+	\item \verb|alt|: rows and columns are alternated
+	\item \verb|spr|: rows and columns are spread
+	\item \verb|random|: the order of the indices is randomized
+\end{itemize}
+
+
+As there are several combinations of these choices, it is easy to visualize them using a directed graph, as shown in Figure \ref{fig:digraph}, where a generating scheme is simply a path from START to END. 
+
+\begin{figure}[h]
+\begin{center}
+\begin{tikzpicture}[every path/.style={>=latex}]
+\node (start) at (6,14) {START};
+\node (po) at (4.5,12.5)  { PO };
+\node (pa) at (7.5,12.5) { PA };
+\node (d1) at (6,11.5) {$\bullet$};
+\node (sorted) at (3,9.5) {sorted};
+\node (unsorted) at (10.5,9.5) {unsorted};
+\node (w) at (2,8.25) {w};
+\node (nw) at (4,8.25) {nw};
+\node (d3pre) at (3,7) {$\bullet$};
+\node (d3) at (6,5) {$\bullet$};
+\node (concat) at (4.5,3) {concat}; 
+\node (mix) at (7,3) {mix};
+\node (random) at (10.5,3) {random};
+\node (simple) at (1,3) {simple};
+\node (alt) at (6.5,2) {alt};
+\node (row) at (4,2) {row};
+\node (col) at (5,2) {col};
+\node (end) at (6,-0.5) {END};
+\node (spr) at (7.5,2) {spr};
+
+\draw[->] (start) edge (po);
+\draw[->] (start) edge (pa);
+ 
+\draw[->] (po) edge (d1);
+\draw[->] (pa) edge (d1);
+ 
+\draw[->] (d1) edge (sorted);
+\draw[->] (d1) edge (unsorted);
+
+\draw[->] (sorted) edge (w);
+\draw[->] (sorted) edge (nw);
+
+\draw[->] (unsorted) edge (d3);
+\draw[->] (w) edge (d3pre);
+\draw[->] (nw) edge (d3pre);
+\draw[->] (d3pre) edge (d3);
+\draw[->] (d3pre) edge (simple);
+
+\draw[->] (d3) edge (mix);
+\draw[->] (d3) edge (concat);
+
+\draw[->] (unsorted) edge (random);
+
+\draw[->] (mix) edge (alt);
+\draw[->] (mix) edge (spr);
+
+\draw[->] (alt) edge (end);
+\draw[->] (spr) edge (end);
+
+\draw[->] (concat) edge (row);
+\draw[->] (concat) edge (col);
+
+\draw[->] (row) edge (end);
+\draw[->] (col) edge (end);
+\draw[->] (simple) edge (end);
+\draw[->] (random) edge (end);
+
+\draw[dashed] (0,13.25) -- (13,13.25);
+\draw[dashed] (0,10.5) -- (13,10.5);
+\draw[dashed] (0,4) -- (13,4);
+\draw[dashed] (0,0.5) -- (13,0.5);
+
+\node[align=left,draw] at (13,12) {usage of previous \\partitioning};
+\node[align=left,draw] at (13,7) {sorting};
+\node[align=left,draw] at (13,2) {internal ordering};
+\end{tikzpicture}
+\end{center}
+\caption{Directed graph that represents the family of heuristics used (any path from START to END). Dummy nodes (the ones without any label) were added in order to reduce the number of edges and ease legibility.} \label{fig:digraph}
+\end{figure}
+
