@@ -1,12 +1,12 @@
-\chapter{Methods for splitting a matrix $A$ into $A_r$ and $A_c$} \label{chap:methods}
+\chapter{Strategies for splitting a matrix $A$ into $A_r$ and $A_c$} \label{chap:methods}
 
 The main goal of this thesis is to find efficient ways of splitting our original matrix $A$ into $A_r$ and $A_c$, in order to use the medium-grain model.
 
 We are interested in both improving the initial partitioning of $A$, and a fully iterative method; therefore, we will make the distinction between methods that don't need an initial partitioning (\emph{partition oblivious} methods), and are therefore suitable for the first case, and methods that do require an initial partitioning (\emph{partition aware} methods), to be used in a fully iterative scheme. Most of the time the same algorithm can be used for both purposes, albeit with slight modifications.  Before we proceed and analyze the details of the examined heuristics, we can make a few observations, to better understand the general principles behind these algorithms.
 
-If we are interested in an initial partitioning into $A_r$ and $A_c$ that will yield a good communication volume, we already have some information about their quality before the actual partitioning is performed. We can indeed compute an upper bound on such communication cost: if a complete row of $A$ is assigned to $A_r$ (or a full column is assigned to $A_c$), we are sure that those nonzeros will be assigned to the same processor, and we already discussed in Section \ref{sec:par_matvec} how this results in no communication for that row (or column). This can give us the idea of trying to keep, as much as possible, full rows and columns together, despite it is impossible to do it all the time (a given nonzero cannot be assigned to both $A_r$ and $A_c$).
+If we are interested in an initial partitioning into $A_r$ and $A_c$ that will yield a good communication volume, we already have some information about their quality before the actual partitioning is performed. We can indeed compute an upper bound on the communication cost: if a complete row of $A$ is assigned to $A_r$ (or a full column is assigned to $A_c$), we are sure that those nonzeros will be assigned to the same processor, and we already discussed in Section \ref{sec:par_matvec} how this results in no communication for that row (or column). This can give us the idea of trying to keep, as much as possible, full rows and columns together, despite it is impossible to do it all the time (a given nonzero cannot be assigned to both $A_r$ and $A_c$).
 
-If our purpose is to compute $A_r$ and $A_c$ to improve an existing partitioning, we can have a few principles to guide us in the choice of keeping and discarding information from it. First of all, it makes sense to somewhat trust the existing partitioning: if some nonzeros (for example, a full row or column) are assigned to the same processor, it means that the partioner decided that it was convenient to put those nonzeros together, and therefore we should have a preference for them to be together also in the new partitioning. However, this must only serve as an indication and not as a rigid rule, leaving some space for new choices to be made, in order to effectively improve the existing partitioning. Furthermore, also in this case we should try and keep, as much as possible, rows and columns together, as noted in the previous paragraph.
+If our purpose is to compute $A_r$ and $A_c$ to improve an existing partitioning, we can have a few principles to guide us in the choice of what information we should keep, and what we should discard for the next iteration. First of all, it makes sense to have confidence in the existing partitioning: if some nonzeros (for example, a full row or column) are assigned to the same processor, it means that at some point in the previous iteration it was decided that it was convenient to put those nonzeros together, and therefore we should have a preference for them to be together also in the new partitioning. However, this must only serve as an indication and not as a rigid rule, leaving some space for new choices to be made, in order to effectively improve the existing partitioning. Furthermore, we should try and keep, as much as possible, rows and columns together, as noted in the previous paragraph.
 
 \section{Individual assignment of nonzeros} \label{sec:localview}
 
@@ -44,7 +44,7 @@ The partition-oblivious version of this heuristic is given in Algorithm \ref{alg
 
 This algorithm can be easily adapted to compute $A_r$ and $A_c$ from a given partitioning of $A$. Previously we claimed that it is convenient that uncut rows and columns have precedence over cut rows and columns: now, whenever we analyze a nonzero $a_{ij}$ we first look at whether $i$ and $j$ are cut or uncut. If only one of them is cut, we assign the nonzero to the uncut one, otherwise (i.e. both are cut, or both are uncut) we do similarly as before and assign it to the shorter one.
 
-Then the partition-aware version of this heuristic is given in Algorithm \ref{alg:localview-pa}:
+The partition aware variant of this heuristic is given explicitly in Algorithm \ref{alg:localview-pa}:
 
 \begin{algorithm}[h]
 	\begin{algorithmic}
@@ -82,7 +82,7 @@ Then the partition-aware version of this heuristic is given in Algorithm \ref{al
 
 Instead of assigning nonzeros individually as in Section \ref{sec:localview}, we can take a more coarse-grained approach and trying to assign at the same time a greater amount of nonzeros to either $A_r$ or $A_c$. In particular, we will discuss how to exploit the Separated Block Diagonals (SBD) form of the partitioned matrix $A$ and introduce a further iteration of this concept, discussing the Separated Block Diagonal of order 2 (SBD2) form of the matrix. Moreover, the heuristics described in this section are only partition-aware, and take as input a partitioned matrix.
 
-As throughout this section the permutations of matrices will be fundamental, we adopt a simplified notation: given an index vector $I$ and one for the columns $J$, we denote as $A(I,J)$ the submatrix of $A$ with only the rows in $I$ and only the columns in $J$, in the order that they appear in the vectors), such that $A([1,\dots,m],[1 \dots n] = A$. Furthermore, if $I_1$ and $I_2$ are both ordered vector of indices, with $(I_1,I_2)$ we denote the simple concatenation of these vectors.
+As throughout this section the permutations of matrices will be fundamental, we adopt a simplified notation: given a vector $I$ with row indices and a vector $J$ with column indices, we denote as $A(I,J)$ the submatrix of $A$ with only the rows in $I$ and only the columns in $J$ (following the order in which they appear in the vectors). With this notation we have, for example, that $A([1,\dots,m],[1 \dots n] = A$. Furthermore, if $I_1$ and $I_2$ are both vectors of indices, with $(I_1,I_2)$ we denote the simple concatenation of these vectors.
 
 \subsection{Using the Separated Block Diagonal form of $A$}
 
@@ -168,20 +168,20 @@ where
 	\item $\dot{A}_{11}$ of size $m_1 \times n_1$, has nonzeros with cut rows and columns.
 \end{itemize}
 
-Note that the size of each part along with amount of contained nonzero can greatly vary, also from matrix to matrix: for example, if the sparsity pattern of the matrix allows a ``perfect'' partitioning such that there is no communication, all blocks are empty except of $\dot{A}_{00}$ and $\dot{A}_{22}$; conversely, if the matrix has a very dense (or complicated) pattern and/or the partitioning is far from the optimal, such blocks might be almost empty and $\dot{A}_{11}$ will have the majority of nonzeros. An example of this difference is shown in Figure \ref{fig:sbd-2}.
+Note that the size of each part along with amount of contained nonzero can greatly vary, also from matrix to matrix: for example, if the sparsity pattern of the matrix allows a ``perfect'' partitioning such that there is no communication, all blocks are empty except of $\dot{A}_{00}$ and $\dot{A}_{22}$; conversely, if the matrix has a very dense (or complicated) pattern and/or the partitioning is far from the optimal, such blocks might be almost empty and $\dot{A}_{11}$ will have the majority of nonzeros. An example of the difference of the block sizes of $\dot{A}$ is shown in Figure \ref{fig:sbd-2}.
 
 \begin{figure}[h]
 	\centering
 	\subfigure[\texttt{impcol\_b}]{ \includegraphics[scale=0.5]{img/impcol_b.pdf} \label{fig:impcol_b}} \hspace{1cm}
 	\subfigure[\texttt{cage6}]{ \includegraphics[scale=0.5]{img/cage6.pdf} \label{fig:cage6} }
-	\caption{Example of SBD forms of partitioning of the matrices \texttt{impcol\_b}\cite{matrixmarket} and \texttt{cage6}\cite{ufl}. Each part of $\dot{A}$ has been colored differently. In the first matrix there are no cut rows, and therefore $\dot{A}_{10}=\dot{A}_{11} =\dot{A}_{12} = \varnothing$. The images were produced with MATLAB.} \label{fig:sbd-2}
+	\caption{Example of SBD forms of partitioning of the matrices \texttt{impcol\_b} \cite{matrixmarket} and \texttt{cage6} \cite{ufl}. Each part of $\dot{A}$ has been colored differently. In the first matrix there are no cut rows, which means that $\dot{A}_{10}=\dot{A}_{11} =\dot{A}_{12} = \varnothing$.} \label{fig:sbd-2}
 \end{figure}
 
 By computing the Separated Block Diagonal form of a matrix, we are able to explicitly see the underlying structure of the partitioning of a matrix, and the properties of each block can be used to adapt the assignment of its nonzeros. More specifically, the blocks $\dot{A}_{00}$ and $\dot{A}_{22}$ have nonzeros with uncut rows and columns and therefore are more suited to be assigned together; of course, we still have to decide between $A_r$ and $A_c$ and, as mentioned earlier, it is impossible to do both: a convenient thing is to base our choice on the sizes of such blocks. For example, if $m_0 < n_0$, in the block $\dot{A}_{00}$ we have that the columns are (on average) longer than the rows: if we assign the nonzeros of this block to $A_c$ we are, on principle, making sure that more things will stay uncut.
 
-For the block with uncut rows ($\dot{A}_{01}$, $\dot{A}_{21}$) and cut columns, the choice is easy: we assign them to $A_r$ and keep their rows uncut. Similarly, we assign the nonzeros of $\dot{A}_{10}$ and $\dot{A}_{12}$ to $A_c$, keeping their column uncut. 
+For the blocks with uncut rows and cut columns (namely, $\dot{A}_{01}$ and $\dot{A}_{21}$), the choice is easy: we assign them to $A_r$ and keep their rows uncut. Similarly, we assign the nonzeros of $\dot{A}_{10}$ and $\dot{A}_{12}$ to $A_c$, keeping their columns uncut. 
 
-For the middle block $\dot{A}_{11}$, whose nonzeros have cut rows and cut columns, we can't exploit any underlying structure: a possible way is to employ one of the other heuristics described in this chapter only considering this submatrix. Our choice is to go with Algorithm \ref{alg:localview-po} presented in Section \ref{sec:localview} (note that we cannot exploit the partition-aware variant of it, because all of the nonzeros have cut rows and columns).
+For the middle block $\dot{A}_{11}$, whose nonzeros have cut rows and cut columns, we can't exploit any underlying structure: a possible way is to employ one of the other heuristics described in this chapter only considering this submatrix. Our choice is to go with Algorithm \ref{alg:localview-po} presented in Section \ref{sec:localview} (note that we cannot exploit the partition-aware variant of it, because all of the nonzeros in the block considered have cut rows and columns).
 
 The heuristic that employs the SBD structure of a matrix is described explicitly in Algorithm \ref{alg:sbdview}.
 
@@ -534,7 +534,6 @@ As the complete description of a generating scheme can easily become lengthy, we
 	\item \verb|random|: the order of the indices is randomized
 \end{itemize}
 
-
 As there are several combinations of these choices, it is easy to visualize them using a directed graph, as shown in Figure \ref{fig:digraph}, where a generating scheme is simply a path from START to END. 
 
 \begin{figure}[h]
@@ -609,4 +608,5 @@ As there are several combinations of these choices, it is easy to visualize them
 \end{center}
 \caption{Directed graph that represents the family of heuristics used (any path from START to END). Dummy nodes (the ones without any label) were added in order to reduce the number of edges and ease legibility.} \label{fig:digraph}
 \end{figure}
+
 
