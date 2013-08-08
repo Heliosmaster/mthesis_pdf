@@ -217,7 +217,7 @@ The heuristic that employs the SBD structure of a matrix is described explicitly
 
 Note that, as mentioned in Chapter \ref{chap:introduction}, the matrix is usually split by means of recursive bipartitionings: it is then sufficient to keep track of the order of these recursions to have an implicit ordering which can be easily used to compute the SBD form of a matrix \cite{yzelman_cache}, instead of computing this form from scratch as we described earlier.
 
-\subsection{Using the Separated Block Diagonal form of order 2 of $A$}
+\subsection{Using the Separated Block Diagonal form of order 2 of $A$} \label{sec:sbd2}
 
 The proposed SBD2 form of a partitioned matrix $A$ is an extension of the SBD form: given a partitioned matrix $A$, we compute the Separate Block Diagonal form of $A$ of order 2 by separating, in $\dot{A}_{10}$ and $\dot{A}_{20}$ the empty and non-empty columns, and in $\dot{A}_{01}$ and $\dot{A}_{02}$ the empty and non-empty rows. Then all the other blocks, except the central one, are permuted and split up accordingly. This procedure is better shown in Algorithm \ref{alg:sbd2}. 
 
@@ -479,9 +479,9 @@ A very important thing to observe is that in any case this overpainting algorith
 
 \subsection{Computation of the priority vector $v$}
 
-Because the quality of $A_r$ and $A_c$ (and consequently of the final partitioning) depends entirely on the choice of $v$, it is important to take a structured approach and explore a wide variety of possibilities for it.
+Because, with the overpainting algorithm, the quality of $A_r$ and $A_c$ depends entirely on the choice of $v$, it is important to take a structured approach and explore a wide variety of possibilities for this priority vector.
 
-In this section, we proceed and define several \emph{generating schemes}, and their input determines whether the overpainting algorithm is used to obtain a better initial partitioning or a fully iterative scheme. In general, we try to come up with schemes that can be used for either purpose. 
+In this section, we proceed and define several \emph{generating schemes}, and their input determines whether the overpainting algorithm is used to obtain a better initial partitioning or a fully iterative scheme. In general, we try to come up with schemes that can be used for either purpose, with slight modifications. 
 
 Each one of the generating scheme can be summarized in three main steps:
 
@@ -491,16 +491,16 @@ Each one of the generating scheme can be summarized in three main steps:
 	\item internal ordering of indices.
 \end{enumerate}
 
-Now, we give a more detailed explanation of each of those steps. The terms in verbatim are the shortcut we use to refer to such strategy/variant.
+Now, we give a more detailed explanation of each of those steps. 
 
 \begin{itemize}
 	\item \textbf{usage of previous partitioning}: if we are considering \emph{partition aware generating schemes}, we divide the set of uncut indices (i.e. indices which correspond to uncut rows or columns) from the  cut indices. We consider the simple concatenation of uncut indices and cut indices, in this order, and the next steps are performed on each of these parts. If, instead, we are considering a \emph{partition oblivious scheme}, the subsequent operations are performed in the set $\{0,\dots,m+n-1\}$.
 
-	\item \textbf{sorting}: we can either keep the set from the previous step untouched (therefore preserving the natural order of indices) or perform a sorting with respect to the number of nonzeros. Usually, we sort in ascending order, as a short row/column is more likely to fit completely in a good partitioning, because it does not cause many cut columns/rows.
+	\item \textbf{sorting}: we can either keep the set from the previous step untouched (therefore preserving the natural order of indices) or perform a sorting with respect to the number of nonzeros. The sorting is done in ascending order, as a short row/column is more likely to fit completely in a good partitioning because it does not yield many cut columns/rows.
 
-In addition, we can refine a bit our sorting: we could move the indices which have only one nonzero to the back, because no matter our assignment of such nonzero, that index will not be cut: therefore, it is best to try and keep also the other dimension uncut. Borrowing a term from typography, where the occurences of a single line that starts a paragraph is alone at a bottom of a page is to be avoided, we adopt the term \emph{widow} to describe such indices with only one nonzero.
+In addition, we can refine a bit our sorting: we could move the indices which have only one nonzero to the back, because no matter our assignment of such nonzero, that index will not be cutand it is best to try and keep also the other dimension uncut. 
 
-\item \textbf{internal ordering}: as the last step, we want to finalize our vector $v$ by deciding more precisely the position of each index. The strategies considered are the following:
+\item \textbf{internal ordering}: as the last step, we want to finalize our vector $v$ by deciding more precisely the position of each index. The strategies considered, which often depend internally on an additional parameter, are the following:
 
 	\begin{itemize}
 		\item \textbf{concatenation}: we put either all the rows before all the columns, or all the columns before all the rows;
@@ -517,7 +517,7 @@ In addition, we can refine a bit our sorting: we could move the indices which ha
 \end{itemize}
 \end{itemize}
 
-As the complete description of a generating scheme can easily become lengthy, we use a simplified notation and adopt the following abbreviations:
+As the complete description of a generating scheme is somewhat lengthy, we use a simplified notation and adopt the following abbreviations:
 
 \begin{itemize}
 	\item \verb|PO|: partition oblivious
@@ -534,7 +534,7 @@ As the complete description of a generating scheme can easily become lengthy, we
 	\item \verb|random|: the order of the indices is randomized
 \end{itemize}
 
-As there are several combinations of these choices, it is easy to visualize them using a directed graph, as shown in Figure \ref{fig:digraph}, where a generating scheme is simply a path from START to END. 
+With this notation, the name \verb|po_sorted_nw_mix_spr| stands for ``partition oblivious generating scheme, with indices sorted by number of nonzeros, without moving the indices with 1 nonzero at the back, with forced mixing of rows and columns, in a spread fashion''. This is just one of the many possibilities, which are convenient to visualize using a directed graph, as shown in Figure \ref{fig:digraph}; a generating scheme is simply a path from START to END. 
 
 \begin{figure}[h]
 \begin{center}
@@ -609,4 +609,4 @@ As there are several combinations of these choices, it is easy to visualize them
 \caption{Directed graph that represents the family of heuristics used (any path from START to END). Dummy nodes (the ones without any label) were added in order to reduce the number of edges and ease legibility.} \label{fig:digraph}
 \end{figure}
 
-
+Other than this family of heuristics, we can also formulate the problem of partial assignment of rows/columns, always following this framework, in another more mathematical way, to which we dedicate Chapter \ref{chap:independent_set}.
