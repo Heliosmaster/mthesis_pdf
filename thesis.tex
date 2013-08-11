@@ -13,7 +13,7 @@
 \usepackage{mathtools}
 \usepackage{amsfonts}
 \usepackage{amssymb}
-%\usepackage{caption}
+\usepackage{caption}
 \usepackage{enumerate}
 \usepackage{algpseudocode}
 \usepackage[boxed,chapter]{algorithm}
@@ -23,6 +23,12 @@
 \usepackage{subfigure}
 
 \usetikzlibrary{chains,scopes,matrix}
+
+\tikzstyle{myred}=[red!90,opacity=.8]
+\tikzstyle{myblue}=[blue!60!cyan,opacity=.9]
+\tikzstyle{mypurple}=[purple!80!blue,opacity=.9]
+\tikzstyle{myarrow}=[line width=1.3pt,>=latex,->]
+\tikzstyle{vertex} = [fill,shape=circle,node distance=100pt,minimum size=0.2cm,inner sep = 0pt]
 
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\N}{\mathbb{N}}
@@ -38,12 +44,13 @@
 \newtheorem{lemma}{Lemma}[chapter]
 \setlength\parindent{0pt}
 \setlength{\parskip}{6pt} %%distanza fra i paragrafi
-%\captionsetup{font=small}
+
+\captionsetup{format=hang,labelfont=bf}
 \bibliography{bib}
 
 \DefineBibliographyStrings{english}{%
-    backrefpage  = {cited on page}, % for single page number
-    backrefpages = {cited on pages} % for multiple page numbers
+	backrefpage  = {cited on page}, % for single page number
+	backrefpages = {cited on pages} % for multiple page numbers
 }
 %\DeclareFieldFormat{journaltitle}{#1,} % italic journal title with comma
 \DeclareFieldFormat[article,unpublished]{title}{``\mkbibemph{#1}'',} % italic journal title with comma
