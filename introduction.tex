@@ -79,8 +79,7 @@ After this distribution, every processor has to compute its local contribution t
 				\State
 			\end{algorithmic}
 	\end{enumerate}
-	\label{alg:matvec}
-	\caption{Parallel sparse matrix-vector multiplication.}
+	\caption{Parallel sparse matrix-vector multiplication.} \label{alg:matvec}
 \end{algorithm}
 
 In reality there is also a fourth phase, in which each processor sums up all the contributions received in phase (2) for all of its owned components of $u$; this is a very small sum with negligible computational cost and for this reason it has been omitted from the algorithm. 
@@ -290,7 +289,7 @@ Now, as the vertices correspond exactly to nonzeros of our matrix, we can use th
 
 On a higher level, one of the benefits of this decomposition model is easy to understand: we have a lot of freedom and we can assign individually each nonzero to a different partition. Similarly as before, however, this advantage can easily become a drawback because now the size of the hypergraph is consistently larger, with $N$ vertices compared to $m$ and $n$ of the previous two models. Thus, computations on the fine-grain model take substantially more time than row-net or column-net models and therefore there is a restriction on the size of the problem that can be efficiently solved.
 
-\section{Earlier work}
+\section{Earlier work} \label{sec:earlier_work} 
 
 Among the models used to translate matrix partitioning into hypergraph partitioning, we already mentioned row-net and column-net \cite{hypergraph_model}, proposed in 1999, and a more recent fine-grained approach \cite{hypergraph_finegrain}, proposed in 2001. New models are relatively rare, and recently Pelt and Bisseling proposed the interesting \textbf{medium-grain} model \cite{mediumgrain}.  As this model is at the very base of our work, a more detailed explanation will be given in Section \ref{sec:mediumgrain}.
 

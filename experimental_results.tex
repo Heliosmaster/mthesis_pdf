@@ -1,4 +1,34 @@
 \chapter{Experimental results} \label{chap:experimental_results}
+
+In Chapter \ref{chap:methods} and \ref{chap:independent_set} we discussed different heuristics to be used in the matrix partitioning problem. Whether we aim at improving the initial partitioning or a fully iterative procedure, we need to apply those ideas to practice, devising an efficient implementation.
+
+In Section \ref{sec:earlier_work}, we mentioned existing software partitioners: Mondriaan \cite{mondriaan} is the package of our choice and we defer to it the actual computations of the partitionings, limiting ourselves to compute the matrix $B$ of the medium grain model starting from $A_r$ and $A_c$. Now, for sake of clarity, we give explicitly the computation of $B$ is given explicitly in Algorithm \ref{alg:B}. Note how we neglect completely the values of the nonzeros and limit ourselves to consider the sparsity pattern of $A$.
+
+\begin{algorithm}[h]
+	\begin{algorithmic}
+		\Require{$A_r$, $A_c$}
+		\Ensure{$B$}
+		\State $B \gets \varnothing$
+		\ForAll{$a_{ij} \in A_c$} \Comment{The part relative to $A_c$}
+		\State $b_{i+n,j} = 1$
+		\EndFor
+		\ForAll{$a_{ij} \in A_r$} \Comment{The part relative to $A_r$}
+		\State $b_{j,i+n} = 1$
+		\EndFor
+		\For{$j=1,\dots,n$} \Comment{Dummy nonzeros for cut columns}
+		\If{$\exists\, i$ s.t. $a_{ij} \in A_r$ and $\exists\, i'$ s.t. $a_{i'j} \in A_c$}
+		\State $b_{i,i} = 1$
+		\EndIf
+		\EndFor
+		\For{$i=1,\dots,m$} \Comment{Dummy nonzeros for cut rows}
+		\If{$\exists\, j$ s.t. $a_{ij} \in A_r$ and $\exists\, j$ s.t. $a_{ij'} \in A_c$}
+		\State $b_{n+i,n+i} = 1$
+		\EndIf
+		\EndFor
+	\end{algorithmic}
+	\caption{Construction of $B$ following the medium-grain model.} \label{alg:B}
+\end{algorithm}
+
 \section{Improving the initial partitioning}
 \section{Fully iterative partitioning}
 
