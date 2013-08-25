@@ -19,15 +19,15 @@ The computation of this quantity following the definition of matrix-vector multi
 	u_i = \sum_{j=0}^{n-1} a_{ij} v_j, \quad \text{for }\; 0 \leq i < m,
 \]
 
-requires $\mathcal{O}(n^2) = \mathcal{O}(mn)$ operations; this is not very efficient if we have a sparse matrix: if we perform the multiplications only on the nonzero elements, we obtain an algorithm with running time $\mathcal{O}(N)$, and by definition of sparsity we have that $N \ll mn$.
+requires $\mathcal{O}(mn)$ operations; this is not very efficient if we have a sparse matrix: if we perform the multiplications only on the nonzero elements, we obtain an algorithm with running time $\mathcal{O}(N)$, and by definition of sparsity we have that $N \ll mn$.
 
 As mentioned, the systems considered are very large, with sparse matrices with thousands (even millions) of rows and columns and millions of nonzeros; for such big instances, even a running time of $\mathcal{O}(N)$ might be non-negligible, especially since sparse matrix-vector multiplications are usually just a part of a bigger iterative algorithm, and need to be performed several times.
 
 It is a very important goal then to be able to perform such computations in the least amount of time possible: however, as there is a natural tradeoff between power consumption and the speed of the processing units \cite{rabaey1996digital}, it is not feasible to rely only on very fast CPUs, but rather focus on parallelism and employ a large number of them with lower processing speed (and, as a result, with fairly low energy requirements).
 
-To describe an efficient way of performing parallel sparse matrix-vector multiplications, we follow the approach described in \cite{BSP}: before the actual computation takes place, the sparse matrix is distributed among the $p$ processors, creating a \textbf{partitioning} of the set of the nonzeros: $A$ is split into $A_0,\dots,A_{p-1}$ disjoint subsets. Moreover, also the input vector $v$ and the output vector $u$ are distributed among the $p$ processors (note that their distribution might not necessarily, and usually it is not, the same).
+To describe an efficient way of performing parallel sparse matrix-vector multiplications, we follow the approach described in \cite{BSP}: before the actual computation takes place, the sparse matrix is distributed among the $p$ processors, creating a \textbf{partitioning} of the set of the nonzeros: $A$ is split into $A_0,\dots,A_{p-1}$ disjoint subsets. Moreover, also the input vector $v$ and the output vector $u$ are distributed among the $p$ processors (note that their distribution might not necessarily be the same, and usually it is not).
 
-Figure \ref{fig:partition} shows a possible partitioning of a $9 \times 9$ matrix with 18 nonzeros. As the the actual values of the nonzeros are not important, we only show the sparsity pattern (a colored cell means that there is a nonzero in that position). The two colors denote, respectively, the two resulting subsets of nonzeros. 
+Figure \ref{fig:partition} shows a possible partitioning of a $9 \times 9$ matrix with 18 nonzeros. As the actual values of the nonzeros are not important, we only show the sparsity pattern (a colored cell means that there is a nonzero in that position). The two colors denote, respectively, the two resulting subsets of nonzeros. 
 
 \begin{figure}[h]
 	\centering
@@ -49,8 +49,8 @@ After this distribution, every processor has to compute its local contribution t
 		\Require{$A_s$, the local part of the vector $v$}
 		\Ensure{The local part of the vector $u$}
 		\State
-		\State 	$I_s := \left\{ i | a_{ij} \in A_s \right\}$
-		\State 	$J_s := \left\{ j | a_{ij} \in A_s \right\}$
+		\State 	$I_s := \left\{ i |\exists j :  a_{ij} \in A_s \right\}$
+		\State 	$J_s := \left\{ j |\exists i :  a_{ij} \in A_s \right\}$
 		\State
 	\end{algorithmic}
 	\begin{enumerate}[(1)]
@@ -84,9 +84,9 @@ After this distribution, every processor has to compute its local contribution t
 
 In reality there is also a fourth phase, in which each processor sums up all the contributions received in phase (2) for all of its owned components of $u$; this is a very small sum with negligible computational cost and for this reason it has been omitted from the algorithm. 
 
-Note that we assume that all of the nonzero values are all represented with the same amount of bits. Doing so, we can focus excusively on the coordinates of the nonzeros, omitting completely their values, as it does not the cost of a parallel sparse matrix-vector multiplication.
+Note that we assume that all of the nonzero values are represented with the same amount of bits. Doing so, we can focus excusively on the coordinates of the nonzeros, omitting completely their values, as it does not the cost of a parallel sparse matrix-vector multiplication.
 
-Figure \ref{fig:communication} shows an example of the communication involved in supersteps (0) and (2), with the example partitioning shoed in Figure \ref{fig:partition}: the vertical arrows represent the fan out, while the horizontal arrows represent the fan in; the color of an arrow indicates which processor is sending data. 
+Figure \ref{fig:communication} shows an example of the communication involved in supersteps (0) and (2), for the example partitioning shown in Figure \ref{fig:partition}: the vertical arrows represent the fan-out, while the horizontal arrows represent the fan-in; the color of an arrow indicates which processor is sending data. 
 
 \begin{figure}[h]
 	\centering
@@ -120,7 +120,7 @@ Figure \ref{fig:communication} shows an example of the communication involved in
 
 
 %	\includegraphics{img/communication}
-	\caption{Communication for the sparse parallel matrix-vector multiplication with a matrix partitioned as in Figure \ref{fig:partition}. Vertical arrows represent step (0) while horizontal ones represent step (2). The color of an arrow denotes which processor is sending their data for that row/column.}
+	\caption{Communication for the parallel sparse matrix-vector multiplication with a matrix partitioned as in Figure \ref{fig:partition}. Vertical arrows represent step (0) while horizontal ones represent step (2). The color of an arrow denotes which processor is sending their data for that row/column.}
 	\label{fig:communication}
 \end{figure}
 
@@ -133,7 +133,7 @@ The time spent by a parallel machine in a computation superstep is exactly the t
 	\label{eq:T_comp}
 \end{align}
 
-It is easy to understand that, in order to have efficient parallelization, the computation load has to be distributed evenly. Usually, however, it is not possible to achieve a perfect load balance (e.g. when dividing up an odd number of computations among an even number of processors) and we have to reason in terms of an allowed imbalance $\varepsilon$. Consequently, we impose the following hard constraint about the maximum size of the subsets of nonzeros assigned to each processor, according to \cite[eq.~4.27]{BSP}:
+It is easy to understand that, in order to have efficient parallelization, the computation load has to be distributed evenly. Usually, however, it is not possible to achieve a perfect load balance (e.g. when dividing an odd number of computations among an even number of processors) and we have to reason in terms of an allowed imbalance $\varepsilon$. Consequently, we impose the following hard constraint about the maximum size of the subsets of nonzeros assigned to each processor, according to \cite[eq.~4.27]{BSP}:
 
 \begin{align}
 	\max_{0 \leq s <p} |A_s| \leq (1+\varepsilon) \frac{N}{p}.
@@ -142,7 +142,7 @@ It is easy to understand that, in order to have efficient parallelization, the c
 
 Typical values for the allowed $\varepsilon$ in this constraint are 0.03, i.e. a 3\% imbalance.
 
-It is reasonable, after all, that the problem of finding an efficient way of performing this computation step boils simply down to a hard constraint for the data distribution. This is because we still have to perform all the multiplications of the form $a_{ij} v_j$, no matter our choice. The communication costs, represented by the first and last supersteps in Algorithm \ref{alg:matvec}, are instead the most interesting aspect about maximizing the efficiency of a parallel sparse-matrix vector multiplication algorithm, as there is extreme variability. As a simple example, suppose $p=2$ and consider the matrix represented in Figure \ref{fig:checkered_matrix}. 
+It is reasonable, after all, that the problem of finding an efficient way of performing this computation step boils simply down to a hard constraint for the data distribution. This is because we still have to perform all the multiplications of the form $a_{ij} v_j$, no matter our choice. The communication costs, represented by the first and last supersteps in Algorithm \ref{alg:matvec}, are instead the most interesting aspect about maximizing the efficiency of a parallel sparse matrix-vector multiplication algorithm, as there is extreme variability. As a simple example, suppose $p=2$ and consider the matrix represented in Figure \ref{fig:checkered_matrix}. 
 
 \begin{figure}[h]
 	\centering
@@ -158,7 +158,7 @@ It is reasonable, after all, that the problem of finding an efficient way of per
 	\caption{Example matrix with checkered sparsity pattern. Black boxes represent the nonzeros.} \label{fig:checkered_matrix}
 \end{figure}
 
-Two possible partitioning of this matrix into two sets are given in Figure \ref{fig:checkered_partitions}. In Figure \ref{fig:checkered_a} no communication is necessary, whereas in Figure \ref{fig:checkered_b}, all of the rows and columns are split, and therefore the maximum possible communication is required during the sparse matrix vector multiplication algorithm.
+Two possible partitionings of this matrix into two sets are given in Figure \ref{fig:checkered_partitions}. In Figure \ref{fig:checkered_a} no communication is necessary, whereas in Figure \ref{fig:checkered_b}, all of the rows and columns are split, and therefore the maximum possible communication is required during the sparse matrix-vector multiplication algorithm.
 
 \begin{figure}[h]
 	\centering
@@ -196,7 +196,7 @@ Previously, we claimed that the matrix and both the vectors have to be partition
 
 If a full column of our matrix $A$ is assigned to the same processor, we can freely assign the corresponding component of $v$ to the same processor, eliminating completely one source of communication (namely, the fan-out for that column). The same reasoning can be done for the rows. This simplification is possible because imposing a hard constraint similar to \eqref{eq:balance} also to the vector distribution is not very helpful, as it only affects the time of linear vector operations outside the matrix-vector multiplication, which are in generally much cheaper \cite[Sec.~3]{mondriaan}. 
 
-We can describe more formally the communications cost, following the notation of \cite[Def.~2.1]{mondriaan}: let $A_0,\dots,A_{p-1}$ be a $p$-way (with $p \geq 1$) partitioning of the sparse matrix $A$ of size $m \times n$. Let $\lambda_i$ denote the number of processors which have a nonzero of row $i$ and let $\mu_j$ be the number of processors that have a nonzero of column $j$; note that, because we assumed that all the rows and columns are nonempty, we have that $\lambda_i, \mu_j \geq 0$. Then the total time costs for the communication steps in our Algorithm \ref{alg:matvec} are:
+We can describe more formally the communications cost, following the notation of \cite[Def.~2.1]{mondriaan}: let $A_0,\dots,A_{p-1}$ be a $p$-way (with $p \geq 1$) partitioning of the sparse matrix $A$ of size $m \times n$. Let $\lambda_i$ denote the number of processors which have a nonzero of row $i$ and let $\mu_j$ be the number of processors that have a nonzero of column $j$; note that, because we assumed that all the rows and columns are nonempty, we have that $\lambda_i, \mu_j \geq 1$. Then the total time costs for the communication steps in our Algorithm \ref{alg:matvec} are:
 
 \begin{align}
 	\begin{aligned}
@@ -205,7 +205,7 @@ We can describe more formally the communications cost, following the notation of
 	\end{aligned} \label{eq:T_comm}
 \end{align}
 
-These costs are quite straightforward: it is reasonable to assume that the owner of the appropriate vector component is one of the processors that have a nonzero in that row/column, and therefore communication is not necessary. Adding these costs together, we define the \textbf{communication volume} $V$ of the considered partitioning as
+These costs are quite straightforward: it is reasonable to assume that the owner of the appropriate vector component is one of the processors that have a nonzero in that row/column, and therefore communication is not necessary for that processor. Adding these costs together, we define the \textbf{communication volume} $V$ of the considered partitioning as
 
 \begin{align}
 	V := V(A_0,\dots,A_{p-1}) = T_{(0)} + T_{(2)} = \sum_{i=0}^{m-1} (\lambda_i -1) + \sum_{j=0}^{n-1} (\mu_j-1).
@@ -230,7 +230,7 @@ where $\varepsilon$, similarly as before, represents the allowed imbalance.
 
 Now, given a partition $(V_0,\dots,V_{p-1})$ of the graph $G$, we say that the edge $e=(i,j)$ is \emph{cut} if $i \in V_k, j \in V_l$, with $k \neq l$; otherwise, it is said to be \emph{uncut}. Previously, we claimed that communication during the parallel matrix-vector multiplication can be avoided if a row/column is uncut, and here the goal is the same: we want to minimize the \emph{cutsize}, i.e. the number of edges cut.
 
-However, despite all the similarities between the matrix partitioning problem and the graph partitioning one, it has been shown \cite{hypergraph_model}\cite{zoltan_worth-it},  that this cut-edge metric is not an accurate representation of the communication volume. Additional criticism \cite{hendrickson_emperor} comes from the fact that the graph partitioning approach can only handle square symmetric matrices. It was also shown \cite{hendrickson_kolda} that these disadvantages hold for all application of graph partitioning in parallel computing, and not only our problem of matrix partitioning for sparse matrix-vector multiplication. An exact way of modeling the matrix partitioning problem is through the concept of hypergraph partitioning \cite{hypergraph_model}.
+However, despite all the similarities between the matrix partitioning problem and the graph partitioning one, it has been shown \cite{hypergraph_model} that this cut-edge metric is not an accurate representation of the communication volume. Additional criticism \cite{hendrickson_emperor} comes from the fact that the graph partitioning approach can only handle square symmetric matrices, even though it has been shown to be a good enough approximation in that case \cite{zoltan_worth-it}. Moreover, it was also shown \cite{hendrickson_kolda} that these disadvantages hold for all application of graph partitioning in parallel computing, and not only our problem of matrix partitioning for sparse matrix-vector multiplication. An exact way of modeling the matrix partitioning problem is through the concept of hypergraph partitioning \cite{hypergraph_model}.
 
 A hypergraph is simply a generalization of a graph: we do not consider edges that connect two nodes, but rather \emph{hyperedges} (or \emph{nets}), which are subsets of nodes. Apart from considering only non-empty hyperedges, note that there is no other restriction on their cardinality.
 
@@ -258,13 +258,15 @@ If, similarly to \eqref{fig:communication}, we define $\lambda_e$ as the number 
 
 We can see how closely these equations resemble the ones given in the previous section: it is clear that the hypergraph partitioning problem closely resembles our original matrix partitioning problem.
 
-Note that the partitioning hypergraph model, along with the graph partitioning problem, are known to be NP-hard \cite[Ch.~6]{lengauer}. 
+Note that the hypergraph partitioning problem, along with the graph partitioning problem, are known to be NP-hard \cite[Ch.~6]{lengauer}. 
 
 Now, we will describe three possible models for the decomposition of a sparse matrix into a hypergraph, and discuss their advantages and disadvantages.
 
-In the \textbf{column-net} model, our matrix $A$ is represented as a hypergraph for a row-wise decomposition: rows of the matrix are nodes ($V=\{v_1,\dots,v_m\}$, while columns are hyperedges ($E= \{e_1,\dots,e_n\}$). We have that the node $v_i$ belongs to the hyperedge $e_j$ (in short $v_i \in e_j$) if and only if $a_{ij} \neq 0$. With this model, we have that the size of the hyperedge $e_j$ is exactly the number of nonzeros in that column, whereas the node $v_i$ belongs exactly to as many hyperedges as there are nonzeros in that row.
+In the \textbf{column-net} model, our matrix $A$ is represented as a hypergraph for a row-wise decomposition: rows of the matrix are nodes ($V=\{v_1,\dots,v_m\}$, while columns are hyperedges ($E= \{e_1,\dots,e_n\}$). We have that the node $v_i$ belongs to the hyperedge $e_j$ (in short $v_i \in e_j$) if and only if $a_{ij} \neq 0$. With this model, we have that the size of the hyperedge $e_j$ is exactly the number of nonzeros in column $j$, whereas the node $v_i$ belongs exactly to as many hyperedges as there are nonzeros in row $i$.
 
-As already said, performing a partitioning on the hypergraph consists of assigning each vertex to one of the sets $V_0,\dots,V_{p-1}$. In this model, this corresponds to assigning a row completely to a processor.However, as vertices are not exactly nonzeros of our matrix, \eqref{eq:balance} and \eqref{eq:balance_hypergraph} are not exactly equivalent; we need to adjust our balance constraint by introducing a weight for each vertex, as in \cite[Def.~4.34]{BSP}. For $v_i \in V$, we define its weight $c_i$ as
+As already said, performing a partitioning on the hypergraph consists of assigning each vertex to one of the sets $V_0,\dots,V_{p-1}$. In this model, this corresponds to assigning a row completely to a processor. 
+
+However, as vertices are not exactly nonzeros of our matrix, \eqref{eq:balance} and \eqref{eq:balance_hypergraph} are not exactly equivalent; we need to adjust our balance constraint by introducing a weight for each vertex, as in \cite[Def.~4.34]{BSP}. For $v_i \in V$, we define its weight $c_i$ as
 
 \[
 	c_i := |\{\;j : \;a_{ij} \neq 0\}|,
@@ -291,9 +293,9 @@ On a higher level, one of the benefits of this decomposition model is easy to un
 
 \section{Earlier work} \label{sec:earlier_work} 
 
-Among the models used to translate matrix partitioning into hypergraph partitioning, we already mentioned row-net and column-net \cite{hypergraph_model}, proposed in 1999, and a more recent fine-grained approach \cite{hypergraph_finegrain}, proposed in 2001. New models are relatively rare, and recently Pelt and Bisseling proposed the interesting \textbf{medium-grain} model \cite{mediumgrain}.  As this model is at the very base of our work, a more detailed explanation will be given in Section \ref{sec:mediumgrain}.
+Among the models used to translate matrix partitioning into hypergraph partitioning, we already mentioned row-net and column-net \cite{hypergraph_model}, proposed in 1999, and a more recent fine-grained approach \cite{hypergraph_finegrain}, proposed in 2001. New models are relatively rare, and recently Pelt and Bisseling proposed the \textbf{medium-grain} model \cite{mediumgrain}.  As this model is at the very base of our work, a more detailed explanation will be given in Section \ref{sec:mediumgrain}.
 
-In addition to these models, there has been some research effort towards the creation of more complicated methods, which often comprise several stages and combine different models.
+In addition to these models, there has been some research effort towards the creation of more sofisticated methods, which often comprise several stages and combine different models.
 
 For example, Uçar and Aykanat \cite{hypergraph_revisiting} first employ an elementary 1-dimensional hypergraph model, and then they transform it in several ways to different hypergraph models suitable for both symmetric and unsymmetric matrix partitionings; it is important to note that these models also include the input and output vectors, and therefore a few extra vertices are added to the hypergraph.
 
@@ -302,17 +304,17 @@ A different 2-dimensional approach is given by the \emph{coarse-grain} method \c
 Moreover, Vastenhouw and Bisseling proposed a 2-dimensional recursive method for data distribution \cite{mondriaan}; this greedy method splits recursively a rectangular matrix into 2 parts.
 At each step of the recursion, there is the choice on the direction to be taken in the next step: two different strategies are proposed, alternating splitting directions or simply trying to split both vertically and horizontally and taking greedily the best of the two.
 
-Besides these general purpose models and methods, it is also possible to take into account the structure of the matrix to be partitioned: the hypergraph-based approach was indeed initially devised for structurally symmetric matrices \cite{hypergraph_model}. Moreover, Hu, Maguire and Blake present in \cite{hu2000} an algorithm for nonsymmetric matrices that performs row and column permutations, getting a bordered block diagonal form and then trying to assign matrix rows such that the number of cut columns is minimized.
+Besides these general purpose models and methods, it is also possible to take into account the structure of the matrix to be partitioned: Hu, Maguire and Blake present in \cite{hu2000} an algorithm for nonsymmetric matrices that performs rows and columns permutations, getting a bordered block diagonal form and then trying to assign matrix rows such that the number of cut columns is minimized.
 
-In general, as there is such a wide variety of different methods and model, it might be difficult to choose the best one, given a matrix to partition. {\c{C}}ataly{\"u}rek, Aykanat, and U{\c{c}}ar propose a partitioning recipe \cite{catalyurek_recipe} that chooses a partitioning method according to some matrix characteristics.
+In general, as there is such a wide variety of different methods and models, it might be difficult to choose the best one, given a matrix to partition. {\c{C}}ataly{\"u}rek, Aykanat, and U{\c{c}}ar propose a partitioning recipe \cite{catalyurek_recipe} that chooses a partitioning method according to some matrix characteristics.
 
 Regarding the actual implementations of the just discussed models, methods and algorithms, there are a few existing software partitioners available. Among the sequential ones we have PaToH (a multilevel Partitioning Tool for Hypergraphs) \cite{patoh}, hMetis \cite{hmetis} (specifically targeted at partitioning hypergraphs for VLSI design), Mondriaan \cite{mondriaan} (among the ones here described, this is the one more specifically designed to solve the matrix partitioning problem), MONET (Matrix Ordering for minimal NET-cut)\cite{hu2000}. Zoltan-PHG (Parallel Hypergraph Partitioner) \cite{parallel_hypergraph} performs instead matrix partitioning in parallel; the relative scarcity of parallel software partitioners is to be explained by the fact that this field is relatively new, and therefore most of the research efforts have been directed toward a sequential approach.
 
-The partitioners just mentioned produce very different results, with respect to both solution quality and execution time, despite having at the core the same method for finding good initial solutions. The method employed is the well-known Kernighan-Lin \cite{kernighan_lin} method, with the optimizations of Fiduccia-Mattheyses \cite{fiduccia}. This local search heuristic was originally designed for bipartitioning graphs and, given a partitioning that obeys the balance constraint \eqref{eq:balance}, it applies a series of small changes to improve the quality of the solution.
+The partitioners just mentioned produce close but slightly different results, with respect to both solution quality and execution time, having at the core the same method for finding good initial solutions. The initial partitioning method employed for small subproblems is the well-known Kernighan-Lin \cite{kernighan_lin} method, with the optimizations of Fiduccia-Mattheyses \cite{fiduccia}. This local search heuristic was originally designed for bipartitioning graphs and, given a partitioning that obeys the balance constraint \eqref{eq:balance}, it applies a series of small changes to improve the quality of the solution.
 
 To solve large instances, all these partitioners use a multi-level method: the large problem is progressively coarsened until a smaller instance is obtained, then the problem is solved on this small instance and the solution is gradually uncoarsened, with a refinement at each step to improve the solution quality.
 
-Finally, these existing software partitioners are all based on \emph{recursive bisection}: instead of partitioning the hypergraph directly into the desired number of parts, they execute a sequence of bisections of the partitions. This is a good semplification in the sense that it just suffices to find very good algorithms for bipartitioning, and also because splitting a hypergraph in just two parts is much easier; there is however one major flaw with this approach: using this recursive bisection  we might not be able to reach the same quality of a solution with direct splitting into the desired number of parts.
+Finally, these existing software partitioners are all based on \emph{recursive bisection}: instead of partitioning the hypergraph directly into the desired number of parts, they execute a sequence of bisections of the partitions. This is a good simplification in the sense that it just suffices to find very good algorithms for bipartitioning, and also because splitting a hypergraph in just two parts is much easier; there is however one major flaw with this approach: using this recursive bisection  we might not be able to reach the same quality of a solution as with direct splitting into the desired number of parts. This flaw is, however, often ignored and direct splitters into more than two parts are rare.
 
 \section{Medium-grain model} \label{sec:mediumgrain}
 
@@ -448,7 +450,7 @@ The diagonal elements of $B$ are used only to compute the communication volume. 
 
 Therefore the diagonal nonzero $B_{k,k}$, assigned by the row-net model to the same processor as the $k$th column of $A_c$, that belongs to same row of $B$ as the $k$th row of $A_r$, has the purpose of ensuring a correct computation of the communication volume \cite[Th.~3.1]{mediumgrain}. Note that, implementation-wise, there is no need to have the complete diagonal of $B$: we put a nonzero if and only if the corresponding row of $A_r^T$ and column of $A_c$ are both nonempty.
 
-Experimental results, performed with both the Mondriaan and PaToH packages seems to confirm that this model has indeed some advantages compared to the column-net, row-net and fine-grain models, both regarding partitioning time and solution quality. Because of these good results, it is our goal to investigate further the properties of this model, following two possible directions.
+Experimental results, performed with both the Mondriaan and PaToH packages seem to confirm that this model has indeed some advantages compared to the column-net, row-net and fine-grain models, both regarding partitioning time and solution quality. Because of these good results, it is our goal to investigate further the properties of this model, following two possible directions.
 
 First of all, as the outcome of the medium-grain model depends remarkably on the initial split of $A$ into $A_r$ and $A_c$, it is interesting to investigate the quality of the algorithm originally proposed in \cite{mondriaan} to achieve this initial partitioning; secondly, we will try to develop a fully iterative method that employs the medium-grain model, where a full multi-level partitioning is performed at each iteration and computation time is traded for solution quality.
 

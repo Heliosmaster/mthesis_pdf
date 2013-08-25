@@ -50,9 +50,34 @@ Note that, as we made a distinction in Chapter \ref{chap:methods} and \ref{chap:
 
 Regarding the actual implementation, we can see from Algorithm \ref{alg:framework} that Mondriaan is used for performing the actual partitioning; this is the ideal case for its use as a software library. As a consequence, we also used C as the main implementation language, even though MATLAB was used for faster prototyping: the flexibility added by managing objects at runtime  is ideal when designing algorithms. In order to have C code and MATLAB code interact in the correct way, we used MEX files \cite{mex}. In general, unless preliminary tests showed that the considered heuristic had a remarkably bad quality, we translated back everything to the C language, in order to remove the MEX layer of complexity and get a more efficient implementation.
 
-The matrices used to test the effectiveness of the discussed heuristics are mainly from the University of Florida Sparse Matrix Collection \cite{ufl}, and some can also be found on the Matrix Market collection \cite{matrixmarket}. 
+The parameter $iter_{max}$ of Algorithm \ref{alg:framework} is of vital importance for the running time of our iterative method: it is true that our research motivation is to trade computation time for solution quality, but we are after the most efficient way to do so. Therefore, an iterative scheme that improves the quality of the solution very slowly (thus needing a high $iter_{max}$ to improve as much as possible) is not desirable; fortunately, preliminary tests showed that our heuristics are indeed very fast in this aspect, and only one iteration is needed: additional iterations either improve the solution quality by a very small amount (which likely depends on the probabilistic nature of the heuristic and the partitioner) or produce the opposite effect, resulting in a much worse solution. Table \ref{tab:iterations} shows an example of multiple iterations for some of the described heuristic.
 
-Table \ref{tab:matrices} provides a more thorough description of the matrices used, along with an outline of their basic properties (number of rows $m$, number of columns $n$, number of nonzeros $N$) and their original purpose. Some of these matrices (namely the ones with the $\dagger$ symbol in the table) belong to the 10th Dimacs Implementation Challenge \cite{dimacs}, which addressed the graph partitioning and graph clustering problem, and are therefore naturally suited for testing the quality solutions of our algorithms.
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|l|c||c|c|c|c|c|c|c|c|c|c|}
+		\hline
+		\multirow{2}{*}{\textbf{Heuristic}} & \multicolumn{11}{c|}{\textbf{Iterations}} \\ \cline{2-12} 
+		& 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ \hline
+		\verb|po_localview| & 599 & 575 & 576 & 578 & 573 & 583 & 578 & 574 & 575 & 578 & 573 \\
+		\verb|pa_localview| & 588 & 577 & 580 & 577 & 577 & 574 & 578 & 580 & 576 & 579 & 575  \\
+ \verb|sbdview| & 590 & 588 & 591 & 579 & 597 & 595 & 589 & 603 & 595 & 589 & 587 \\
+ \verb|po_unsorted_concat| & 579 & 597 & 594 & 593 & 593 & 597 & 597 & 598 & 594 & 603 & 596 \\ 
+		\hline
+	\end{tabular}
+	\caption{Multiple iterations of four different heuristics for the test matrix \texttt{dfl001}. The numbers shown are the rounded arithmetic means of each iteration over 10 repeats of the experiment. Iteration 0 stands for the initial partitioning obtained with the medium-grain model. } \label{tab:iterations}
+\end{table}
+
+In order to perform effective numerical experiments, we need to have a precise methodology. First of all, since we are after heuristics suitable for many matrices, it makes sense to have several matrices to use, with different features, as described in Section \ref{sec:test_matrices}. 
+
+Secondly, since randomness is involved in the partitioner itself and, with a different extent, in some of the considered heuristics, in order to have insightful results, we need to perform several measurements and compute an average. We used each of the heuristics 100 times: after generating an initial partitioning we performed 5 times one iteration of the heuristic, thus obtaining 5 independent results, which were averaged; this same process was repeated 20 times, obtaining an average of the 20 initial partitioning and an average of the 20 averages of final results. Note that even though the average of the initial partitioning will roughly be the same (with some statistical variation) for all of the heuristics, since we are describing an iterative process it is best to explicitly give each the precise average of the used initial partitioning, instead of using the same for every heuristic.
+
+Lastly, in order to have a meaningful result that can help us understand whether the given heuristic is globally effective, we will compute the geometric mean of all the initial partitioning and the geometric mean of all the final results. Then we will normalize w.r.t the first value and understand whether the considered heuristic performs better, on average, or not. This normalized geometric mean is denoted, in the next tables, with the symbol $\rho$.
+
+\section{Test matrices} \label{sec:test_matrices}
+
+In order to have insightful results, we mentioned that the matrices used in the numerical experiments should have different features: in particular we distinguish between  (strongly) rectangular matrices and square matrices, and try to have a wide selection w.r.t. the number of nonzeros. 
+
+These matrices are mainly from the University of Florida Sparse Matrix Collection \cite{ufl}, and some can additionally be found on the Matrix Market collection \cite{matrixmarket} and Table \ref{tab:matrices} provides a more thorough description of the matrices used, along with an outline of their basic properties (number of rows $m$, number of columns $n$, number of nonzeros $N$) and their original purpose. Some of these matrices (namely the ones with the $\dagger$ symbol in the table) belong to the 10th Dimacs Implementation Challenge \cite{dimacs}, which addressed the graph partitioning and graph clustering problem, and are therefore naturally suited for testing the quality solutions of our algorithms.
 
 \begin{table}[h]
 	\centering
@@ -79,30 +104,63 @@ Table \ref{tab:matrices} provides a more thorough description of the matrices us
 		\verb|stanford_berkeley| 						& 683446 	& 683446 	& 7583376 & Links between Stanford and Berkeley websites \\
 		\hline
 	\end{tabular}
-	\caption{Matrices used in our experiments} \label{tab:matrices}
+	\caption{Matrices used in our experiments.} \label{tab:matrices}
 \end{table}
 
-The parameter $iter_{max}$ of Algorithm \ref{alg:framework} is of vital importance for the running time of our iterative method: it is true that our research motivation is to trade computation time for solution quality, but we are after the most efficient way to do so. Therefore, an iterative scheme that improves the quality of the solution very slowly (thus needing a high $iter_{max}$ to improve as much as possible) is not desirable; fortunately, preliminary tests showed that our heuristic are indeed very fast in this aspect and only one iteration is needed: additional iterations either improve the solution quality by a very small amount (which likely depends on the probabilistic nature of the heuristic and the partitioner) or produce the opposite effect, resulting in a much worse solution. Table \ref{tab:iterations} shows an example of multiple iterations for some of the described heuristic.
+\section{Preliminary selection of the best heuristics}
+
+Since in Chapter \ref{chap:methods} and \ref{chap:independent_set} we discussed many heuristics, which in turn depend on different parameters, it is best to perform a preliminary analysis to quickly figure out which produce the best solutions and should therefore be tested exenstively, and the ones that should not be furtherly considered.
+
+For this reason, a small number of different matrices (with a relatively small amount of nonzeros) has been selected from our choice of Table \ref{tab:matrices}: in particular the considered matrices, which have a different structure, are \verb|dfl001|, \verb|tbdlinux|, \verb|nug30|, \verb|rgg_n_2_18_s0|, \verb|bcsstk30|.
+
+The local search heuristic given in Section \ref{sec:globalview}, quickly turned out to be far from effective, and therefore we decided to discard it altogether in the numerical experiments. 
+
+Table \ref{tab:preliminary_po} summarizes the results of this preliminary analysis of the partition-oblivious heuristics for the 5 chosen matrices, whereas Table \ref{tab:preliminary_pa} summarizes the results of the partition-aware heuristics. With $i$ we denote the iteration number: 0 stands for the initial partitioning and 1 is the actual performing of the considered heuristic and the subsequent partitioning. The value $\rho$ represents, as already said, the geometric mean of the final results, averaged over all matrices and normalized w.r.t. the average of the all initial partitionings.
 
 \begin{table}[h]
 	\centering
-	\begin{tabular}{|l|c||c|c|c|c|c|c|c|c|c|c|}
-		\hline
-		\multirow{2}{*}{\textbf{Heuristic}} & \multicolumn{11}{c|}{\textbf{Iterations}} \\ \cline{2-12} 
-		& 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ \hline
-		\verb|po_localview| & 599 & 575 & 576 & 578 & 573 & 583 & 578 & 574 & 575 & 578 & 573 \\
-		\verb|pa_localview| & 588 & 577 & 580 & 577 & 577 & 574 & 578 & 580 & 576 & 579 & 575  \\
- \verb|sbdview| & 590 & 588 & 591 & 579 & 597 & 595 & 589 & 603 & 595 & 589 & 587 \\
- \verb|po_unsorted_concat| & 579 & 597 & 594 & 593 & 593 & 597 & 597 & 598 & 594 & 603 & 596 \\ 
-		\hline
-	\end{tabular}
-	\caption{Multiple iterations of four different heuristics for the test matrix \texttt{dfl001}. The numbers shown are the rounded arithmetic means of each iteration over 10 repeats of the experiment. Iteration 0 stands for the initial partitioning obtained with the medium-grain model. } \label{tab:iterations}
+	\begin{tabular}{|l|c||c|c|c|c|c||c|}
+\hline
+\multirow{2}{*}{\textbf{Heuristic}} & \multirow{2}{*}{$i$} &  \multicolumn{5}{|c||}{\textbf{Matrix}} & \multirow{2}{*}{$\rho$} \\ \cline{3-7}
+& & \texttt{dfl001} & \texttt{nug\_30} & \texttt{bcsstk30} & \texttt{tbdlinux} & \texttt{rgg\_n\_2\_18\_s0} & \\ \hline
+\verb|po_localview| & 0 & 590  & \textbf{36275} & 573 & 8135 & 910 & \\ 
+& 1 & \textbf{571} & 36665 & 598 & 8327 & 1160  & \multirow{-2}{*}{\~1.0} \\ \hline
+\verb|po_unsorted_concat_row| & 0 & 586 & 36596 & 536 & &  \\ % 0 0 * 
+& 1 & 1492 & 189689 & 653 & & \\\hline
+\verb|po_unsorted_concat_col| & 0 & 590 & 36091 & 538 \\ % 0 1 *
+& 1 & 589 & 38491  & 600 \\\hline
+\verb|po_unsorted_random| & 0 & 588 & 36056 & 576 \\ % 2 * *
+ & 1 & 1314 & 113070 & 1127 \\ \hline
+\verb|po_unsorted_mix_alt| & 0 & 584 & & 549 \\ % 4 0 *
+ & 1 & 1461 & & 715 \\ \hline
+\verb|po_unsorted_mix_spr| & 0 & 595 & & 572 \\ % 4 1 *
+ & 1 & 1322 & & 759 \\ \hline
+\verb|po_sorted_w_simple| & 0 & 593 & 36296 & 552 \\ % 6 1 *
+ & 1 & 597 & 38383 & 785 \\ \hline
+\verb|po_sorted_nw_simple| & 0 & 596 & 36342 & 548 \\ % 6 0 *
+ & 1 & 606 & 38674 & 789 \\ \hline
+\verb|po_sorted_w_concat_row| & 0 & 588 & 36817 & 531 \\ % 8 1 0 
+ & 1 & 1486 & 189681 & 642 \\ \hline
+\verb|po_sorted_w_concat_col| & 0 & 596 & 36262  & 546 \\ % 8 1 1
+ & 1 & 597 & 38655 & 621 \\ \hline
+\verb|po_sorted_nw_concat_row| & 0 & 592 & 36400 & 544 \\ % 8 0 0
+ & 1 & 1496 & 189683 & 614 \\ \hline
+\verb|po_sorted_nw_concat_col| & 0 & 589 & 35806 & 559 \\ % 8 0 1
+ & 1 & 593 & 38513 & 621 \\ \hline
+\verb|po_sorted_w_mix_alt| & 0 & 585 & 36471 & 542 \\ % 10 0 1
+ & 1 & 1317 & 162549 & 790 \\ \hline
+\verb|po_sorted_w_mix_spr| & 0 & 588 & & 550 \\ % 10 1 1
+ & 1 & 641 & & 782 \\ \hline
+\verb|po_sorted_nw_mix_alt| & 0 & 585 & 36412 & 553 \\ % 10 0 0
+ & 1 & 1457 & 163013 & 797 \\ \hline
+\verb|po_sorted_nw_mix_spr| & 0 & 600 & & 547 \\ % 10 1 0
+ & 1 & 719 & & 793 \\ \hline
+\end{tabular}
+\caption{Results of the devised partition-oblivious heuristics for the five chosen matrices. In each column, we use the boldface to highlight the best found partitioning for each matrix. } \label{tab:preliminary_po}
 \end{table}
 
 
-
-\section{Improving the initial partitioning}
-\section{Fully iterative partitioning}
+\section{Analysis of the performance of the best heuristics through the test matrices}
 
 
 
