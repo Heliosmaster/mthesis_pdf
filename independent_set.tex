@@ -123,7 +123,7 @@ In Figure \ref{fig:konig} we can visualize the relationships between maximum ind
 		\foreach \x in {0,1,4,8} { \node[vertex,myred] at (r\x) {};}
 		\foreach \x in {3,4,5,6,7,8} { \node[vertex,myred] at (c\x) {};}
 	\end{tikzpicture}
-	\caption{Visualization of the relationships due to K\H{o}nig's theorem and Lemma \ref{lemma:is}, shown on the graph of Figure \ref{fig:bipartite_graph}. Red vertices belong to the maximum independent set, black vertices to the minimum vertex cover; blue edges are in the maximum matching. We can clearly see how the maximum independent set and the minimum vertex cover are complementary, and how every edge in the matching is incident to a vertex in the vertex cover.} \label{fig:konig}
+	\caption{Visualization of the relationships due to K\H{o}nig's theorem and Lemma \ref{lemma:is}, shown on the graph of Figure \ref{fig:bipartite_graph}. Red vertices belong to the maximum independent set, black vertices to the minimum vertex cover; blue edges are in the maximum matching. We can clearly see how the maximum independent set and the minimum vertex cover are complementary.} \label{fig:konig}
 \end{figure}
 
 Because of K\H{o}nig's Theorem, then, it suffices to find an efficient algorithm for the computation of the maximum matching on a bipartite graph, then finding the corresponding minimum vertex cover and finally, by taking the complementary set, obtaining the corresponding maximum independent set.

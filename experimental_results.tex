@@ -1,8 +1,8 @@
 \chapter{Implementation and experimental results} \label{chap:experimental_results}
 
-In Chapter \ref{chap:methods} and \ref{chap:independent_set} we discussed different heuristics to be used in the matrix partitioning problem. Whether we aim at improving the initial partitioning or a fully iterative procedure, we need to apply those ideas to practice, devising an efficient implementation.
+In Chapter \ref{chap:methods} and \ref{chap:independent_set} we discussed different heuristics aimed at solving the the matrix partitioning problem; whether we try to improve the initial partitioning or perform a fully iterative procedure, we need to translate those ideas into practice, devising an efficient implementation.
 
-In Section \ref{sec:earlier_work}, we mentioned existing software partitioners: Mondriaan \cite{mondriaan} is the package of our choice and we defer to it the actual computations of the partitionings, limiting ourselves to create the matrix $B$ of the medium grain model. Now, for sake of clarity, we give explicitly the computation of $B$ in Algorithm \ref{alg:B}. Note how we neglect completely the values of the nonzeros, only considering the sparsity pattern of $A$.
+In Section \ref{sec:earlier_work}, we mentioned existing software partitioners: Mondriaan \cite{mondriaan} is the package of our choice and we defer to it the actual computations of the partitionings, limiting ourselves to create the matrix $B$ of the medium-grain model as in \eqref{eq:Bmatrix}. The actual algorithm used to construct this matrix is given explicitly in Algorithm \ref{alg:B}. Note how we consider only the sparsity patterns of $A$, neglecting completely the values of the nonzeros.
 
 \begin{algorithm}[h]
 	\begin{algorithmic}
@@ -29,13 +29,13 @@ In Section \ref{sec:earlier_work}, we mentioned existing software partitioners: 
 	\caption{Construction of $B$ following the medium-grain model.} \label{alg:B}
 \end{algorithm}
 
-Now, we can outline in more detail the general framework that we used to implement and test the heuristics described in the previous chapters, as done in Algorithm \ref{alg:framework}. The maximum number of iterations allowed, the parameter $iter_{max}$, is required for such algorithm.  
+Now, having discussed the means of obtaining $A_r$ and $A_c$ and the matrix $B$, we can outline the general framework used to test the effectiveness of the proposed heuristics. The framework is given explicitly in Algorithm \ref{alg:framework}, and it takes as a parameter the maximum number of iterations allowed, $iter_{max}$.  
 
 \begin{algorithm}[h]
 	\begin{algorithmic}
 		\Require{Sparse matrix $A$}
 		\Ensure{Partitioning for the matrix $A$}
-		\State Partition $A$ with Mondriaan using the default options and the medium grain model
+		\State Partition $A$ with Mondriaan using the default options and the medium-grain model
 		\For{$i=0,\dots,iter_{max}$}
 		\State Use any of the heuristics described previously to compute $A_r$ and $A_c$
 		\State compute $B$, using Algorithm \ref{alg:B}, from $A_r$ and $A_c$
@@ -46,11 +46,11 @@ Now, we can outline in more detail the general framework that we used to impleme
 	\caption{General framework for the testing of our heuristics} \label{alg:framework}
 \end{algorithm}
 
-Note that, as we made a distinction in Chapter \ref{chap:methods} and \ref{chap:independent_set} between partition-oblivious and partition-aware methods, Algorithm \ref{alg:framework} is suitable for both the research directions mentioned in Chapter \ref{chap:introduction}: even though the framework is naturally suited for developing a fully iterative scheme for sparse matrix partitioning, if we are after a better initial partitioning for the medium grain, we can simply neglect the partitioning done in the first step; this is precisely the scope for a partition-oblivious heuristic.
+In Chapter \ref{chap:methods} and \ref{chap:independent_set}, we distinguished between partition-oblivious and partition-aware methods, and Algorithm \ref{alg:framework} is suitable for both types of heuristics: even though the framework is naturally suited for developing a fully iterative scheme, if we are after a better initial partitioning for the medium-grain, we can simply neglect the partitioning done in the first step. This is precisely the scope of a partition-oblivious heuristic.
 
-Regarding the actual implementation, we can see from Algorithm \ref{alg:framework} that Mondriaan is used for performing the actual partitioning; this is the ideal case for its use as a software library. As a consequence, we also used C as the main implementation language, even though MATLAB was used for faster prototyping: the flexibility added by managing objects at runtime  is ideal when designing algorithms. In order to have C code and MATLAB code interact in the correct way, we used MEX files \cite{mex}. In general, unless preliminary tests showed that the considered heuristic had a remarkably bad quality, we translated back everything to the C language, in order to remove the MEX layer of complexity and get a more efficient implementation.
+Regarding the actual implementation, we can see from Algorithm \ref{alg:framework} that Mondriaan is used to perform the actual partitioning and this is the ideal case for its use as a software library. As a consequence, we used C as the main implementation language, even though MATLAB was used for faster prototyping: the flexibility added by managing objects at runtime  is ideal when designing algorithms. In order to have C code and MATLAB code interact in the correct way, we took advantage of MEX files \cite{mex}. In general, unless preliminary tests showed that the considered heuristic had a remarkably bad quality, we translated back everything to the C language, in order to remove the MEX layer of complexity and get a more efficient implementation. For the Hopcroft-Karp algorithm described in Chapter \ref{chap:independent_set}, we used an implementation \cite{hkarp_impl} written in the python programming language which computes directly the matching on a bipartite graph and the maximum independent set. 
 
-The parameter $iter_{max}$ of Algorithm \ref{alg:framework} is of vital importance for the running time of our iterative method: it is true that our research motivation is to trade computation time for solution quality, but we are after the most efficient way to do so. Therefore, an iterative scheme that improves the quality of the solution very slowly (thus needing a high $iter_{max}$ to improve as much as possible) is not desirable; fortunately, preliminary tests showed that our heuristics are indeed very fast in this aspect, and only one iteration is needed: additional iterations either improve the solution quality by a very small amount (which likely depends on the probabilistic nature of the heuristic and the partitioner) or produce the opposite effect, resulting in a much worse solution. Table \ref{tab:iterations} shows an example of multiple iterations for some of the described heuristic.
+The parameter $iter_{max}$ of Algorithm \ref{alg:framework} is of vital importance for the running time of our iterative method: it is true that our research motivation is to trade computation time for solution quality, but efficiency in doing so is a fundamental goal. Therefore, an iterative scheme that improves the quality of the solution very slowly (thus needing a high $iter_{max}$ to improve as much as possible) is not desirable; fortunately, preliminary tests showed that our heuristics are indeed very fast in this aspect, and only one iteration is needed: additional ones either improve the solution quality by a very small amount (which likely depends on the probabilistic nature of the heuristic and the partitioner) or produce the opposite effect, resulting in a much worse solution. Table \ref{tab:iterations} shows an example of multiple iterations for some of the described heuristic.
 
 \begin{table}[h]
 	\centering
@@ -67,9 +67,9 @@ The parameter $iter_{max}$ of Algorithm \ref{alg:framework} is of vital importan
 	\caption{Multiple iterations of four different heuristics for the test matrix \texttt{dfl001}. The numbers shown are the rounded arithmetic means of each iteration over 10 repeats of the experiment. Iteration 0 stands for the initial partitioning obtained with the medium-grain model. } \label{tab:iterations}
 \end{table}
 
-In order to perform effective numerical experiments, we need to have a precise methodology. First of all, since we are after heuristics suitable for many matrices, it makes sense to have several matrices to use, with different features, as described in Section \ref{sec:test_matrices}. 
+In order to perform effective numerical experiments, we need to have a consistent way of testing. First of all, since we are after heuristics suitable for many matrices, it makes sense to have several matrices to test for as described in Section \ref{sec:test_matrices}. 
 
-Secondly, since randomness is involved in the partitioner itself and, with a different extent, in some of the considered heuristics, in order to have insightful results, we need to perform several measurements and compute an average. We used each of the heuristics 100 times: after generating an initial partitioning we performed 5 times one iteration of the heuristic, thus obtaining 5 independent results, which were averaged; this same process was repeated 20 times, obtaining an average of the 20 initial partitioning and an average of the 20 averages of final results. Note that even though the average of the initial partitioning will roughly be the same (with some statistical variation) for all of the heuristics, since we are describing an iterative process it is best to explicitly give each the precise average of the used initial partitioning, instead of using the same for every heuristic.
+Secondly, since randomness is involved in the partitioner itself and, to a different extent, in some of the considered heuristics, in order to have insightful results we need to perform several measurements and compute an average. After generating an initial partitioning, one iteration of the heuristic was performed independently 5 times, and their result was averaged; this was repeated 20 times, obtaining an average of the 20 initial partitioning and an average of the 20 averages of final results. 
 
 Lastly, in order to have a meaningful result that can help us understand whether the given heuristic is globally effective, we will compute the geometric mean of all the initial partitioning and the geometric mean of all the final results. Then we will normalize w.r.t the first value and understand whether the considered heuristic performs better, on average, or not. This normalized geometric mean is denoted, in the next tables, with the symbol $\rho$.
 
@@ -119,7 +119,6 @@ The local search heuristic given in Section \ref{sec:globalview}, quickly turned
 
 Table \ref{tab:preliminary_po} summarizes the results of this preliminary analysis of the partition-oblivious heuristics for the 5 chosen matrices. In the first line, the results of the medium-grain with the algorithm proposed by the authors are given. The value $\rho$ represents the geometric mean of the results for a given heuristics, averaged over all matrices and normalized w.r.t. the default medium-grain.
 
-
 \begin{table}[h]
 	\centering
 
@@ -128,7 +127,7 @@ Table \ref{tab:preliminary_po} summarizes the results of this preliminary analys
 		\hline
 		\multirow{2}{*}{\textbf{Heuristic}} &  \multicolumn{5}{|c||}{\textbf{Matrix}} & \multirow{2}{*}{$\rho$} \\ \cline{2-6}
 		& \texttt{dfl001} & \texttt{nug\_30} & \texttt{bcsstk30} & \texttt{tbdlinux} & \texttt{rgg\_n\_2\_18\_s0} & \\ \hline
-		medium grain & 590 & 36262 & 552 & 8135 & 910 & 1.0 \\ \hline %2445
+		medium-grain & 590 & 36262 & 552 & 8135 & 910 & 1.0 \\ \hline %2445
 		\verb|po_localview|& \textbf{571} & 36665 & \textbf{598} & 8327 & 1160  & 1.07 \\  %2609.2
 		\verb|po_unsorted_concat_row|& 1492 & 189689 & 653 & 15081 & 1098 & 2.04 \\ % 0 0 0 %4979.1
 		\verb|po_unsorted_concat_col|& 589 & 38491  & 600 & 24024 & \textbf{1066} & 1.32 \\ % 0 1 0 %3224.1
@@ -151,9 +150,11 @@ Table \ref{tab:preliminary_po} summarizes the results of this preliminary analys
 	\caption{Results of the devised partition-oblivious heuristics for the five chosen matrices. In each column, we use the boldface to highlight the best found partitioning for each matrix (not considering the medium-grain value). } \label{tab:preliminary_po}
 \end{table}
 
+In table there is no result for the heuristic \verb|po_is| and the  matrix \verb|rgg_n_2_18_s0|, because the maximum number of levels of recursion was reached before the algorithm completed.
+
 \subsection{Partition-aware heuristics}
 
-In Table \ref{tab:preliminary_pa} we summarize the results of the partition-aware heuristics. As now we are considering a fully iterative framework, it is best to explicitly give the average of the 20 initial partitionings (iteration 0) alongside the average of the 20 final results (iteration 1). The value rho represents, simily as before, the geometric mean of the final results, normalized w.r.t. the average of the initial partitionings for that heuristic. 
+In Table \ref{tab:preliminary_pa} we summarize the results of the partition-aware heuristics. As now we are considering a fully iterative framework, it is best to explicitly give the average of the 20 initial partitionings (iteration 0) alongside the average of the 20 final results (iteration 1). The value $\rho$ represents, similarly as before, the geometric mean of the final results, normalized w.r.t. the average of the initial partitionings for that heuristic. 
 
 \begin{table}[h]
 	\centering
@@ -209,17 +210,19 @@ In Table \ref{tab:preliminary_pa} we summarize the results of the partition-awar
 	\caption{Results of the devised partition-oblivious heuristics for the five chosen matrices. In each column, we use the boldface to highlight the best found partitioning for each matrix. } \label{tab:preliminary_pa}
 \end{table}
 
+Similarly as before, the computation of the independent set was not possible in the case of the matrix \verb|rgg_n_2_18_s0| because the maximum levels of recursion was reached before being able to finish the algorithm.
+
 \subsection{Observations on the preliminary tests}
 
-These preliminary tests proved themselves useful, as we could effectively narrow down the best heuristics among the ones proposed; moreover, as a side effect, we are able to make a few general observations regarding the feature of the heuristics and their outcome.
+These preliminary tests proved themselves useful, as we could effectively narrow down the best heuristics among the ones proposed; moreover, as a side effect, we are able to make a few general observations regarding desirable and undesirable features of the heuristics.
 
-First of all, we can see that in Table \ref{tab:preliminary_po} the first heuristic, discussed in Section \ref{sec:localview}, is the one that produced the best results among the partition-oblivious ones. This is not surprising, as the algorithm is very similar to the one originally proposed by the authors in \cite{mediumgrain}, even though without a few refinements, which result in our \verb|po_localview| slightly worse than our reference values.
+First of all, we can see that in Table \ref{tab:preliminary_po} the first heuristic, discussed in Section \ref{sec:localview}, is the one that produced the best results among the partition-oblivious ones. This is not surprising, as the algorithm is very similar to the one originally proposed by the authors in \cite{mediumgrain}, even though without a few refinements, which result in our \verb|po_localview| slightly worse than our reference values. The results with the partition-oblivious computation of the independent set was surprisingly good, especially with the matrix \verb|nug_30|.
 
 Secondly, regarding the family of heuristics discussed in Section \ref{sec:hot_restart}, it appears that mixing rows and columns in in general not advisable: for both the partition-oblivious and partition-aware schemes, the results are considerably worse than the reference values. 
 
 The same principle can be deducted also from the surprisingly good results of the \verb|unsorted_concat| family of schemes, in which there is a clear separation of rows and columns. For these schemes, it appears that the matrix structure (and in particular, how far it is from being square) heavily influence the quality of the final partitioning. Furthermore, they are mutually exclusive, as expected: if one produces good results, the other one performs terribly. The consistency of their behavior suggests us that they could be merged into a \verb|po_unsorted_concat| and \verb|pa_unsorted_concat| schemes that automatically choose whether having columns-rows or rows-columns, depending on the size of the matrix to be partitioned.
 
-Moreover, it appears that moving or not the indices with one nonzero to the back (denoted, respectively, by \verb|w| and \verb|nw|) does not yield a substantial difference: the results of the first case are usually better, but not as much as expected.
+Moreover, it appears that moving or not the indices with one nonzero to the back (denoted, respectively, by \verb|w| and \verb|nw|) does not yield a substantial difference: the results of the first case are usually better, but not as much as expected. In both cases, however, sorting w.r.t the number of nonzeros does not seem to yield a dramatic improvement over the unsorted heuristics.
 
 \section{Analysis of the performance of the best heuristics through the test matrices}
 
