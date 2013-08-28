@@ -60,8 +60,8 @@ The parameter $iter_{max}$ of Algorithm \ref{alg:framework} is of vital importan
 		& 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ \hline
 		\verb|po_localview| & 599 & 575 & 576 & 578 & 573 & 583 & 578 & 574 & 575 & 578 & 573 \\
 		\verb|pa_localview| & 588 & 577 & 580 & 577 & 577 & 574 & 578 & 580 & 576 & 579 & 575  \\
- \verb|sbdview| & 590 & 588 & 591 & 579 & 597 & 595 & 589 & 603 & 595 & 589 & 587 \\
- \verb|po_unsorted_concat| & 579 & 597 & 594 & 593 & 593 & 597 & 597 & 598 & 594 & 603 & 596 \\ 
+		\verb|sbdview| & 590 & 588 & 591 & 579 & 597 & 595 & 589 & 603 & 595 & 589 & 587 \\
+		\verb|po_unsorted_concat| & 579 & 597 & 594 & 593 & 593 & 597 & 597 & 598 & 594 & 603 & 596 \\ 
 		\hline
 	\end{tabular}
 	\caption{Multiple iterations of four different heuristics for the test matrix \texttt{dfl001}. The numbers shown are the rounded arithmetic means of each iteration over 10 repeats of the experiment. Iteration 0 stands for the initial partitioning obtained with the medium-grain model. } \label{tab:iterations}
@@ -115,50 +115,111 @@ For this reason, a small number of different matrices (with a relatively small a
 
 The local search heuristic given in Section \ref{sec:globalview}, quickly turned out to be far from effective, and therefore we decided to discard it altogether in the numerical experiments. 
 
-Table \ref{tab:preliminary_po} summarizes the results of this preliminary analysis of the partition-oblivious heuristics for the 5 chosen matrices, whereas Table \ref{tab:preliminary_pa} summarizes the results of the partition-aware heuristics. With $i$ we denote the iteration number: 0 stands for the initial partitioning and 1 is the actual performing of the considered heuristic and the subsequent partitioning. The value $\rho$ represents, as already said, the geometric mean of the final results, averaged over all matrices and normalized w.r.t. the average of the all initial partitionings.
+\subsection{Partition-oblivious heuristics}
+
+Table \ref{tab:preliminary_po} summarizes the results of this preliminary analysis of the partition-oblivious heuristics for the 5 chosen matrices. In the first line, the results of the medium-grain with the algorithm proposed by the authors are given. The value $\rho$ represents the geometric mean of the results for a given heuristics, averaged over all matrices and normalized w.r.t. the default medium-grain.
+
 
 \begin{table}[h]
 	\centering
-	\begin{tabular}{|l|c||c|c|c|c|c||c|}
-\hline
-\multirow{2}{*}{\textbf{Heuristic}} & \multirow{2}{*}{$i$} &  \multicolumn{5}{|c||}{\textbf{Matrix}} & \multirow{2}{*}{$\rho$} \\ \cline{3-7}
-& & \texttt{dfl001} & \texttt{nug\_30} & \texttt{bcsstk30} & \texttt{tbdlinux} & \texttt{rgg\_n\_2\_18\_s0} & \\ \hline
-\verb|po_localview| & 0 & 590  & \textbf{36275} & 573 & 8135 & 910 & \\ 
-& 1 & \textbf{571} & 36665 & 598 & 8327 & 1160  & \multirow{-2}{*}{\~1.0} \\ \hline
-\verb|po_unsorted_concat_row| & 0 & 586 & 36596 & 536 & &  \\ % 0 0 * 
-& 1 & 1492 & 189689 & 653 & & \\\hline
-\verb|po_unsorted_concat_col| & 0 & 590 & 36091 & 538 \\ % 0 1 *
-& 1 & 589 & 38491  & 600 \\\hline
-\verb|po_unsorted_random| & 0 & 588 & 36056 & 576 \\ % 2 * *
- & 1 & 1314 & 113070 & 1127 \\ \hline
-\verb|po_unsorted_mix_alt| & 0 & 584 & & 549 \\ % 4 0 *
- & 1 & 1461 & & 715 \\ \hline
-\verb|po_unsorted_mix_spr| & 0 & 595 & & 572 \\ % 4 1 *
- & 1 & 1322 & & 759 \\ \hline
-\verb|po_sorted_w_simple| & 0 & 593 & 36296 & 552 \\ % 6 1 *
- & 1 & 597 & 38383 & 785 \\ \hline
-\verb|po_sorted_nw_simple| & 0 & 596 & 36342 & 548 \\ % 6 0 *
- & 1 & 606 & 38674 & 789 \\ \hline
-\verb|po_sorted_w_concat_row| & 0 & 588 & 36817 & 531 \\ % 8 1 0 
- & 1 & 1486 & 189681 & 642 \\ \hline
-\verb|po_sorted_w_concat_col| & 0 & 596 & 36262  & 546 \\ % 8 1 1
- & 1 & 597 & 38655 & 621 \\ \hline
-\verb|po_sorted_nw_concat_row| & 0 & 592 & 36400 & 544 \\ % 8 0 0
- & 1 & 1496 & 189683 & 614 \\ \hline
-\verb|po_sorted_nw_concat_col| & 0 & 589 & 35806 & 559 \\ % 8 0 1
- & 1 & 593 & 38513 & 621 \\ \hline
-\verb|po_sorted_w_mix_alt| & 0 & 585 & 36471 & 542 \\ % 10 0 1
- & 1 & 1317 & 162549 & 790 \\ \hline
-\verb|po_sorted_w_mix_spr| & 0 & 588 & & 550 \\ % 10 1 1
- & 1 & 641 & & 782 \\ \hline
-\verb|po_sorted_nw_mix_alt| & 0 & 585 & 36412 & 553 \\ % 10 0 0
- & 1 & 1457 & 163013 & 797 \\ \hline
-\verb|po_sorted_nw_mix_spr| & 0 & 600 & & 547 \\ % 10 1 0
- & 1 & 719 & & 793 \\ \hline
-\end{tabular}
-\caption{Results of the devised partition-oblivious heuristics for the five chosen matrices. In each column, we use the boldface to highlight the best found partitioning for each matrix. } \label{tab:preliminary_po}
+
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{|l||c|c|c|c|c||c|}
+		\hline
+		\multirow{2}{*}{\textbf{Heuristic}} &  \multicolumn{5}{|c||}{\textbf{Matrix}} & \multirow{2}{*}{$\rho$} \\ \cline{2-6}
+		& \texttt{dfl001} & \texttt{nug\_30} & \texttt{bcsstk30} & \texttt{tbdlinux} & \texttt{rgg\_n\_2\_18\_s0} & \\ \hline
+		medium grain & 590 & 36262 & 552 & 8135 & 910 & 1.0 \\ \hline %2445
+		\verb|po_localview|& \textbf{571} & 36665 & \textbf{598} & 8327 & 1160  & 1.07 \\  %2609.2
+		\verb|po_unsorted_concat_row|& 1492 & 189689 & 653 & 15081 & 1098 & 2.04 \\ % 0 0 0 %4979.1
+		\verb|po_unsorted_concat_col|& 589 & 38491  & 600 & 24024 & \textbf{1066} & 1.32 \\ % 0 1 0 %3224.1
+		\verb|po_unsorted_random|& 1314 & 113070 & 1127 & 20154 & 1093 & 2.11 \\  % 2 0 0 %5169
+		\verb|po_unsorted_mix_alt|& 1461 & 181216 & 715 & 27942 & 1104 & 2.32 \\  % 4 0 0 % 5666
+		\verb|po_unsorted_mix_spr|& 1322 & 81915 & 759 & 18584 & 1122 & 1.81 \\  % 4 1 0 % 4434
+		\verb|pa_sorted_w_simple|& 597 & 38383 & 785  & 8307 & 1093 & 1.13 \\ % 6 0 0 % 2771
+		\verb|po_sorted_nw_simple|& 606 & 38674 & 789 & \textbf{8301} & 1096 & 1.14 \\ % 6 1 0 % 2787
+		\verb|po_sorted_w_concat_row|& 1486 & 189681 & 642 & 15082 & 1078 & 2.01 \\ % 8 1 0 % 4907
+		\verb|po_sorted_w_concat_col|& 597 & 38655 & 621 & 24045 & 1068 & 1.33 \\  % 8 1 1 % 3261
+		\verb|po_sorted_nw_concat_row|& 1496 & 189683 & 614 & 15086 & 1090 & 2.01 \\ % 8 0 0 % 4913
+		\verb|po_sorted_nw_concat_col|& 593 & 38513 & 621 & 24005 & 1076 & 1.33 \\ % 8 0 1 % 3256
+		\verb|po_sorted_w_mix_alt|& 1317 & 162549 & 790 & 23683 & 1091 & 2.19 \\ % 10 0 1 % 5346
+		\verb|po_sorted_w_mix_spr|& 641 & 163013 & 782 & 23441 & 1093 & 1.88 \\ % 10 0 0 % 4615
+		\verb|po_sorted_nw_mix_alt|& 1457 & 62273 & 797 & 15015 & 1096 & 1.69 \\ % 10 1 0  % 4122
+		\verb|po_sorted_nw_mix_spr|& 719 & 62402 & 793 & 15072 & 1106 & 1.47 \\  % 10 1 1 % 3586
+		\verb|po_is|& 594 & \textbf{30655} & 615 & 13286 & -  & 1.12 \\ % 3491 
+		\hline
+	\end{tabular}
+	\caption{Results of the devised partition-oblivious heuristics for the five chosen matrices. In each column, we use the boldface to highlight the best found partitioning for each matrix (not considering the medium-grain value). } \label{tab:preliminary_po}
 \end{table}
 
+\subsection{Partition-aware heuristics}
+
+In Table \ref{tab:preliminary_pa} we summarize the results of the partition-aware heuristics. As now we are considering a fully iterative framework, it is best to explicitly give the average of the 20 initial partitionings (iteration 0) alongside the average of the 20 final results (iteration 1). The value rho represents, simily as before, the geometric mean of the final results, normalized w.r.t. the average of the initial partitionings for that heuristic. 
+
+\begin{table}[h]
+	\centering
+	\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{|l|c||c|c|c|c|c||c|}
+		\hline
+		\multirow{2}{*}{\textbf{Heuristic}} & \multirow{2}{*}{$i$} &  \multicolumn{5}{|c||}{\textbf{Matrix}} & \multirow{2}{*}{$\rho$} \\ \cline{3-7}
+		& & \texttt{dfl001} & \texttt{nug\_30} & \texttt{bcsstk30} & \texttt{tbdlinux} & \texttt{rgg\_n\_2\_18\_s0} & \\ \hline
+		\verb|pa_localview| & 0 & 582 & 36224 & 537 & 8051 & 914  \\ % 2422
+		& 1 & \textbf{575} & 36896 & 577 & 9934 & 2189 \\ \hline %3055
+		\verb|pa_sbdview| & 0 & 590 & 36057 & 546 & 8112 & 899 \\ % 2430
+		& 1 & 1493 & 187241 & 699 & 19852 & 1074 \\ \hline % 5296
+	\verb|pa_sbd2view| & 0 & 583 &  36123 & 542 & 8018 & 906 \\
+		& 1 & 1276 & 125009 & 1150 & 20757 & 1055\\ \hline
+		\verb|pa_unsorted_concat_row| & 0 & 584 & 36512 & 597 & 7934 & 929 \\ % 1 0 * 
+		& 1 & 628 & 42581 & 641 & 7337 & 1088 \\\hline
+		\verb|pa_unsorted_concat_col| & 0 & 589 & 35945 & 574 & 7999 & 898 \\ % 1 1 *
+		& 1 & 589 & 38862 & 602 & 10087 & 1069 \\\hline
+		\verb|pa_unsorted_random| & 0 & 591 & 36390 & 550 & 8044 & 909 \\ % 3 * *
+		& 1 & 622 & 36952 & 589 & 8383 & 1094 \\ \hline
+		\verb|pa_unsorted_mix_alt| & 0 & 592 & 36097 & 536 & 8019 & 896 \\ % 5 0 *
+		& 1 &  633 & 40286 & 684 & 9683 & 1108 \\ \hline
+		\verb|pa_unsorted_mix_spr| & 0 & 589 & 36137 & 542 & 8024 & 905 \\ % 5 1 *
+		& 1 &  642 & 39703 & 645 & 8361 & 1094 \\ \hline
+		\verb|pa_sorted_w_simple| & 0 & 594 & 36589 & 544 & 8012 & 876 \\ % 7 1 *
+		& 1 &  599 & 38887 & 563 & 8002 & 1093 \\ \hline
+		\verb|pa_sorted_nw_simple| & 0 & 596 & 36115 & 542 & 7995 & 888 \\ % 7 0 *
+		& 1 &  599 & 38793 & 572 & 8014 & 1098 \\ \hline
+		\verb|pa_sorted_w_concat_row| & 0 & 585 & 36305 & 537 & 8006 & 898 \\ % 9 1 0 
+		& 1 &  1494 & 190799 & 661 & 19036 & 1087 \\ \hline
+		\verb|pa_sorted_w_concat_col| & 0 & 590 & 36164 & 537 & 8032 & 903 \\ % 9 1 1
+		& 1 &  954 & 115312 & 689 & 25157 & 1074 \\ \hline
+		\verb|pa_sorted_nw_concat_row| & 0 & 590 & 35955 & 545 & 7999 & 897 \\ % 9 0 0
+		& 1 & 1489 & 190657 & 693 & 19152 & 1073 \\ \hline
+		\verb|pa_sorted_nw_concat_col| & 0  & 597 & 36436 & 548 & 8009 & 891 \\ % 9 0 1
+		& 1 & 975 & 116063 & 707 & 25543  & 1063 \\ \hline
+		\verb|pa_sorted_w_mix_alt| & 0 &  586 & 36566 & 549 & 8006  & 912 \\ % 11 0 1
+		& 1 & 692 & 41963 & 593 & 9476 & 1105 \\ \hline
+		\verb|pa_sorted_w_mix_spr| & 0 &  593 & 36085 &  537 & 8010 & 924 \\ % 11 1 1
+		& 1 & 619 & 39697 & 571 &  9060 & 1078 \\ \hline
+		\verb|pa_sorted_nw_mix_alt| & 0 & 588 & 36509 & 546 & 8020 & 891 \\ % 11 0 0
+		& 1 &  687 & 42542 & 566 & 9486 & 1085 \\ \hline
+		\verb|pa_sorted_nw_mix_spr| & 0 & 589 & 36197 & 553 &8006  & 886 \\ % 11 1 0
+		& 1 &  655 & 39201 & 602 & 9076 & 1094 \\ \hline
+		\verb|pa_is_1| & 0 & 592 & 36716 & 534 & 7997 & \\ 
+		& 1 & 588 & \textbf{36118} & 614 & \textbf{7323} & - \\ \hline
+		\verb|pa_is_2| & 0 & 596 & 35972 &  539 & 8011 &  \\ 
+		& 1 & 592 & 36375 &  631 & 8681 & - \\ \hline
+		\verb|pa_is_3| & 0 & 590 & 36432 & 540 & &\\ 
+		& 1 & 589 & 36324 & 635 & & -\\ \hline
+
+	\end{tabular}
+	\caption{Results of the devised partition-oblivious heuristics for the five chosen matrices. In each column, we use the boldface to highlight the best found partitioning for each matrix. } \label{tab:preliminary_pa}
+\end{table}
+
+\subsection{Observations on the preliminary tests}
+
+These preliminary tests proved themselves useful, as we could effectively narrow down the best heuristics among the ones proposed; moreover, as a side effect, we are able to make a few general observations regarding the feature of the heuristics and their outcome.
+
+First of all, we can see that in Table \ref{tab:preliminary_po} the first heuristic, discussed in Section \ref{sec:localview}, is the one that produced the best results among the partition-oblivious ones. This is not surprising, as the algorithm is very similar to the one originally proposed by the authors in \cite{mediumgrain}, even though without a few refinements, which result in our \verb|po_localview| slightly worse than our reference values.
+
+Secondly, regarding the family of heuristics discussed in Section \ref{sec:hot_restart}, it appears that mixing rows and columns in in general not advisable: for both the partition-oblivious and partition-aware schemes, the results are considerably worse than the reference values. 
+
+The same principle can be deducted also from the surprisingly good results of the \verb|unsorted_concat| family of schemes, in which there is a clear separation of rows and columns. For these schemes, it appears that the matrix structure (and in particular, how far it is from being square) heavily influence the quality of the final partitioning. Furthermore, they are mutually exclusive, as expected: if one produces good results, the other one performs terribly. The consistency of their behavior suggests us that they could be merged into a \verb|po_unsorted_concat| and \verb|pa_unsorted_concat| schemes that automatically choose whether having columns-rows or rows-columns, depending on the size of the matrix to be partitioned.
+
+Moreover, it appears that moving or not the indices with one nonzero to the back (denoted, respectively, by \verb|w| and \verb|nw|) does not yield a substantial difference: the results of the first case are usually better, but not as much as expected.
 
 \section{Analysis of the performance of the best heuristics through the test matrices}
 

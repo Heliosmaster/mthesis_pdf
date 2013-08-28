@@ -312,7 +312,7 @@ The size of these parts, and more generally of all of the blocks of $\ddot{A}$, 
 
 Other than the corner blocks, for which we already argued that the matrix partitioning problem is easy, this structure enables us to assign more specifically nonzeros to either $A_r$ or $A_c$: it is convenient to assign $\ddot{A}_{01}$ and $\ddot{A}_{43}$ to $A_r$, as these nonzeros can be fully assigned to one processor without having the columns cut, and similarly we can assign $\ddot{A}_{10}$ and $\ddot{A}_{34}$ to $A_c$; for the other blocks, we can repeat the reasoning of the last section.
 
-This heuristic that exploits the SBD2 form of the matrix $A$ is given explicitly in \eqref{alg:sbd2view}
+This heuristic that exploits the SBD2 form of the matrix $A$ is given explicitly as follows:
 
 \begin{align}
 	\text{Assignment of } \ddot{A}: \begin{bmatrix}
