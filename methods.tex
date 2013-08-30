@@ -6,7 +6,7 @@ We are interested in both improving the initial partitioning of $A$, and a fully
 
 If we are interested in an initial partitioning into $A_r$ and $A_c$ that will yield a good communication volume, we already have some information about their quality before the actual partitioning is performed. We can indeed compute an upper bound on the communication cost: if a complete row of $A$ is assigned to $A_r$ (or a full column is assigned to $A_c$), we are sure that those nonzeros will be assigned to the same processor, and we already discussed in Section \ref{sec:par_matvec} how this results in no communication for that row (or column). This can give us the idea of trying to keep, as much as possible, full rows and columns together, although it is impossible to do it all the time (because a given nonzero cannot be assigned to both $A_r$ and $A_c$).
 
-If our purpose is to compute $A_r$ and $A_c$ to improve an existing partitioning, we can follow a few principles to guide us in the choice of what information we should keep, and what we should discard for the next iteration. First of all, it makes sense to have confidence in the existing partitioning: if some nonzeros (for example, a full row or column) are assigned to the same processor, it means that at some point in the previous iteration it was decided that it was convenient to put those nonzeros together, and therefore we should have a preference for them to be together also in the new partitioning. However, this must only serve as an indication and not as a rigid rule, leaving some space for new choices to be made, in order to effectively improve the existing partitioning. Furthermore, we should try and keep, as much as possible, rows and columns together, as noted in the previous paragraph.
+If our purpose is to compute $A_r$ and $A_c$ to improve an existing partitioning, we can follow a few principles to guide us in the choice of what information we should keep, and what we should discard for the next iteration. First of all, it makes sense to have confidence in the existing partitioning: if some nonzeros (for example, a full row or column) are assigned to the same processor, it means that at some point in the previous iteration it was decided that it was convenient to put those nonzeros together, and therefore we should have a preference for them to be together also in the new partitioning. However, this must only serve as an indication and not as a rigid rule, leaving some space for new choices to be made, in order to effectively improve the existing partitioning. Furthermore, we should try to keep, as much as possible, rows and columns together, as noted in the previous paragraph.
 
 \section{Individual assignment of nonzeros} \label{sec:localview}
 
@@ -84,7 +84,7 @@ In Chapter \ref{chap:experimental_results}, when we are going to perform numeric
 
 Instead of assigning nonzeros individually as in Section \ref{sec:localview}, we can take a more coarse-grained approach and try to assign at the same time a greater amount of nonzeros to either $A_r$ or $A_c$. In particular, we will discuss how to exploit the Separated Block Diagonal (SBD) form of the partitioned matrix $A$ and introduce a further iteration of this concept, discussing the Separated Block Diagonal of order 2 (SBD2) form of the matrix. Moreover, the heuristics described in this section are all partition-aware, and take as input a partitioned matrix.
 
-As throughout this section the permutations of matrices will be fundamental, we adopt a simplified notation: given a vector $I$ with row indices and a vector $J$ with column indices, we denote as $A(I,J)$ the submatrix of $A$ with only the rows in $I$ and only the columns in $J$ (following the order in which they appear in the vectors). With this notation we have, for example, that $A([1,\dots,m],[1 \dots n]) = A$. Furthermore, if $I_1$ and $I_2$ are both vectors of indices, with $(I_1,I_2)$ we denote the simple concatenation of these vectors.
+As throughout this section the permutations of matrices will be fundamental, we adopt a simplified notation: given a vector $I$ with row indices and a vector $J$ with column indices, we denote as $A(I,J)$ the submatrix of $A$ with only the rows in $I$ and only the columns in $J$ (following the order in which they appear in the vectors). With this notation, for example, $A([1,\dots,m],[1 \dots n]) = A$. Furthermore, if $I_1$ and $I_2$ are both vectors of indices, with $(I_1,I_2)$ we denote the simple concatenation of these vectors.
 
 \subsection{Using the Separated Block Diagonal form of $A$}
 
@@ -140,10 +140,10 @@ An example of the procedure for obtaining this form is shown in Figure \ref{fig:
 		\draw[ultra thick] ({17+0},-3) -- ({17+9},-3);
 		\draw[ultra thick] ({17+0},-6) -- ({17+9},-6);
 	\end{tikzpicture}
-	\caption{Example process to obtain the SBD form of a partitioned matrix. On the left the original matrix is shown, whereas on the right we have the permuted SBD form. On the top/left sides of the matrices the color of the circle denotes whether that row/column is completely red or blue or it is mixed (purple), whereas on the bottom/right sides the indices of the columns/rows are explicitly given.} \label{fig:sbd}
+	\caption{Example process to obtain the SBD form of a partitioned matrix. On the left the original matrix is shown, whereas on the right the permuted SBD form. On the top/left sides of the matrices the color of the circle denotes whether that row/column is completely red or blue or it is mixed (purple), whereas on the bottom/right sides the indices of the columns/rows are explicitly given.} \label{fig:sbd}
 \end{figure}
 
-More explicitly, if we denote as $m_i := |R_i|$, $n_i := |C_i|$, with $i=0,1,2$, we have that the SBD form is the resulting block matrix:
+More explicitly, if we denote as $m_i := |R_i|$, $n_i := |C_i|$, with $i=0,1,2$, the SBD form is the resulting block matrix:
 
 \begin{align}\dot{A} := A(I,J) = 
 	\begin{bmatrix}
@@ -165,7 +165,7 @@ where
 	\item $\dot{A}_{11}$ of size $m_1 \times n_1$, has nonzeros with cut rows and columns.
 \end{itemize}
 
-Note that the size of each part along with the number of contained nonzeros can greatly vary, also from matrix to matrix: for example, if the sparsity pattern of the matrix allows a ``perfect'' partitioning such that there is no communication, all blocks are empty except $\dot{A}_{00}$ and $\dot{A}_{22}$; conversely, if the matrix has a very dense (or complicated) pattern and/or the partitioning is far from optimal, such blocks might be almost empty and $\dot{A}_{11}$ will have the majority of nonzeros. An example of the difference of the block sizes of $\dot{A}$ is shown in Figure \ref{fig:sbd-2}.
+Note that the size of each part along with the number of contained nonzeros can greatly vary, also from matrix to matrix: for example, if the sparsity pattern of the matrix allows a ``perfect'' partitioning such that there is no communication, all blocks are empty except $\dot{A}_{00}$ and $\dot{A}_{22}$; conversely, if the matrix has a dense (or complicated) pattern and/or the partitioning is far from optimal, such blocks might be almost empty and $\dot{A}_{11}$ will have the majority of nonzeros. An example of the difference of the block sizes of $\dot{A}$ is shown in Figure \ref{fig:sbd-2}.
 
 \begin{figure}[h]
 	\centering
@@ -174,7 +174,7 @@ Note that the size of each part along with the number of contained nonzeros can 
 	\caption{Example of SBD forms of partitioning of the matrices \texttt{impcol\_b} and \texttt{cage6} \cite{ufl}. Each part of $\dot{A}$ has been colored differently. In the first matrix there are no cut rows, which means that $\dot{A}_{10}=\dot{A}_{11} =\dot{A}_{12} = \varnothing$.} \label{fig:sbd-2}
 \end{figure}
 
-By computing the Separated Block Diagonal form of a matrix, we are able to explicitly see the underlying structure of the partitioning of a matrix, and the properties of each block can be used to adapt the assignment of its nonzeros. More specifically, the blocks $\dot{A}_{00}$ and $\dot{A}_{22}$ have nonzeros with uncut rows and columns and therefore are more suited to be assigned together; of course, we still have to decide between $A_r$ and $A_c$ and, as mentioned earlier, it is impossible to do both: a convenient thing is to base our choice on the sizes of such blocks. For example, if $m_0 < n_0$, in the block $\dot{A}_{00}$ we have that the columns are (on average) sparser than the rows: if we assign the nonzeros of this block to $A_c$ we are, in principle, making sure that more rows/columns will stay uncut.
+By computing the Separated Block Diagonal form of a matrix, we are able to explicitly see the underlying structure of the partitioning of a matrix, and the properties of each block can be used to adapt the assignment of its nonzeros. More specifically, the blocks $\dot{A}_{00}$ and $\dot{A}_{22}$ have nonzeros with uncut rows and columns and therefore are more suited to be assigned together; of course, we still have to decide between $A_r$ and $A_c$ and, as mentioned earlier, it is impossible to do both: it is convenient to base our choice on the sizes of such blocks. For example, if $m_0 < n_0$, in the block $\dot{A}_{00}$ the columns are (on average) sparser than the rows: if we assign the nonzeros of this block to $A_c$ we are, in principle, making sure that more rows/columns will stay uncut.
 
 For the blocks with uncut rows and cut columns (namely, $\dot{A}_{01}$ and $\dot{A}_{21}$), the choice is easy: we assign them to $A_r$ and keep their rows uncut. Similarly, we assign the nonzeros of $\dot{A}_{10}$ and $\dot{A}_{12}$ to $A_c$, keeping their columns uncut. 
 
@@ -388,7 +388,7 @@ Throughout this section we will stop distinguishing between rows and columns of 
 
 This simplification of terms is due to the fact that the core of this heuristic lies in the computation of a \textbf{priority vector} $v$, which is none other than a permutation of the indices $0,\dots,m+n-1$, where they appear in order of decreasing priority: in this sense, the priority is to be intended as the probability of the nonzeros of that index to be together in a good partitioning.
 
-The assignment of nonzeros is done by ``painting'' them with an imaginary color, which corresponds either to $A_r$ or $A_c$: we iterate through our priority vector backwards (i.e. starting from the index with the lowest priority) and assign all of its nonzeros to go together: if the index corresponds to a row, then we assign all of its nonzeros to $A_r$, otherwise we assign them to $A_c$. Because each nonzero has both a row and a column, we have that it is represented twice in our priority vector; the second time it is considered, we re-assign it by ``painting it over'' (hence the name of the algorithm).
+The assignment of nonzeros is done by ``painting'' them with an imaginary color, which corresponds either to $A_r$ or $A_c$: we iterate through our priority vector backwards (i.e. starting from the index with the lowest priority) and assign all of its nonzeros to go together: if the index corresponds to a row, then we assign all of its nonzeros to $A_r$, otherwise we assign them to $A_c$. Because each nonzero has both a row and a column, it is represented twice in our priority vector; the second time it is considered, we re-assign it by ``painting it over'' (hence the name of the algorithm).
 
 A more explicit formulation of this procedure is given in Algorithm \ref{alg:overpainting}.
 
@@ -427,11 +427,11 @@ It is possible also to give an alternative formulation for this algorithm in whi
 	\caption{Alternative formulation of Algorithm \ref{alg:overpainting}.} \label{alg:overpainting-2}
 \end{algorithm}
 
-In this formulation, every assignment to $A_r$ and $A_c$ is final, but we have the added complexity of checking which nonzeros of the considered index are still to be assigned, and only work with them.
+In this formulation, every assignment to $A_r$ and $A_c$ is final, but with the added complexity of checking which nonzeros of the considered index are still to be assigned, and only work with them.
 
-Lastly, another different formulation is possible: we consider individually each nonzero $a_{ij}$ and see whether in $v$ we have $i < j$ (where the $<$ symbol is to be intended as ``$i$ precedes $j$'' and not as the comparison of the values) or the other way around; in the first case, the row has more priority and we assign $a_{ij}$ to $A_r$, otherwise we assign it to $A_c$. Note that, since we have to perform $N$ lookups on the vector $v$, this is a more expensive formulation of the same algorithm.
+Lastly, another different formulation is possible: we consider individually each nonzero $a_{ij}$ and see whether in $v$ $i < j$ (where the $<$ symbol is to be intended as ``$i$ precedes $j$'' and not as the comparison of the values) or the other way around; in the first case, the row has more priority and we assign $a_{ij}$ to $A_r$, otherwise we assign it to $A_c$. Note that, since we have to perform $N$ lookups on the vector $v$, this is a more expensive formulation of the same algorithm.
 
-A very important point to observe is that this overpainting algorithm is completely deterministic: $A_r$ and $A_c$ are uniquely determined by the ordering of the indices in $v$. Therefore, the heuristic part of this algorithm lies entirely in the choice of this priority vector, and, for this reason, we will focus on it in the next subsection. 
+An important point to observe is that this overpainting algorithm is completely deterministic: $A_r$ and $A_c$ are uniquely determined by the ordering of the indices in $v$. Therefore, the heuristic part of this algorithm lies entirely in the choice of this priority vector, and, for this reason, we will focus on it in the next subsection. 
 
 \subsection{Computation of the priority vector $v$}
 
@@ -454,13 +454,13 @@ Now, we give a more detailed explanation of each of those steps.
 
 	\item \textbf{sorting}: we can either keep the set from the previous step untouched (therefore preserving the natural order of indices) or perform a sorting with respect to the number of nonzeros. The sorting is done in ascending order, as a short row/column is more likely to fit completely in a good partitioning because it does not yield many cut columns/rows.
 
-		In addition, we can refine a bit our sorting: we could move the indices which have only one nonzero to the back, because no matter our assignment of such nonzero, that index will not be cut and it is best to try and keep also the other dimension uncut. 
+		In addition, we can refine a bit our sorting: we could move the indices which have only one nonzero to the back, because no matter our assignment of such nonzero, that index will not be cut and it is best to try to keep also the other dimension uncut. 
 
 	\item \textbf{internal ordering}: as the last step, we want to finalize our vector $v$ by deciding more precisely the position of each index. The strategies considered, which often depend internally on an additional parameter, are the following:
 
 		\begin{itemize}
 			\item \textbf{concatenation}: we put either all the rows before all the columns, or all the columns before all the rows;
-			\item \textbf{mixing}: we can mix rows and columns in two main ways: alternation and spread. Suppose we have twice as many columns as rows: in the first case we have 
+			\item \textbf{mixing}: we can mix rows and columns in two main ways: alternation and spread. Suppose there are twice as many columns as rows: in the first case we get
 				$$(c,r,c,r,c,r,\dots,c,r,c,c,c,\dots,c,c,c),$$
 
 				whereas with the second one we get 

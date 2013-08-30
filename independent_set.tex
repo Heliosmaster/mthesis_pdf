@@ -1,16 +1,16 @@
 \chapter{Maximum independent set formulation of the partial row/column assignment problem} \label{chap:independent_set}
 
-With the framework introduced in Section \ref{sec:hot_restart}, we basically translated the problem of the assignment of nonzeros to $A_r$ and $A_c$ (which is already another formulation of the matrix partitioning problem with the medium grain model) to the problem of an efficient computation of a permutation of the indices $0,\dots,m+n-1$. In this chapter, we will propose a method for this vector computation problem, which relies on concepts of the field of graph theory.
+With the framework introduced in Section \ref{sec:hot_restart}, we basically translated the problem of the assignment of nonzeros to $A_r$ and $A_c$ (which is already another formulation of the matrix partitioning problem with the medium grain model) to the problem of an efficient computation of a permutation of the indices $\{0,\dots,m+n-1\}$. In this chapter, we will propose a method for this vector computation problem which relies on concepts of the field of graph theory.
 
-The main idea is somewhat similar to the principle that led us to the development of the Separated Block Diagonal form of order 2 in Section \ref{sec:sbd2}. In that particular form of a partitioned matrix, as already argued, the blocks $\ddot{A}_{00}$ and $\ddot{A}_{44}$ are interesting, because they contain ``independent'' nonzeros. More specifically, those rows and columns are fully assigned to a processor, and whose nonzeros do not have any neighbor (a nonzero in the same row or column) which had a cut column/row. The analogue concept of \emph{independendence}, in this reasoning, has to be defined very carefully: we want find a subset of the indices $\{0,\dots,m+n-1\}$ which does not cause any communication, whenever we fully assign its rows to $A_r$ and its columns to $A_c$. With this definition, our goal is clear: we want to assign as many nonzeros as possible in this way, obtaining a low upper bound on the communication volume, which can be computed during the creation of $A_r$ and $A_c$.
+The main idea is somewhat similar to the principle that led us to the development of the Separated Block Diagonal form of order 2 in Section \ref{sec:sbd2}. In that particular form of a partitioned matrix, the blocks $\ddot{A}_{00}$ and $\ddot{A}_{44}$ are interesting, as they contain ``independent'' nonzeros. More specifically, those rows and columns are fully assigned to a processor, and whose nonzeros do not have any neighbor (a nonzero in the same row or column) which has a cut column/row. The analogue of this concept of independendence, is now to be defined carefully: we want find a subset of the indices $\{0,\dots,m+n-1\}$ which does not cause any communication, whenever we fully assign its rows to $A_r$ and its columns to $A_c$. With this definition, our goal is clear: we want to assign as many nonzeros as possible in this way, obtaining a low upper bound on the communication volume, which can be computed during the creation of $A_r$ and $A_c$.
 
-To do so, we can employ a very well studied object in graph theory: the \textbf{maximum independent set}. However, this requires a correct translation of our sparse matrix into a graph, described in Section \ref{sec:is_graph}. In Section \ref{sec:is_comp}, we delve a little more into the graph theory required and describe the actual algorithm used to compute the maximum independent set in such a graph.
+To do so, we can employ a well studied object in graph theory: the \textbf{maximum independent set}. However, this requires a correct translation of our sparse matrix into a graph, described in Section \ref{sec:is_graph}. In Section \ref{sec:is_comp}, we delve a little more into the graph theory required and describe the actual algorithm used to compute a maximum independent set in such a graph. In Section \ref{sec:is_vector}, finally, we give a few different possibilities for computing the priority vector $v$ using the concepts and algorithms just introduced.
 
 \section{Graph construction} \label{sec:is_graph}
 
-We need to construct the graph correctly from our sparse matrix, in order to retrieve our desired information. In our case, we can simply consider the graph whose adjacency matrix is none other than the sparsity pattern of our matrix $A$. This exact same formulation has already been studied: for example, Hendrickson and Kolda \cite{hendrickson} used their \emph{bipartite graph model} to discuss different algorithms for bipartite graph partitioning, coming to the conclusion that the best strategy is to use multilevel methods with Fiduccia-Mattheyses refinement.
+We need to construct the graph correctly from our sparse matrix, in order to retrieve the desired information. In our case, we can simply consider the graph whose adjacency matrix is none other than the sparsity pattern of our matrix $A$. This exact same formulation has already been studied, for example, by Hendrickson and Kolda \cite{hendrickson}, who used their \emph{bipartite graph model} to discuss different algorithms for bipartite graph partitioning.
 
-More explicitly, in this graph formulation, we have that rows and columns are vertices, and we have an edge $(i,j)$ if $a_{ij} \neq 0$. It is fairly clear that the resulting graph is bipartite, because an edge connects only rows with columns.
+More explicitly, in this graph formulation, rows and columns are vertices, and we have the edge $(i,j)$ if $a_{ij} \neq 0$. It is fairly clear that the resulting graph is bipartite, because an edge connects only a row with a column.
 
 An example of such translation from matrix to graph is shown in Figure \ref{fig:bipartite_graph}, where we start from the matrix given in Figure \ref{fig:partition}. 
 
@@ -34,16 +34,16 @@ An example of such translation from matrix to graph is shown in Figure \ref{fig:
 		\foreach \x / \y in {0/0,0/2,1/1,3/4,3/3,6/2,7/4,5/6,8/0} { \draw[myred] (r\x) -- (c\y);}
 		\foreach \x / \y in {0/1,1/2,2/5,2/8,5/5,4/0,6/7,7/6,8/1} { \draw[myblue] (r\x) -- (c\y);} 
 	\end{tikzpicture}
-	\caption{Graph constructed using the sparsity pattern of the matrix of Figure \ref{fig:partition} as adjacency matrix (rows and columns are vertices, nonzeros are edges). The edge color is the same of the corresponding nonzero, but only to facilitate the understanding of this translation; in reality there is no distinction between edges. In the bipartite graph, with $r_i$ we denote row $i$, whereas with $c_j$ we denote column $j$.} \label{fig:bipartite_graph}
+	\caption{Graph constructed using the sparsity pattern of the matrix of Figure \ref{fig:partition} as adjacency matrix (rows and columns are vertices, nonzeros are edges). The edge color has been kept the same as the corresponding nonzero, but only to facilitate the understanding. The fact that the matrix is partitioned does not play any role in the resulting graph. In the bipartite graph, with $r_i$ we denote row $i$, whereas with $c_j$ we denote column $j$.} \label{fig:bipartite_graph}
 \end{figure}
 
 \section{The maximum independent set and its computation} \label{sec:is_comp}
 
-In this section, we will give an extensive overview of the maximum independent set problem, discuss its complexity and the relation with other famous problems in graph theory, and, lastly, give an efficient algorithm that can be used in our case, with a bipartite graph.
+In this section, we will give an overview of the maximum independent set problem, discuss its complexity and the relation with other famous problems in graph theory, and, lastly, give an efficient algorithm that can be used with a bipartite graph.
 
 \subsection{Maximum independent set}
 
-The concept of independent set is closely related to the concept of \emph{vertex cover} \cite{np_book}: let $G=(V,E)$ be an undirected graph.
+The concepts of \emph{independent set} and \emph{vertex cover} are closely related \cite{np_book}: let $G=(V,E)$ be an undirected graph.
 
 \begin{definition}[Independent set]
 	An \emph{independent set} is a subset $V' \subseteq V$ such that $ \forall u,v \in V'$, $(u,v) \notin E$.
@@ -54,7 +54,7 @@ The concept of independent set is closely related to the concept of \emph{vertex
 	A \emph{vertex cover} is a subset $V' \subseteq V$ such that $\forall (u,v) \in E$ we have $u \in V' \vee v \in V'$, i.e. at least one of the endpoints of any edge is in the cover. A \emph{minimum} vertex cover is a vertex cover of $G$ with minimum cardinality.
 \end{definition}
 
-A graphical depiction of two independent sets is shown in Figure \ref{fig:is_example}.
+A graphical depiction of two independent sets for an example graph is shown in Figure \ref{fig:is_example}.
 
 \begin{figure}[h]
 	\centering
@@ -85,30 +85,134 @@ A graphical depiction of two independent sets is shown in Figure \ref{fig:is_exa
 	\caption{Two different independent sets (red vertices) on an example graph. The two independent sets have different cardinality, and the one on the right is a maximum independent set.} \label{fig:is_example}
 \end{figure}
 
+The following lemma explicitly gives us the relation between a vertex cover and an independent set.
+
 \begin{lemma} 
 	\label{lemma:is}
-	Given a graph $G$, $V'$ is a vertex cover set if and only if $V \setminus V'$ is a independent set.
+	Given a graph $G$, $V'$ is a vertex cover set if and only if $V \setminus V'$ is an independent set.
 \end{lemma}
 \begin{proof}
-	Let $V'$ be a vertex cover, i.e. $\forall (u,v) \in E$, we have that $u \in V'$ or $v \in V'$. This is equivalent to say that $\forall u,v \in V \setminus V'$ we have that $(u,v) \notin E$, which is the definition of independent set.
+	Let $V'$ be a vertex cover, i.e. $\forall (u,v) \in E$, $u \in V'$ or $v \in V'$. This is equivalent to say that $\forall u,v \in V \setminus V'$, $(u,v) \notin E$, which is the definition of independent set.
 \end{proof}
 
 As the decision variant of the problem of finding a minimum vertex cover is NP-complete \cite[Theorem 3.3]{np_book}, it follows from this lemma that also finding a maximum independent set in a graph is NP-complete; the main consequence of this result is that we cannot solve this problem directly for a generic graph, as it would be as hard as our original matrix partitioning problem. Luckily, we are dealing with a particular kind of graph, a bipartite graph, which simplifies greatly the computations of a maximum independent set.
 
-Before exploiting the bipartiteness of our graph, we need to make an additional observation: Lemma \ref{lemma:is} states that, in a generic graph, the vertex cover problem and independent set cover are complementary. Therefore, computing a maximum independent set is equivalent to computing a minimum vertex cover.
-
-This equivalence is particularly useful in our case, because in addition we can employ K\H{o}nig's Theorem \cite{konig}, which states that, in a bipartite graph, the size of a maximum matching is the size of a minimum vertex cover. 
-
-Because of this relationship, it is convenient to recall the definition of (maximum) matching.
+Before exploiting the bipartiteness of our graph, we need to make an additional observation: Lemma \ref{lemma:is} states that, in a generic graph, the vertex cover problem and independent set cover are complementary. Therefore, computing a maximum independent set is equivalent to computing a minimum vertex cover. This equivalence is particularly useful in our case, because another mathematical object can be related: the maximum matching.
 
 \begin{definition}[Matching]
 	Let $G=(V,E)$ be a graph. A \emph{matching} $M \subseteq E$ is a set of edges such that at most one edge is incident to each vertex $v \in V$. We say that a vertex $v \in V$ is matched by $M$ if an edge in $M$ is incident to $v$. A \emph{maximum} matching is a matching of maximum cardinality.
 \end{definition}
 
-In Figure \ref{fig:konig} we can visualize the relationships between maximum independent set, minimum vertex cover and maximum matching.
+In particular, because we are in a bipartite graph, we can employ K\H{o}nig's Theorem \cite{konig}:
+
+\begin{theorem}[K\H{o}nig]
+In a bipartite graph, the size of a maximum matching is equal to the size of a minimum vertex cover. \label{th:konig}
+\end{theorem}
+
+We will algorithmically prove the theorem, showing that from a maximum matching we can obtain a minimum vertex cover and their size is equal. First, however, we need two more definitions that are useful when dealing with (maximum) matchings.
+
+\begin{definition}[Simple path]
+	Let $G=(V,E)$ be a graph. A path $P=(v_1,\dots,v_k)$ is said to be \emph{simple} if $v_i \neq v_j$, $\forall i \neq j$, i.e. all the vertices are distinct and there are no self-edges or sub-cycles. \label{def:simple_path} 
+\end{definition}
+
+\begin{definition}[Augmenting path]
+	Let $M$ be a matching on the graph $G=(V,E)$. The simple path $P$ is said to be \emph{augmenting} if it starts and ends on unmatched (or exposed) vertices, and its edges alternate between $E \setminus M$ and $M$, in this order.\label{def:augmenting_path}
+\end{definition}
+
+It is easy to see that, if we have a matching $M$ and an augmenting path $P$, if $P$ contains $k$ edges in $M$, then it has exactly $k+1$ edges in $E\setminus M$, and, if the graph is bipartite, the two endpoints of $P$ belong to the two different sets of vertices. Moreover, $M \oplus P$ is a matching of size $|M|+1$, where $M \oplus P := (M \setminus P) \cup (P \setminus M)$ denotes the \emph{symmetric difference} between $M$ and $P$. 
+
+Now, in Algorithm \ref{alg:directed_graph}, we give a scheme that constructs a bipartite directed graph, starting from a bipartite undirected graph $G=(L \cup R,E)$ and a matching $M$.
+
+\begin{algorithm}[h]
+	\begin{algorithmic}
+	\Require{Bipartite undirected graph $G=(L \cup R,E)$, matching $M$.}
+	\Ensure{Bipartite directed graph $G' = (L \cup R,D)$.}
+	\State $D \gets \varnothing$
+	\For{$(i,j) \in E$ such that $i \in L$ and $j \in R$}
+	\If{$(i,j) \in M$}
+	\State $D \gets D \cup (j,i)$
+	\Else
+	\State $D \gets D \cup (i,j)$
+	\EndIf
+	\EndFor
+	\end{algorithmic}
+	\caption{Construction of a bipartite directed graph starting from an undirected bipartite graph and a matching.} \label{alg:directed_graph}
+\end{algorithm}
+
+In other words, the edges in $E$ are given a direction: the ones in the matching go from $R$ to $L$, and the others from $L$ to $R$.
+
+In Algorithm \ref{alg:konig}, we give an explicit scheme to compute a minimum vertex cover starting from a maximum matching.
+
+\begin{algorithm}[h]
+	\begin{algorithmic}
+	\Require{Bipartite graph $G=(L \cup R,E)$, maximum matching $M$.}
+	\Ensure{Minimum vertex cover $C$.}
+	\State Construct the modified graph $G' = (L \cup R,D)$ as in Algorithm \ref{alg:directed_graph}
+	\State $T \gets \varnothing$
+	\ForAll{$v \in L$ such that $v$ is not matched}
+	\State Add $v$ to $T$
+	\ForAll{$u \in L \cup R$ reachable from $v$ using the directed edges in $D$}
+	\State Add $u$ to $T$
+	\EndFor
+	\EndFor
+	\State $C \gets (L \setminus T) \cup (R \cap T)$
+	\end{algorithmic}
+	\caption{Construction of the minimum vertex cover in a bipartite graph, starting from the maximum matching.} \label{alg:konig}
+\end{algorithm}
+
+In Figure \ref{fig:konig}, we can visualize an example of Algorithm \ref{alg:konig}, starting from the graph of Figure \ref{fig:bipartite_graph}, with a maximum matching. In the final image, the relationships between maximum independent set, minimum vertex cover and maximum matching can be easily recognized. 
 
 \begin{figure}[h]
 	\centering
+	\subfigure[Graph at the beginning of the algorithm. The edges in blue belong to the maximum matching $M$. $T = \varnothing$.]{ 
+		\begin{tikzpicture}[scale=0.5]
+			\foreach \x in {0,...,8} { 
+				\node[vertex,label=left:\(r_{\x}\)] (r\x) at (16,{3.5-2*\x}) {}; 
+				\node[vertex,label=right:\(c_{\x}\)] (c\x) at (26,{3.5-2*\x}) {};
+			}
+
+			\foreach \x / \y in {0/0,3/4,6/2,8/0} { \draw (r\x) -- (c\y);}
+			\foreach \x / \y in {0/1,1/2,2/8,5/5,7/6,8/1} { \draw (r\x) -- (c\y);}
+
+			\foreach \x / \y in {4/0,1/1,0/2,3/3,7/4,2/5,5/6,6/7} { \draw[myblue,very thick] (r\x) -- (c\y);}
+		\end{tikzpicture}
+	} \hspace{2cm}
+	\subfigure[We start with the unmatched vertex in $r_8$; we traverse the unmatched edge $(r_8,c_0)$ and the matched edge $(c_0,r_4)$. $T = \{r_8,c_0,r_4\}$. ]{ 
+		\begin{tikzpicture}[scale=0.5]
+			\foreach \x in {0,...,8} { 
+				\node[vertex,label=left:\(r_{\x}\)] (r2\x) at (16,{3.5-2*\x}) {}; 
+				\node[vertex,label=right:\(c_{\x}\)] (c2\x) at (26,{3.5-2*\x}) {};
+			}
+
+			\foreach \x / \y in {0/0,3/4,6/2} { \draw (r2\x) -- (c2\y);}
+			\foreach \x / \y in {0/1,1/2,2/8,5/5,7/6,8/1} { \draw (r2\x) -- (c2\y);}
+
+			\foreach \x / \y in {1/1,0/2,3/3,7/4,2/5,5/6,6/7} { \draw[myblue,very thick] (r2\x) -- (c2\y);}
+			\foreach \x / \y in {8/0} { \draw[myred] (r2\x) -- (c2\y);}
+			\foreach \x / \y in {4/0} { \draw[myred,very thick] (r2\x) -- (c2\y);}
+			\foreach \x in {4,8} { \node[vertex,myred] at (r2\x) {};}
+			\foreach \x in {0} { \node[vertex,myred] at (c2\x) {};}
+
+		\end{tikzpicture}
+	}\vspace{1cm}
+	\subfigure[We traverse the unmatched edge $(r_8,c_1)$, then the matched edge $(c_1,r_1)$, then the unmatched $(r_1,c_2)$ and lastly the matched $(c_2,r_0)$. $T = \{ r_8,c_0,r_4,c_1,r_1,c_2, r_0 \}$.]{
+		\begin{tikzpicture}[scale=0.5]
+			\foreach \x in {0,...,8} { 
+				\node[vertex,label=left:\(r_{\x}\)] (r3\x) at (16,{3.5-2*\x}) {}; 
+				\node[vertex,label=right:\(c_{\x}\)] (c3\x) at (26,{3.5-2*\x}) {};
+			}
+
+			\foreach \x / \y in {0/0,3/4,6/2} { \draw (r3\x) -- (c3\y);}
+			\foreach \x / \y in {0/1,8/0,2/8,5/5,7/6} { \draw (r3\x) -- (c3\y);}
+
+			\foreach \x / \y in {4/0,3/3,7/4,2/5,5/6,6/7} { \draw[myblue,very thick] (r3\x) -- (c3\y);}
+			\foreach \x / \y in {8/1,1/2} { \draw[myred] (r3\x) -- (c3\y);}
+			\foreach \x / \y in {1/1,0/2} { \draw[myred,very thick] (r3\x) -- (c3\y);}
+			\foreach \x in {0,1,4,8} { \node[vertex,myred] at (r3\x) {};}
+			\foreach \x in {0,1,2} { \node[vertex,myred] at (c3\x) {};}
+		\end{tikzpicture}
+	}\hspace{2cm}
+	\subfigure[We take as $C = (L \cap T) \cup (R \setminus T)$ (depicted in orange). We can see from the final graph that it is indeed a minimum vertex cover.]{
 	\begin{tikzpicture}[scale=0.5]
 
 		\foreach \x in {0,...,8} { 
@@ -120,35 +224,46 @@ In Figure \ref{fig:konig} we can visualize the relationships between maximum ind
 		\foreach \x / \y in {0/1,1/2,2/8,5/5,7/6,8/1} { \draw (r\x) -- (c\y);}
 
 		\foreach \x / \y in {4/0,1/1,0/2,3/3,7/4,2/5,5/6,6/7} { \draw[myblue,very thick] (r\x) -- (c\y);}
-		\foreach \x in {0,1,4,8} { \node[vertex,myred] at (r\x) {};}
-		\foreach \x in {3,4,5,6,7,8} { \node[vertex,myred] at (c\x) {};}
+		\foreach \x in {0,1,4,8} { \node[vertex,orange] at (r\x) {};}
+		\foreach \x in {3,4,5,6,7,8} { \node[vertex,orange] at (c\x) {};}
 	\end{tikzpicture}
-	\caption{Visualization of the relationships due to K\H{o}nig's theorem and Lemma \ref{lemma:is}, shown on the graph of Figure \ref{fig:bipartite_graph}. Red vertices belong to the maximum independent set, black vertices to the minimum vertex cover; blue edges are in the maximum matching. We can clearly see how the maximum independent set and the minimum vertex cover are complementary.} \label{fig:konig}
+	}
+	\caption{Example of the actions performed in Algorithm \ref{alg:konig} for the graph of Figure \ref{fig:bipartite_graph}. The red vertices are in the set $T$. In the last image the organge vertices belong to a minimum vertex cover. Lemma \ref{lemma:is} can quickly be checked, as the black vertices are indeed an independent set.} \label{fig:konig}
 \end{figure}
 
-Because of K\H{o}nig's Theorem, then, it suffices to find an efficient algorithm for the computation of the maximum matching on a bipartite graph, then finding the corresponding minimum vertex cover and finally, by taking the complementary set, obtaining the corresponding maximum independent set.
+With the following lemma, we will prove the correctness of Algorithm \ref{alg:konig} and K\H{o}nig's Theorem.
+
+\begin{lemma}
+	Let $G=(L\cup R,E)$ be a bipartite graph and let $M$ be a maximum matching. The subset of vertices $C$ obtained following Algorithm \ref{alg:konig} is the minimum vertex cover. In addition, we have that $|C| = |M|$.
+\end{lemma}
+\begin{proof}
+First of all, we will prove that $C$ is a vertex cover: assume it is not, which means that there is an edge $e = (i,j) \in E$ with $i,j \notin C$, which implies that $i \in L \cap T$ and $j \in R \setminus T$, because the graph is bipartite. 
+	
+We now have two possibilities: either $e \notin M$ or $e \in M$.  In the first case, because $i \in T$ and $e$ can be traversed (it goes from $L$ to $R$ in the directed graph), $j$ can be reached and thus $j \in T$, a contradiction. In the second case, we have that $i$ is matched and belongs to $T$: this means that it was reached by traversing the matched edge, which implies that $j \in T$, again a contradiction. Since in both cases we get to a contradiction, $C$ is indeed a vertex cover of $G$.
+
+Now, we will prove that $|C| \leq |M|$, by showing that every vertex in $C$ is matched. It is clear that every vertex in $L \setminus T$ is matched, by definition of $T$. Suppose there is a unmatched vertex $v \in R \cap T$: since $v \in T$, it means that it was reached from a unmatched vertex $u$ in $L$, thus the path from $u$ to $v$ is augmenting, which would imply that the matching $M$ is not of maximum cardinality, a contradiction. Moreover, note that there are no edges in the matching between $L \setminus T$ and $R \cap T$ (otherwise, as shown previously, the endpoint in $L$ would also be in $T$).
+
+Therefore we have that all the vertices in $C$ are matched and the edges of the matching are distinct, which implies that $|C| \leq |M|$. Furthermore, for any matching $M'$ and vertex cover $C'$ is true that $|M'| \leq |C'|$ as there is at least one endpoint in $C'$ for every edge in $M'$. So we have that $|C| = |M|$, proving Theorem \ref{th:konig}.
+
+Lastly, these inequality also imply that $C$ is the vertex cover of minimum cardinality: assume it is not, i.e. we have that $C'$ is a vertex cover with $|C'| < |C|$. Now, if we consider the maximum matching $M$, the inequalities give us that $|M| \leq |C'| < |C| \leq |M|$, a contradiction. $C$ is then the minimum vertex cover.
+
+\end{proof}
+
+
+
+We have shown that there are close relationships between the maximum matching, minimum vertex cover and maximum independent set. Now, the problem is shifted toward finding an efficient way of computing the maximum matching. In the next section we will describe the Hopcroft-Karp algorithm, which is a simple extension of Algorithm \ref{alg:konig}.
 
 \subsection{The Hopcroft-Karp algorithm for bipartite matching}
 
-An efficient algorithm for the computation of the maximum matching of a bipartite graph is the Hopcroft-Karp algorithm \cite{hopcroft_karp}, devised in 1973. The running time of this algorithm is $\mathcal{O}\left( |E|\sqrt{|V|} \right)$, a considerable improvement over the famous Ford-Fulkerson algorithm which, for bipartite graphs, has a running time of $\mathcal{O}\left( |V||E| \right)$. We can do a compare it with the Ford-Fulkerson algorithm, which is technically meant for the maximum flow problem, because we can modify a bipartite graph such that the maximum flow in the modified graph corresponds to a maximum matching in the original graph. 
+The Hopcroft-Karp algorithm \cite{hopcroft_karp}, devised in 1973, is an efficient scheme for finding a maximum independent set on bipartite graphs, with a running time of $\mathcal{O}\left( |E|\sqrt{|V|} \right)$. This is a considerable improvement over the famous Ford-Fulkerson algorithm of 1956, which, for bipartite graphs, has a running time of $\mathcal{O}\left( |V||E| \right)$. We can do a comparison between these two algorithms, even though the latter is technically meant for the maximum flow problems, because a bipartite graph can be modified in such a way that a maximum flows corresponds to a maximum matching in the original graph.
 
-Both these two algorithms rely on the concept of \emph{simple paths} and \emph{augmenting paths}: in our case we have the following definitions:
+Both algorithms relies on the concepts of augmenting paths, introduced in the previous section in Definition \ref{def:augmenting_path}.
 
-\begin{definition}[Simple path]
-	Let $G=(V,E)$ be a graph. A path $P=(v_1,\dots,v_k)$ is said to be \emph{simple} if $v_i \neq v_j$, $\forall i \neq j$, i.e. all the vertices are distinct and there are no self-edges or sub-cycles. 
-\end{definition}
-
-\begin{definition}[Augmenting path]
-	Let $M$ be a matching on the graph $G=(V,E)$. The simple path $P$ is said to be \emph{augmenting} if it starts and ends on unmatched vertices, and its edges alternate between $E \setminus M$ and $M$ (i.e. alternating between the edges in the matching and the other edges).
-\end{definition}
-
-It is easy to see that if we have a matching $M$ and an augmenting path $P$, $M \oplus P$ is a matching of size $|M|+1$, where $M \oplus P := (M \setminus P) \cup (P \setminus M)$ denotes the \emph{symmetric difference} between $M$ and $P$. 
-
-The general idea of the Hopcroft-Karp algorithm is to use these augmenting paths to progressively increase the size of the matching, as outlined in Algorithm \ref{alg:hopcroft-karp} \cite{hopcroft_karp}:
+The main idea of the Hopcroft-Karp algorithm is to find these augmenting paths to progressively increase the size of the matching, as outlined in Algorithm \ref{alg:hopcroft-karp}. The fact that in the main loop we augment the matching over several augmenting paths simultaneously gives us the $\sqrt{|V|}$ factor in the running time, instead of a simple $|V|$.
 
 \begin{algorithm}[h]
 	\begin{algorithmic}
-		\Require{Bipartite graph $G=(V,E)$}
+		\Require{Bipartite graph $G=(L \cup R,E)$}
 		\Ensure{Maximum matching $M$}
 		\State $M \gets \varnothing$
 		\Repeat
@@ -160,23 +275,19 @@ The general idea of the Hopcroft-Karp algorithm is to use these augmenting paths
 	\caption{Basic outline of the Hopcroft-Karp algorithm} \label{alg:hopcroft-karp}
 \end{algorithm}
 
-The core of this algorithm relies on finding all the shortest augmenting paths, and this is where the bipartiteness of the graph is fundamental (note that Algorithm \ref{alg:hopcroft-karp} is technically suitable for any graph). Let $L,R$ be the two disjoint sets of vertices such that $V = L \cup R$.
-
-The procedure of computing $l_M$ and $P$, which is divided in three phases:
+The core of this algorithm is substantially Algorithm \ref{alg:konig}: instead of starting from a maximum matching $M$ to compute the set $T$ (from which follows immediately a minimum vertex cover $C$), we construct the matching and the $T$ progressively, as follows:
 
 \begin{enumerate}
-	\item \textbf{partitioning of the graph into layers}: the first layer $\Lambda_0$ is constructed with only the unmatched vertices in $L$, then in $\Lambda_1$ we place the vertices in $R$ connected to the nodes in $\Lambda_0$ (the edges traversed in this step are, by definition of unmatched vertices of $L$, not in $M$); this process is iterated such that $\Lambda_i$ contains vertices in $L$ if $i$ is even, and vertices in $R$ if $i$ is odd, and the traversed edges between the layers have to alternate between unmatched (from even layer to odd, i.e. from $L$ to $R$) and matched (between odd layer to even, i.e. from $R$ to $L$). This partitioning is performed with a \textbf{breadth-first search} and it terminates at layer $l_M$, where one or more free vertices in $R$ are reached.
-	\item \textbf{collection of free vertices}: all the free vertices of $R$ discovered at layer $l_M$ (thus only the endpoints of a shortest augmenting path) are collected in a set $F$.
-	\item \textbf{computation of a maximal set of vertex-disjoint shortest augmenting paths}: $P$ is computed using a \textbf{depth-first search} from $F$ to $L$, using the layers $\Lambda_i$, $i=1,\dots,k$ for the search. In particular, at each level we are only allowed to follow edges that lead to an unused vertex in the previous layer, and paths must alternate between matched and unmatched edges. Whenever we find an augmenting path we add it to $P$ and resume with the next vertex in $F$.
+	\item we construct the directed graph as in Algorithm \ref{alg:directed_graph};
+	\item we perform a breadth-first search (following the directed edges) starting from the unmatched vertices in $L$, which terminates when unmatched vertices in $R$ are reached. $l_M$ is the length of these shortest augmenting paths;
+	\item the maximal set of vertex-disjoint shortest augmenting paths is computed: we start from an unmatched vertex in $R$ reached in the previous step and perform a depth-first search. Whenever we reach a unmatched vertex in $L$ it means that we found an augmenting path $P$, because we were following the directed edges constructed in the first step. We then add this path to $P$ and resume with the next depth-first search. 
 \end{enumerate}
 
-It can be shown that, by finding a maximal set of shortest augmenting paths, we need only $\mathcal{O}\left( \sqrt{|V|} \right)$ inner iterations inside Algorithm \ref{alg:hopcroft-karp}. This, combined with the fact that the breadth-first search and depth-first search have a running time of $\mathcal{O}(|E|)$, yields a total running time of $\mathcal{O} \left( |E|\sqrt{|V|} \right)$.
+If we use the Hopcroft-Karp algorithm in our sparse graph constructed as in Section \ref{sec:is_graph}, the running time can be even considerably better than the theoretical one: if there are no particularly dense rows and columns, the graph is far from being strongly connected, as each vertex in the graph has just a handful of edges, resulting in fast search phases.
 
-Furthermore, if we use the Hopcroft-Karp algorithm in our sparse graph constructed as in Section \ref{sec:is_graph}, the running time can be even considerably better (if there are no particularly dense rows and columns, each vertex in the graph has just a handful of edges, resulting in fast search phases).
+\section{Computation of the priority vector $v$ with the maximum independent set} \label{sec:is_vector}
 
-\section{Computation of the priority vector $v$ with the maximum independent set}
-
-After having translated our matrix into a graph as in Section \ref{sec:is_graph} and having computed the maximum independent set as described in Section \ref{sec:is_comp}, we still have to compute our priority vector $v$, to be used in the same framework of Section \ref{sec:hot_restart}. Similarly as done for all the methods described in Chapter \ref{chap:methods}, we will specify two ways of computing the vector $v$, one partition-oblivious and one partition-aware; in both cases we apply the same principle.
+After having translated our matrix into a graph as in Section \ref{sec:is_graph} and having computed the maximum independent set as described in Section \ref{sec:is_comp}, we still have to compute our priority vector $v$, to be used in the same framework of Section \ref{sec:hot_restart}. Similarly as done for all the methods described in Chapter \ref{chap:methods}, we will distinguish between partition-oblivious heuristics and partition-aware ones.
 
 Let $I \subseteq \{ 0,\dots,m+n-1\}$ be a set of indices. Instead of computing the graph starting from the full matrix $A$, we do it from the submatrix $A(I)$ (i.e. only taking rows and columns in $I$); next, we compute the maximum independent set on the resulting graph using the Hopcroft-Karp algorithm: if we denote by $S_I$ the indices that correspond to this maximum independent set, we always give to this set a high priority, putting it before the remaining indices of $I \setminus S_I$. 
 
@@ -199,11 +310,11 @@ Now, for a partitioned matrix, let $U$ denote the set of uncut indices, and $C$ 
 		v := (S_U, U \setminus S_U, S_C, C \setminus S_C);
 \]
 
-	\item we compute $S_U$, then we define $U' = U \setminus S_U$ and compute $S_{C \cup U'}$, having
+	\item we compute $S_U$, then we define $U' := U \setminus S_U$ and compute $S_{C \cup U'}$, having
 
 		\[
 			v:= (S_U, S_{C \cup U'}, (C \cup U') \setminus S_{C \cup U'}).
 		\]
 \end{enumerate}
 
-Note that, by construction, we do not expect these three strategies to be radically different in practice: if at the previous iteration the partitioning was done well, $U$ will be quite big, resulting in very similar priority vectors.
+Note that, by construction, we do not expect these three strategies to be radically different in practice: if at the previous iteration the partitioning was done well, $U$ will be quite big, resulting in similar priority vectors.
