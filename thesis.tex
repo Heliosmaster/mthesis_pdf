@@ -22,7 +22,7 @@
 \usepackage{tikz}
 \usepackage{footmisc}
 \usepackage{subfigure}
-
+\usepackage{array}
 \usepackage{rotating}
 \usepackage{multirow}
 \usetikzlibrary{chains,scopes,matrix}
@@ -49,7 +49,7 @@
 \newtheorem{theorem}{Theorem}[chapter]
 \setlength\parindent{0pt}
 \setlength{\parskip}{6pt} %%distanza fra i paragrafi
-
+\newcolumntype{x}[1]{>{\centering\arraybackslash}p{#1}}
 \captionsetup{format=hang,labelfont=bf}
 \bibliography{bib}
 

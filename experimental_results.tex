@@ -60,7 +60,7 @@ Lastly, in order to have a meaningful result that can help us understand whether
 
 In order to have insightful results, we mentioned that the matrices used in the numerical experiments should have different features: in particular we distinguish between (strongly) rectangular matrices and square matrices, and try to have a wide selection w.r.t. the number of nonzeros. 
 
-These matrices are mainly from the University of Florida Sparse Matrix Collection \cite{ufl}, and some can additionally be found on the Matrix Market collection \cite{matrixmarket}. The matrices \verb|tbdmatlab| and \verb|tbdlinux| are from \cite{mondriaan}. Table \ref{tab:matrices} provides a more thorough description of the matrices used, along with an outline of their basic properties (number of rows $m$, number of columns $n$, number of nonzeros $N$) and their original purpose. Some of these matrices (namely the ones with the $\dagger$ symbol in the table) belong to the 10th Dimacs Implementation Challenge \cite{dimacs}, which addressed the graph partitioning and graph clustering problem, and are therefore naturally suited for testing the quality of the solutions produced by our algorithms.
+These matrices are mainly from the University of Florida Sparse Matrix Collection \cite{ufl}, and some can additionally be found on the Matrix Market collection \cite{matrixmarket}. The matrices \verb|tbdmatlab| and \verb|tbdlinux| are from \cite{mondriaan}. Table \ref{tab:matrices} provides a more thorough description of the matrices used, along with an outline of their basic properties (number of rows $m$, number of columns $n$, number of nonzeros $N$) and their original purpose. Some of these matrices (namely the ones with the $\dagger$ symbol in the table) belong to the 10th Dimacs Implementation Challenge \cite{dimacs}, which addressed the graph partitioning and graph clustering problem, and are therefore naturally suited for testing the quality of the solutions produced by our algorithms. The three symmetric matrices which represent street networks, are the undirected and unweighted version of the largest strongly connected component of the corresponding OpenStreetMap road network.
 
 \begin{table}[h]
 	\centering
@@ -73,22 +73,63 @@ These matrices are mainly from the University of Florida Sparse Matrix Collectio
 		\verb|deltaX| 											& 68600 	& 21961 	& 247424 & High fillin with exact partial pivoting \\
 		\verb|cre_b| 												& 9648 		& 77137 	& 260785 & Netlib Linear Programming \\ 
 		\verb|tbdmatlab| 										& 19859 	& 5979 		& 430171 & Term-by-document matrix \\ 
-		\verb|nug30| 												& 52260 	& 379350 	& 1567800 & Netlib Linear Programming \\ 
+		\verb|nug30|												& 52260 	& 379350 	& 1567800 & Netlib Linear Programming \\ 
 		\verb|coAuthorsCiteseer| $\dagger$ 	& 227320 	& 227320 	& 1628268 & Citation and coauthor network\\ 
 		\verb|bcsstk32| $\dagger$ 					& 44609 	& 44609 	& 2014701 & Stiffness matrix for automobile chassis \\ 
 		\verb|bcsstk30| $\dagger$						& 28924 	& 28924 	& 2043492 & Stiffness matrix for off-shore generator platform \\
-		\verb|c98a| 												& 56243 	& 56274 	& 2075889 & Factorization of composite integers with 98 decimal digits  \\ 
 		\verb|wave| 	$\dagger$							& 156317 	& 156317 	& 2118662 & 3D finite elements \\
 		\verb|tbdlinux| 										& 112757 	& 20167 	& 2157675 & Term-by-document matrix \\
-		\verb|stanford| 										& 281903 	& 281903 	& 2312497 & Links between pages in Stanford website \\
 		\verb|rgg_n_2_18_s0| $\dagger$ 			& 262144 	& 262144 	& 3094566 & Random graph \\
+		\verb|belgium_osm| $\dagger$				& 1441295 & 1441295 & 3099940 & Street network of Belgium\\
 		\verb|polyDFT| 											& 46176 	& 46176 	& 3690048 & Polymer self-assembly \\ 
+		\verb|netherlands_osm| $\dagger$		& 2216688 & 2216688 & 4882476 & Street network of The Netherlands \\
 		\verb|cage13| 											& 445315 	& 445315 	& 7479343 & DNA Electrophoresis \\
-		\verb|stanford_berkeley| 						& 683446 	& 683446 	& 7583376 & Links between Stanford and Berkeley websites \\
+		\verb|italy_osm| $\dagger$					& 6686493 & 6686493 & 14027956 & Street network of Italy\\
 		\hline
 	\end{tabular}
 	\caption{Matrices used in our experiments, sorted by number of nonzeros.} \label{tab:matrices}
 \end{table}
+
+In Figures \ref{fig:patterns1}, \ref{fig:patterns2} and \ref{fig:patterns3}, we show the sparsity patterns of the test matrices. The images were obtained using the \verb|spy| function of MATLAB.
+
+%\begin{figure}[h]
+%	\centering
+%	\subfigure[\texttt{lpi\_ceria3d}]{ \includegraphics[scale=0.45]{img/lpi_ceria3d.pdf} \label{fig:lpi_ceria3d}}
+%	\subfigure[\texttt{dfl001}]{ \includegraphics[scale=0.45]{img/dfl001.pdf} }
+%	
+%	\subfigure[\texttt{delaunay\_n15}]{ \includegraphics[scale=0.45]{img/delaunay_n15.pdf} }
+%	\subfigure[\texttt{deltaX}]{ \includegraphics[scale=0.45]{img/deltaX.pdf} }
+%	
+%	\subfigure[\texttt{cre\_b}]{ \includegraphics[scale=0.45]{img/cre_b.pdf} }
+%	\subfigure[\texttt{tbdmatlab}]{ \includegraphics[scale=0.45]{img/tbdmatlab.pdf} }
+%	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns1}
+%\end{figure}
+%
+%\begin{figure}[h]
+%	\centering
+%	\subfigure[\texttt{nug30}]{ \includegraphics[scale=0.45]{img/nug30.pdf} }
+%	\subfigure[\texttt{coAuthorsCiteseer}]{ \includegraphics[scale=0.45]{img/coAuthorsCiteseer.pdf} }
+%
+%	\subfigure[\texttt{bcsstk30}]{ \includegraphics[scale=0.45]{img/bcsstk30.pdf} }
+%	\subfigure[\texttt{bcsstk32}]{ \includegraphics[scale=0.45]{img/bcsstk32.pdf} }
+%	
+%	\subfigure[\texttt{wave}]{ \includegraphics[scale=0.45]{img/wave.pdf} }
+%	\subfigure[\texttt{tbdlinux}]{ \includegraphics[scale=0.45]{img/tbdlinux.pdf} }
+%	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns2}
+%\end{figure}
+%
+%\begin{figure}[h]
+%	\centering
+%	\subfigure[\texttt{rgg\_n\_2\_18\_s0}]{ \includegraphics[scale=0.45]{img/rgg_n_2_18_s0.pdf} }
+%	\subfigure[\texttt{belgium\_osm}]{ \includegraphics[scale=0.45]{img/belgium_osm.pdf} }
+%	
+%	\subfigure[\texttt{polyDFT}]{ \includegraphics[scale=0.45]{img/polyDFT.pdf} }
+%	\subfigure[\texttt{netherlands\_osm}]{ \includegraphics[scale=0.45]{img/netherlands_osm.pdf} }
+%	
+%	\subfigure[\texttt{cage13}]{ \includegraphics[scale=0.45]{img/cage13.pdf} }
+%	\subfigure[\texttt{italy\_osm}]{ \includegraphics[scale=0.45]{img/italy_osm.pdf} }
+%	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns3}
+%\end{figure}
 
 \section{Preliminary selection of the best heuristics} \label{sec:preliminary_tests}
 
@@ -111,7 +152,7 @@ Table \ref{tab:preliminary_po} summarizes the results of this preliminary analys
 	\begin{tabular}{|l||c|c|c|c|c||c|}
 		\hline
 		\multirow{2}{*}{\textbf{Heuristic}} &  \multicolumn{5}{|c||}{\textbf{Matrix}} & \multirow{2}{*}{$\rho$} \\ \cline{2-6}
-		& \texttt{dfl001} & \texttt{nug\_30} & \texttt{bcsstk30} & \texttt{tbdlinux} & \texttt{rgg\_n\_2\_18\_s0} & \\ \hline
+		& \texttt{dfl001} & \texttt{nug30} & \texttt{bcsstk30} & \texttt{tbdlinux} & \texttt{rgg\_n\_2\_18\_s0} & \\ \hline
 		medium-grain & 590 & 36262 & 552 & 8135 & 910 & 1.0 \\ \hline %2445
 		\verb|po_localview|& \textbf{571} & 36665 & \textbf{598} & 8327 & 1160  & 1.07 \\  %2609.2
 		\verb|po_unsorted_concat_row|& 1492 & 189689 & 653 & 15081 & 1098 & 2.04 \\ % 0 0 0 %4979.1
@@ -140,9 +181,9 @@ In the table there is no result for the heuristic \verb|po_is| and the  matrix \
 
 The first method shown in the table, discussed in Section \ref{sec:localview}, shows the best results among these partition-oblivious heuristics. This is not surprising, as such algorithm is quite similar to the one originally proposed in \cite{mediumgrain}; \verb|po_localview| performs slightly worse (7\%, on average) than \verb|medium-grain| because the latter also includes an iterative refinement procedure \cite[Section 3.3]{mediumgrain}: after the partitioning is performed, the matrix $B$ is constructed by assigning all the nonzeros that belong to processor 0 to $A_r$ and the ones that belong to processor 1 to $A_c$, then the corresponding hypergraph is created and a single run of the Kernighan-Lin heuristic is performed; this procedure (which does not increase the communication value) is repeated until there are no more improvements, then the roles of $A_r$ and $A_c$ are inverted and the procedure is restarted. This fairly cheap scheme, computationally speaking, is repeated several times, until no further reduction can be obtained. 
 
-From the table, it appears that the framework discussed in Section \ref{sec:hot_restart} is not particularly effective in this case: some methods result even in twice the communication volume, on average; the \verb|po_sorted_w_simple| and \verb|po_sorted_nw_simple| heuristics produce the best results with a communication volume, respectively, 13\% and 14\% worse than the reference value. Moreover, it appears that mixing rows and columns in the priority vector is not advisable: for the matrices \verb|dfl001| and \verb|nug_30|, for example, we obtain a communication volume 3-5 times higher than \verb|medium-grain|. 
+From the table, it appears that the framework discussed in Section \ref{sec:hot_restart} is not particularly effective in this case: some methods result even in twice the communication volume, on average; the \verb|po_sorted_w_simple| and \verb|po_sorted_nw_simple| heuristics produce the best results with a communication volume, respectively, 13\% and 14\% worse than the reference value. Moreover, it appears that mixing rows and columns in the priority vector is not advisable: for the matrices \verb|dfl001| and \verb|ug_30|, for example, we obtain a communication volume 3-5 times higher than \verb|medium-grain|. 
 
-The heuristic that employs the computation of the maximum independent set on the full matrix produces interesting results, especially with the matrix \verb|nug_30|: the communication volume is, on average, 16\% lower than the one obtained with the medium-grain method; with the other matrices (in particular \verb|tbdlinux|), however, the results are not as satisfactory.
+The heuristic that employs the computation of the maximum independent set on the full matrix produces interesting results, especially with the matrix \verb|nug30|: the communication volume is, on average, 16\% lower than the one obtained with the medium-grain method; with the other matrices (in particular \verb|tbdlinux|), however, the results are not as satisfactory.
 
 From this preliminary testing, we should choose the heuristic \verb|po_localview| and \verb|po_is| for further testing in Section \ref{sec:final_tests}
 
@@ -156,7 +197,7 @@ In Table \ref{tab:preliminary_pa}, we summarize the results for the partition-aw
 	\begin{tabular}{|l|c||c|c|c|c|c||c|}
 		\hline
 		\multirow{2}{*}{\textbf{Heuristic}} & \multirow{2}{*}{$i$} &  \multicolumn{5}{|c||}{\textbf{Matrix}} & \multirow{2}{*}{$\rho$} \\ \cline{3-7}
-		& & \texttt{dfl001} & \texttt{nug\_30} & \texttt{bcsstk30} & \texttt{tbdlinux} & \texttt{rgg\_n\_2\_18\_s0} & \\ \hline
+		& & \texttt{dfl001} & \texttt{nug30} & \texttt{bcsstk30} & \texttt{tbdlinux} & \texttt{rgg\_n\_2\_18\_s0} & \\ \hline
 		\verb|pa_localview| & 0 & 582 & 36224 & 537 & 8051 & 914 &   \\ % 2422
 		& 1 & \textbf{575} & 36896 & 577 & 9934 & 2189 & 1.26 \\ \hline %3055
 
@@ -262,7 +303,7 @@ In Table \ref{tab:iterations}, we show the results of multiple iterations for so
 		&\verb|pa_is_1| & 599 & 593 & 586 & 597 & 592 & 598 & 607 & 592 & 587 & 587  & 601 \\
 		&\verb|pa_is_3| & 597 & 600 & 594 & 589 & 600 & 601 & 592 & 594 & 594 & 593 & 590 \\
 		\hline
-			\multirow{5}{*}{\texttt{nug\_30}}		&\verb|pa_unsorted_concat_row| & 	36308 & 41522 & 58016 & 57194 & 60054 & 60361 & 62408 & 63244 & 63699 & 64994 & 66534 \\ 
+		\multirow{5}{*}{\texttt{nug30}}		&\verb|pa_unsorted_concat_row| & 	36308 & 41522 & 58016 & 57194 & 60054 & 60361 & 62408 & 63244 & 63699 & 64994 & 66534 \\ 
 		&\verb|pa_unsorted_concat_col| & 36059 & 32965&  31550 & 31335 & 31390 & 31009 & 30881 & 30709 & 30437 & 30924 & 31345 \\
 		&\verb|pa_unsorted_w_simple| & 37158 & 37051 & 37515 & 37723 & 37389 & 37732 & 37683 & 37660 & 37613 & 37491 & 37681 \\
 		&\verb|pa_is_1| & 	36649 & 36828 & 36849 & 36976 & 36856 & 36894 & 36970 & 37105 & 36851 & 36989 & 36440 \\
@@ -286,9 +327,43 @@ In Table \ref{tab:iterations}, we show the results of multiple iterations for so
 	\caption{Multiple iterations of the four selected partion-aware heuristics. The numbers shown are the rounded arithmetic means of each iteration over 10 repeats of the experiment. Iteration 0 stands for the initial partitioning obtained with the medium-grain model.} \label{tab:iterations}
 \end{sidewaystable}
 
-From the table, it seems there is no clear advantage in performing 10 iterations over just one, except for the combination \verb|pa_unsorted_concat_col| and \verb|nug_30|. In particular, in the other interesting combinations (\verb|pa_is_1| and \verb|pa_is_3| for the matrix \verb|tbdlinux|, for example), we can see that the communication volume, after improving quickly in the first iteration from the initial partitioning, stays at the same levels. In most of the other cases, 10 iterations do not improve significantly the value attained at the first iteration, or improve it at all.
+From the table, it seems there is no clear advantage in performing 10 iterations over just one, except for the combination \verb|pa_unsorted_concat_col| and \verb|nug30|. In particular, in the other interesting combinations (\verb|pa_is_1| and \verb|pa_is_3| for the matrix \verb|tbdlinux|, for example), we can see that the communication volume, after improving quickly in the first iteration from the initial partitioning, stays at the same levels. In most of the other cases, 10 iterations do not improve significantly the value attained at the first iteration, or improve it at all.
 
 \section{Analysis of the performance of the best heuristics through the test matrices} \label{sec:final_tests}
 
+In Section \ref{sec:preliminary_tests} we selected the most interesting heuristic for the final round of tests. In this section, we will check the quality of these methods for all of the matrices discussed in Section \ref{sec:test_matrices}.
 
+The testing is performed exactly as before: 20 initial partitionings, and for each 5 runs of a single iteration of the considered heuristic. The means are computed as in Section \ref{sec:preliminary_tests}.
 
+The results for the partition-oblivious heuristics can be found in Table \ref{tab:final_po}.
+
+\begin{table}[h]
+	\renewcommand{\arraystretch}{1.3}
+	\centering
+	\begin{tabular}{|l|x{2.8cm}|x{2.8cm}|x{2.8cm}|}
+	\hline
+	\multirow{2}{*}{\textbf{Heuristic}} & \multicolumn{3}{c|}{\textbf{Matrix}} \\ \cline{2-4}
+	& \texttt{medium-grain} &  \texttt{po\_localview} & \texttt{po\_is} \\\hline
+	\verb|lpi_ceria3d| & 220 & 239 & 1030 \\
+	\verb|dfl001| & 590 & 571 & 594  \\
+	\verb|delaunay_n15| & 310 & 338 & 367 \\
+	\verb|deltaX| & 236 & 222 & 586 \\
+	\verb|cre_b| & 580 & 630 & 632 \\
+	\verb|tbdmatlab| & 3951 & 4276 & 4711 \\
+	\verb|nug30| & 36262 & 36665 & 30655 \\
+	\verb|coAuthorsCiteseer| & 9583 & 10459 & 16217 \\
+	\verb|bcsstk30| & 552 & 598 & 615 \\
+	\verb|bcsstk32| & 818 & 993 & 1082 \\
+	\verb|wave| & 4624 & 5660 & 5100 \\
+	\verb|tbdlinux| & 8135 & 8327 & 13286\\
+	\verb|rgg_n_2_18_s0| & 910 & 1160 & - \\
+	\verb|belgium_osm| & 248 & 264 & \\
+	\verb|polyDFT| & 3633 & 3701 & $3456^{*}$ \\
+	\verb|netherlands_osm| & 206 & 204 & \\
+	\verb|cage13| & 45233 & 52109 & 57556 \\
+	\verb|italy_osm| & 300 & 280 & \\ \hline
+	% 1371 & 1468
+	\multicolumn{1}{|r|}{$\rho$}	& 1.0 & 1.07 & \\ \hline
+\end{tabular}
+\caption{Results of the selected partition-oblivious heuristics with the test matrices.} \label{tab:final_po}
+\end{table}
