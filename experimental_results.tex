@@ -141,7 +141,7 @@ The local search heuristic given in Section \ref{sec:globalview}, quickly turned
 
 In the following tests, the parameter $iter_{max}$ has been set to 1, which means that we are only perfoming one iteration of our heuristic. The reason for this choice will become clear in Section \ref{sec:iter_max}; for now, we will just take advantage of the fact that performing only one iteration is relatively fast and we can quickly get an idea about the best heuristics.
 
-\subsection{Partition-oblivious heuristics}
+\subsection{Partition-oblivious heuristics} \label{sec:preliminary_po}
 
 Table \ref{tab:preliminary_po} summarizes the results of this preliminary analysis of the partition-oblivious heuristics for the 5 chosen matrices. In the first line, the results of the medium-grain with the algorithm proposed in \cite{mediumgrain} are given. The value $\rho$ represents the geometric mean of the results for a given heuristic, averaged over all matrices and normalized w.r.t. the default medium-grain method.
 
@@ -346,39 +346,39 @@ The results for the partition-oblivious heuristics can be found in Table \ref{ta
 	\hline
 	\multirow{2}{*}{\textbf{Matrix}} & \multicolumn{3}{c|}{\textbf{Heuristic}} \\ \cline{2-4}
 	& \texttt{medium-grain} &  \texttt{po\_localview} & \texttt{po\_is} \\\hline
-	\verb|lpi_ceria3d| & 220 & 239 & 1030 \\
-	\verb|dfl001| & 590 & 571 & 594  \\
-	\verb|delaunay_n15| & 310 & 338 & 367 \\
-	\verb|deltaX| & 236 & 222 & 586 \\
-	\verb|cre_b| & 580 & 630 & 632 \\
-	\verb|tbdmatlab| & 3951 & 4276 & 4711 \\
-	\verb|nug30| & 36262 & 36665 & 30655 \\
-	\verb|coAuthorsCiteseer| & 9583 & 10459 & 16217 \\
-	\verb|bcsstk30| & 552 & 598 & 615 \\
-	\verb|bcsstk32| & 818 & 993 & 1082 \\
-	\verb|wave| & 4624 & 5660 & 5100 \\
-	\verb|tbdlinux| & 8135 & 8327 & 13286\\
-	\verb|rgg_n_2_18_s0| & 910 & 1160 & - \\
-	\verb|belgium_osm| & 248 & 264 & \\
-	\verb|polyDFT| & 3633 & 3701 & $3456^{*}$ \\
-	\verb|netherlands_osm| & 206 & 204 & \\
-	\verb|cage13| & 45233 & 52109 & 57556 \\
-	\verb|italy_osm| & 300 & 280 & \\ \hline
-	% 1371 & 1468
-	\multicolumn{1}{|r|}{$\rho$}	& 1.0 & 1.07 & \\ \hline
+	\verb|lpi_ceria3d| & \textbf{220} & 239 & 1030 \\
+	\verb|dfl001| & 590 & \textbf{571} & 594  \\
+	\verb|delaunay_n15| & \textbf{310} & 338 & 367 \\
+	\verb|deltaX| & 236 & \textbf{222} & 586 \\
+	\verb|cre_b| & \textbf{580} & 630 & 632 \\
+	\verb|tbdmatlab| & \textbf{3951} & 4276 & 4711 \\
+	\verb|nug30| & 36262 & 36665 & \textbf{30655} \\
+	\verb|coAuthorsCiteseer| & \textbf{9583} & 10459 & 16217 \\
+	\verb|bcsstk30| & \textbf{552} & 598 & 615 \\
+	\verb|bcsstk32| &  \textbf{818} & 993 & 1082 \\
+	\verb|wave| & \textbf{4624} & 5660 & 5100 \\
+	\verb|tbdlinux| & \textbf{8135} & 8327 & 13286\\
+	\verb|rgg_n_2_18_s0| & \textbf{910} & 1160 & - \\
+	\verb|belgium_osm| & 248 & 264 & \textbf{263} \\
+	\verb|polyDFT| & 3633 & 3701 & $\textbf{3456}^*$ \\
+	\verb|netherlands_osm| & \textbf{194} & 204 & 215 \\
+	\verb|cage13| & \textbf{45233} & 52109 & 57556 \\
+	\verb|italy_osm| & \textbf{262} & 280 & 284 \\ \hline
+	% 1371 & 1468 &&& 1488 & 1826
+	\multicolumn{1}{|r|}{$\rho$}	& 1.0 & 1.07 & 1.22\\ \hline
 \end{tabular}
-\caption{Results of the selected partition-oblivious heuristics with the test matrices.} \label{tab:final_po}
+\caption{Results of the selected partition-oblivious heuristics with the test matrices. For each matrix, the best found average partitioning is highlighted.} \label{tab:final_po}
 \end{table}
 
-First of all, from this table we can see that the matrices chosen for our preliminary tests in Section \ref{sec:preliminary_tests} were quite representative: the final value of $\rho$ is indeed very close to the previously attained one. Similarly as before, then, we can see how the \verb|medium-grain| heuristic is the best among the 3 considered: the communication volume for the \verb|po_localview| is, on average, 7\% worse, whereas for the heuristic \verb|po_is| we have a X\% higher value.
+First of all, we can see that the value of $\rho$ attained by the heuristic \verb|po_localview| is indeed very similar to the one obtained in Section \ref{sec:preliminary_tests}, which suggests us that the preliminary matrices were indeed a good sample of the whole test set, at least for this heuristic. Regarding \verb|po_is|, instead, we can see that now the final value of $\rho$ is much higher: this is to be explained from the fact that in the preliminary tests one of the matrices did not yield any result, and therefore the average was computed only on four matrices, and among those there was the matrix for which this heuristic performs best, \verb|nug30|, which therefore had a lot of weight. Now that there is a wide variety of matrices, the good result attained for \verb|nug30| has a lower weight, and the performance of this method with the other matrices are not particularly satisfactory.
 
-It is interesting to note that this heuristic that employs the computation of the independent set has somewhat of an erratic behavior: in a few matrices (\verb|nug30|, \verb|polyDFT|) the communication value is the lowest among the three methods considered, whereas on other matrices (\verb|lpi_ceria3d|, \verb|tbdlinux|, \verb|coAuthorsCiteseer|) the final solution is, on average, much worse.
+It is interesting to note that this heuristic that employs the computation of the independent set has somewhat of an erratic behavior: in a few matrices (\verb|nug30|, \verb|polyDFT|) the communication value is the lowest among the three methods considered (respectively 16\% and 5\% lower than the second best method, \verb|medium-grain|), whereas on other matrices (\verb|lpi_ceria3d|, \verb|tbdlinux|, \verb|coAuthorsCiteseer|) the final solution is much worse.
 
-In the table, we marked with the symbol $~^*$ the solution attained by the heuristic \verb|po_is| for the matrix \verb|polyDFT| because it had a particular property: for every initial partitioning with medium grain, each independent iteration with the heuristic produced the exact same value 3456, the lowest recorded among all the heuristics tested with this matrix. This suggest that either this value is a local optima with a big ``capture range'' (i.e. the interval of the initial solutions which result in that value for the next iteration) or the optimal value.
+It it interesting to highlight a particular result of the table: we marked with the symbol $*$ the solution attained by \verb|po_is| for the matrix \verb|polyDFT| because, for every initial partitioning with medium-grain, each independent iteration with the heuristic produced the same communication value of 3456, the lowest recorded. This suggest that either this value is a local optima in which it is particulary easy to get stuck with, or the optimal value.
 
 \subsection{Partition-aware heuristics}
 
-Table \ref{tab:final_pa} shows the final results for the partition-aware heuristics, with all the matrices from Section \ref{sec:test_matrices}.
+Table \ref{tab:final_pa} shows the final results for the partition-aware heuristics, with all the matrices from Section \ref{sec:test_matrices}. We used simplified labels for the considered heuristics, as there is no possible confusion among those. \verb|pa_row| and \verb|pa_col| represent, respectively, \verb|pa_unsorted_concat_row| and \verb|pa_unsorted_concat_col|, whereas \verb|pa_simple| represents \verb|pa_sorted_w_simple|.
 
 \begin{sidewaystable}[h]
 	\begin{tabular}{|l|c|c||c|c||c|c||c|c||c|c||c|c|}
@@ -386,23 +386,23 @@ Table \ref{tab:final_pa} shows the final results for the partition-aware heurist
 	\multirow{3}{*}{\textbf{Matrix}} & \multicolumn{12}{c|}{\textbf{Heuristic}} \\ \cline{2-13}
 	& \multicolumn{2}{c||}{\texttt{pa\_row}} &  \multicolumn{2}{c||}{\texttt{pa\_col}} & \multicolumn{2}{c||}{\texttt{pa\_localbest}} & \multicolumn{2}{c||}{\texttt{pa\_simple}} & \multicolumn{2}{c||}{\texttt{pa\_is\_1}} & \multicolumn{2}{c|}{\texttt{pa\_is\_3}} \\\cline{2-13}
 	& initial & final & initial & final & initial & final & initial & final & initial & final & initial & final \\ \hline
-	\verb|lpi_ceria3d| & 225 & 225 & 223 & 243 & 223 & 225 &  224 & 229 & 221 & 229 & 222 & 222 \\
-	\verb|dfl001| & 584 & 628 & 589 & 589 & 589 & 589 & 587 & 586 & 593 & 589 & 590 & 589 \\
-	\verb|delaunay_n15| & 310 & 350 & 306 & 362 & 310 & 350 & 312 & 333 & 309 & 365 & 309 & 367\\
-	\verb|deltaX| & 236 & 224 & 236 & 227 & 236 & 224 & 234 & 222 & 235 & 223 & 237 & 224 \\
-	\verb|cre_b| & 602 & 1014 & 599 & 637 & 599 & 637 & 590 & 627 & 590 & 649 & 590 & 627 \\
-	\verb|tbdmatlab|& 3884 & 3623 & 3934 & 4096 & 3884 & 3623 & 3878 & 3903 & 3928 & 3739 & 3939 & 3677 \\
-	\verb|nug30| & 36512 & 42581 & 35945 & 38862 & 35945 & 38862 & 36498 & 38731 & 36716 & 36119 & 36432 & 36324 \\
-	\verb|coAuthorsCiteseer| & 9534 & 9885 & 9697 & 10050 & 9534 & 9885 & 9633 & 9955 & 9523 & 10049 & 9528 & 14737 \\
-	\verb|bcsstk30| & 597 & 641 & 574 & 602 & 574 & 602 & 567 & 577 & 535 & 614 & 540 & 636 \\
-	\verb|bcsstk32| & 804 & 958 & 837 & 1022 & 804 & 958 & 818 & 944 & 903 & 1037 & 850 & 1003 \\
-	\verb|wave| & 4737 & 4893 & 4782 & 4893 & 4782 & 4893 & 4725 & 5427 & 4689 & 5099 & 4650 & 5199 \\
-	\verb|tbdlinux| &  7984 & 7337 & 7999 & 10086 & 7984 & 7337 & 8018 & 7992 & 7998 & 7323 & 7997 & 7410 \\
-	\verb|rgg_n_2_18_s0| & 928 & 1088 & 897 & 1069 & 897 & 1069 & 903 & 1102 & - & - & - & - \\
-	\verb|belgium_osm| & 227 & 258 & 255 & 266 & 227 & 258 &  282 & 251 & 247 & 248 & 242 & 260 \\
-	\verb|polyDFT| & 3643 & 3616 & 3732 & 3607 & 3732 &  3607 & 3725 & 3729 & 3648 & 3508 & 3629 & 3515 \\
-	\verb|netherlands_osm| & 204 & 190 & 175 & 191 & 204 & 190 & 191 & 199 & 194 & 199 & 192 & 210 \\
-	\verb|cage13| & 45845 & 54155 & 45405 & 52251 & 45405 & 52251 & 45686 & 49784 & 45252 & 57117 & 45314 & 57181\\
+	\verb|lpi_ceria3d| & 225 & 225 & 223 & 243 & 223 & 225 &  224 & 229 & \textbf{221} & 229 & 222 & 222 \\
+	\verb|dfl001| & \textbf{584} & 628 & 589 & 589 & 589 & 589 & 587 & 586 & 593 & 589 & 590 & 589 \\
+	\verb|delaunay_n15| & 310 & 350 & \textbf{306} & 362 & 310 & 350 & 312 & 333 & 309 & 365 & 309 & 367\\
+	\verb|deltaX| & 236 & 224 & 236 & 227 & 236 & 224 & 234 & \textbf{222} & 235 & 223 & 237 & 224 \\
+	\verb|cre_b| & 602 & 1014 & 599 & 637 & 599 & 637 & \textbf{590} & 627 & 590 & 649 & 590 & 627 \\
+	\verb|tbdmatlab|& 3884 & 3623 & 3934 & 4096 & 3884 & \textbf{3623} & 3878 & 3903 & 3928 & 3739 & 3939 & 3677 \\
+	\verb|nug30| & 36512 & 42581 & 35945 & 38862 & \textbf{35945} & 38862 & 36498 & 38731 & 36716 & 36119 & 36432 & 36324 \\
+	\verb|coAuthorsCiteseer| & 9534 & 9885 & 9697 & 10050 & 9534 & 9885 & 9633 & 9955 & \textbf{9523} & 10049 & 9528 & 14737 \\
+	\verb|bcsstk30| & 597 & 641 & 574 & 602 & 574 & 602 & 567 & 577 & \textbf{535} & 614 & 540 & 636 \\
+	\verb|bcsstk32| & 804 & 958 & 837 & 1022 & \textbf{804} & 958 & 818 & 944 & 903 & 1037 & 850 & 1003 \\
+	\verb|wave| & 4737 & 4893 & 4782 & 4893 & 4782 & 4893 & 4725 & 5427 & 4689 & 5099 & \textbf{4650} & 5199 \\
+	\verb|tbdlinux| &  7984 & 7337 & 7999 & 10086 & 7984 & 7337 & 8018 & 7992 & 7998 & \textbf{7323} & 7997 & 7410 \\
+	\verb|rgg_n_2_18_s0| & 928 & 1088 & 897 & 1069 & \textbf{897} & 1069 & 903 & 1102 & - & - & - & - \\
+	\verb|belgium_osm| & 227 & 258 & 255 & 266 & \textbf{227} & 258 &  282 & 251 & 247 & 248 & 242 & 260 \\
+	\verb|polyDFT| & 3643 & 3616 & 3732 & 3607 & 3732 &  3607 & 3725 & 3729 & 3648 & \textbf{3508} & 3629 & 3515 \\
+	\verb|netherlands_osm| & 204 & 190 & \textbf{175} & 191 & 204 & 190 & 191 & 199 & 194 & 199 & 192 & 210 \\
+	\verb|cage13| & 45845 & 54155 & 45405 & 52251 & 45405 & 52251 & 45686 & 49784 & \textbf{45252} & 57117 & 45314 & 57181\\
 	\verb|italy_osm| & 254 & 278 & 262 & 278 &262 & 278 & 279 & 284 & &   \\ \hline
 	\multicolumn{1}{|r|}{$\rho$}	& 1.0  & & 1.0  & & 1.0  & & 1.0  & & 1.0  & & 1.0  & \\ \hline
 
