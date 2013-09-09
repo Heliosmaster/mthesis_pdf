@@ -92,44 +92,44 @@ These matrices are mainly from the University of Florida Sparse Matrix Collectio
 
 In Figures \ref{fig:patterns1}, \ref{fig:patterns2} and \ref{fig:patterns3}, we show the sparsity patterns of the test matrices. The images were obtained using the \verb|spy| function of MATLAB.
 
-%\begin{figure}[h]
-%	\centering
-%	\subfigure[\texttt{lpi\_ceria3d}]{ \includegraphics[scale=0.45]{img/lpi_ceria3d.pdf} \label{fig:lpi_ceria3d}}
-%	\subfigure[\texttt{dfl001}]{ \includegraphics[scale=0.45]{img/dfl001.pdf} }
-%	
-%	\subfigure[\texttt{delaunay\_n15}]{ \includegraphics[scale=0.45]{img/delaunay_n15.pdf} }
-%	\subfigure[\texttt{deltaX}]{ \includegraphics[scale=0.45]{img/deltaX.pdf} }
-%	
-%	\subfigure[\texttt{cre\_b}]{ \includegraphics[scale=0.45]{img/cre_b.pdf} }
-%	\subfigure[\texttt{tbdmatlab}]{ \includegraphics[scale=0.45]{img/tbdmatlab.pdf} }
-%	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns1}
-%\end{figure}
-%
-%\begin{figure}[h]
-%	\centering
-%	\subfigure[\texttt{nug30}]{ \includegraphics[scale=0.45]{img/nug30.pdf} }
-%	\subfigure[\texttt{coAuthorsCiteseer}]{ \includegraphics[scale=0.45]{img/coAuthorsCiteseer.pdf} }
-%
-%	\subfigure[\texttt{bcsstk30}]{ \includegraphics[scale=0.45]{img/bcsstk30.pdf} }
-%	\subfigure[\texttt{bcsstk32}]{ \includegraphics[scale=0.45]{img/bcsstk32.pdf} }
-%	
-%	\subfigure[\texttt{wave}]{ \includegraphics[scale=0.45]{img/wave.pdf} }
-%	\subfigure[\texttt{tbdlinux}]{ \includegraphics[scale=0.45]{img/tbdlinux.pdf} }
-%	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns2}
-%\end{figure}
-%
-%\begin{figure}[h]
-%	\centering
-%	\subfigure[\texttt{rgg\_n\_2\_18\_s0}]{ \includegraphics[scale=0.45]{img/rgg_n_2_18_s0.pdf} }
-%	\subfigure[\texttt{belgium\_osm}]{ \includegraphics[scale=0.45]{img/belgium_osm.pdf} }
-%	
-%	\subfigure[\texttt{polyDFT}]{ \includegraphics[scale=0.45]{img/polyDFT.pdf} }
-%	\subfigure[\texttt{netherlands\_osm}]{ \includegraphics[scale=0.45]{img/netherlands_osm.pdf} }
-%	
-%	\subfigure[\texttt{cage13}]{ \includegraphics[scale=0.45]{img/cage13.pdf} }
-%	\subfigure[\texttt{italy\_osm}]{ \includegraphics[scale=0.45]{img/italy_osm.pdf} }
-%	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns3}
-%\end{figure}
+\begin{figure}[h]
+	\centering
+	\subfigure[\texttt{lpi\_ceria3d}]{ \includegraphics[scale=0.45]{img/lpi_ceria3d.pdf} \label{fig:lpi_ceria3d}}
+	\subfigure[\texttt{dfl001}]{ \includegraphics[scale=0.45]{img/dfl001.pdf} }
+	
+	\subfigure[\texttt{delaunay\_n15}]{ \includegraphics[scale=0.45]{img/delaunay_n15.pdf} }
+	\subfigure[\texttt{deltaX}]{ \includegraphics[scale=0.45]{img/deltaX.pdf} }
+	
+	\subfigure[\texttt{cre\_b}]{ \includegraphics[scale=0.45]{img/cre_b.pdf} }
+	\subfigure[\texttt{tbdmatlab}]{ \includegraphics[scale=0.45]{img/tbdmatlab.pdf} }
+	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns1}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\subfigure[\texttt{nug30}]{ \includegraphics[scale=0.45]{img/nug30.pdf} }
+	\subfigure[\texttt{coAuthorsCiteseer}]{ \includegraphics[scale=0.45]{img/coAuthorsCiteseer.pdf} }
+
+	\subfigure[\texttt{bcsstk30}]{ \includegraphics[scale=0.45]{img/bcsstk30.pdf} }
+	\subfigure[\texttt{bcsstk32}]{ \includegraphics[scale=0.45]{img/bcsstk32.pdf} }
+	
+	\subfigure[\texttt{wave}]{ \includegraphics[scale=0.45]{img/wave.pdf} }
+	\subfigure[\texttt{tbdlinux}]{ \includegraphics[scale=0.45]{img/tbdlinux.pdf} }
+	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns2}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\subfigure[\texttt{rgg\_n\_2\_18\_s0}]{ \includegraphics[scale=0.45]{img/rgg_n_2_18_s0.pdf} }
+	\subfigure[\texttt{belgium\_osm}]{ \includegraphics[scale=0.45]{img/belgium_osm.pdf} }
+	
+	\subfigure[\texttt{polyDFT}]{ \includegraphics[scale=0.45]{img/polyDFT.pdf} }
+	\subfigure[\texttt{netherlands\_osm}]{ \includegraphics[scale=0.45]{img/netherlands_osm.pdf} }
+	
+	\subfigure[\texttt{cage13}]{ \includegraphics[scale=0.45]{img/cage13.pdf} }
+	\subfigure[\texttt{italy\_osm}]{ \includegraphics[scale=0.45]{img/italy_osm.pdf} }
+	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns3}
+\end{figure}
 
 \section{Preliminary selection of the best heuristics} \label{sec:preliminary_tests}
 
@@ -403,10 +403,14 @@ Table \ref{tab:final_pa} shows the final results for the partition-aware heurist
 	\verb|polyDFT| & 3643 & 3616 & 3732 & 3607 & 3732 &  3607 & 3725 & 3729 & 3648 & \textbf{3508} & 3629 & 3515 \\
 	\verb|netherlands_osm| & 204 & 190 & \textbf{175} & 191 & 204 & 190 & 191 & 199 & 194 & 199 & 192 & 210 \\
 	\verb|cage13| & 45845 & 54155 & 45405 & 52251 & 45405 & 52251 & 45686 & 49784 & \textbf{45252} & 57117 & 45314 & 57181\\
-	\verb|italy_osm| & 254 & 278 & 262 & 278 &262 & 278 & 279 & 284 & &   \\ \hline
-	\multicolumn{1}{|r|}{$\rho$}	& 1.0  & & 1.0  & & 1.0  & & 1.0  & & 1.0  & & 1.0  & \\ \hline
-
+	\verb|italy_osm| & 254 & 278 & 262 & 278 &262 & 278 & 279 & 284 & & & &  \\ \hline
+	\multicolumn{1}{|r|}{$\rho$}	& 1.0  & 1.08 & 1.0  & 1.08 & 1.0  & 1.04 & 1.0  & 1.04 & 1.0  & & 1.0  & \\ \hline
 		\end{tabular}
 	\caption{Results of the selected partition-aware heuristics with the test matrices.} \label{tab:final_pa}
 \end{sidewaystable}
 
+From the table, it appears that the properties of the matrices used for our tests were well balanced, as the final value of $\rho$ for the heuristics \verb|pa_row| and \verb|pa_col| is the same, as we already observed how these two heuristics show opposite behavior. In this case, it means that there is no clear advantage for either heuristic for the matrices considered. Moreover, resulting in a 8\% higher communication volume than \verb|medium-grain| we confirmed our expectation: simple concatenation of rows and columns is an interesting choice. This is more evident from the good results showed by the \verb|pa_localbest| heuristic: as predicted, its average communication volume is lower than each of its parts, being only 4\% worse than \verb|medium-grain|. A similarly good result was attained also by the other method of the same family, \verb|pa_simple|.
+
+The main consequence of of this series of experiment is that none of the examined heuristics was found to be generally better than medium-grain: even the heuristics that employed the computation of the maximum independent set resulted in, respectively, a X\% and Y\% higher communication volume. 
+
+However, the algorithms \verb|pa_localbest|, \verb|pa_is_1| and \verb|pa_is_3| produced very interesting results with (strongly) rectangular matrices. In particular, if we were to consider only such matrices (i.e. \verb|lpi_ceria3d|, \verb|dfl001|, \verb|deltaX|, \verb|cre_b|, \verb|tbdmatlab|, \verb|nug_30| and \verb|tbdlinux|) we would obtain much better results: the value of $\rho$ for these heuristics would respectively be of 0.99, 0.99 and 0.98, showing that indeed these schemes perform better (albeit slightly) than \verb|medium-grain|. This other alternative finding shows that the independent set approach devised in Chapter \ref{chap:independent_set} is indeed wortwhile of deeper investigation, as we will explain in more detail in Chapter \ref{chap:conclusions}.
