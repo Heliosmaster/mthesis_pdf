@@ -52,15 +52,15 @@ Regarding the actual implementation, we can see from Algorithm \ref{alg:framewor
 
 In order to perform effective numerical experiments, we need to have a consistent way of testing. First of all, since we seek heuristics suitable for many matrices, it makes sense to have several matrices to test for, as described in Section \ref{sec:test_matrices}. 
 
-Secondly, since randomness is involved in the partitioner itself and, to a different extent, in some of the heuristics, need to perform several measurements and compute an average. After generating an initial partitioning, one iteration of the heuristic was performed independently 5 times, and their result was averaged; this was repeated 20 times, obtaining an average of the 20 initial partitioning and an average of the 20 averages of final results. 
+Secondly, since randomness is involved in the partitioner itself and, to a different extent, in some of the heuristics, we need to take several measurements and compute an average. After generating an initial partitioning, one iteration of the heuristic was performed independently 5 times, and their result was averaged; this was repeated 20 times, obtaining an average of the 20 initial partitioning and an average of the 20 averages of final results. 
 
 Lastly, in order to have a meaningful result that can help us understand whether the given heuristic is globally effective, we will compute the geometric mean of all the initial partitioning and the geometric mean of all the final results. Then, we will normalize w.r.t the first value. Doing so, we can understand whether the considered heuristic performs better or worse in a consistent way. This normalized geometric mean is denoted, in the following tables, with the symbol $\rho$.
 
 \section{Test matrices} \label{sec:test_matrices}
 
-In order to have insightful results, we mentioned that the matrices used in the numerical experiments should have different features: in particular we distinguish between (strongly) rectangular matrices and square matrices, and try to have a wide selection w.r.t. the number of nonzeros. 
+In order to have insightful results, we mentioned that the matrices used in the numerical experiments should have different features: in particular we distinguish between rectangular matrices and square matrices, and try to have a wide selection w.r.t. the number of nonzeros. 
 
-These matrices are mainly from the University of Florida Sparse Matrix Collection \cite{ufl}, and some can additionally be found on the Matrix Market collection \cite{matrixmarket}. The matrices \verb|tbdmatlab| and \verb|tbdlinux| are from \cite{mondriaan}. Table \ref{tab:matrices} provides a more thorough description of the matrices used, along with an outline of their basic properties (number of rows $m$, number of columns $n$, number of nonzeros $N$) and their original purpose. Some of these matrices (namely the ones with the $\dagger$ symbol in the table) belong to the 10th Dimacs Implementation Challenge \cite{dimacs}, which addressed the graph partitioning and graph clustering problem, and are therefore naturally suited for testing the quality of the solutions produced by our algorithms. The three symmetric matrices which represent street networks, are the undirected and unweighted version of the largest strongly connected component of the corresponding OpenStreetMap road network.
+These matrices are mainly from the University of Florida Sparse Matrix Collection \cite{ufl}, and some can additionally be found on the Matrix Market collection \cite{matrixmarket}. The matrices \verb|tbdmatlab| and \verb|tbdlinux| are from \cite{mondriaan}. Table \ref{tab:matrices} provides a more thorough description of the matrices used, along with an outline of their basic properties (number of rows $m$, number of columns $n$, number of nonzeros $N$) and their original purpose. Some of these matrices (namely the ones with the $\dagger$ symbol in the table) belong to the 10th Dimacs Implementation Challenge \cite{dimacs}, which addressed the graph partitioning and graph clustering problem, and are therefore naturally suited for testing the quality of the solutions produced by our algorithms. The three symmetric matrices which represent street networks, are the undirected and unweighted version of the largest strongly connected component of the corresponding OpenStreetMap road network of that country.
 
 \begin{table}[h]
 	\centering
@@ -92,44 +92,44 @@ These matrices are mainly from the University of Florida Sparse Matrix Collectio
 
 In Figures \ref{fig:patterns1}, \ref{fig:patterns2} and \ref{fig:patterns3}, we show the sparsity patterns of the test matrices. The images were obtained using the \verb|spy| function of MATLAB.
 
-\begin{figure}[h]
-	\centering
-	\subfigure[\texttt{lpi\_ceria3d}]{ \includegraphics[scale=0.45]{img/lpi_ceria3d.pdf} \label{fig:lpi_ceria3d}}
-	\subfigure[\texttt{dfl001}]{ \includegraphics[scale=0.45]{img/dfl001.pdf} }
-	
-	\subfigure[\texttt{delaunay\_n15}]{ \includegraphics[scale=0.45]{img/delaunay_n15.pdf} }
-	\subfigure[\texttt{deltaX}]{ \includegraphics[scale=0.45]{img/deltaX.pdf} }
-	
-	\subfigure[\texttt{cre\_b}]{ \includegraphics[scale=0.45]{img/cre_b.pdf} }
-	\subfigure[\texttt{tbdmatlab}]{ \includegraphics[scale=0.45]{img/tbdmatlab.pdf} }
-	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns1}
-\end{figure}
-
-\begin{figure}[h]
-	\centering
-	\subfigure[\texttt{nug30}]{ \includegraphics[scale=0.45]{img/nug30.pdf} }
-	\subfigure[\texttt{coAuthorsCiteseer}]{ \includegraphics[scale=0.45]{img/coAuthorsCiteseer.pdf} }
-
-	\subfigure[\texttt{bcsstk30}]{ \includegraphics[scale=0.45]{img/bcsstk30.pdf} }
-	\subfigure[\texttt{bcsstk32}]{ \includegraphics[scale=0.45]{img/bcsstk32.pdf} }
-	
-	\subfigure[\texttt{wave}]{ \includegraphics[scale=0.45]{img/wave.pdf} }
-	\subfigure[\texttt{tbdlinux}]{ \includegraphics[scale=0.45]{img/tbdlinux.pdf} }
-	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns2}
-\end{figure}
-
-\begin{figure}[h]
-	\centering
-	\subfigure[\texttt{rgg\_n\_2\_18\_s0}]{ \includegraphics[scale=0.45]{img/rgg_n_2_18_s0.pdf} }
-	\subfigure[\texttt{belgium\_osm}]{ \includegraphics[scale=0.45]{img/belgium_osm.pdf} }
-	
-	\subfigure[\texttt{polyDFT}]{ \includegraphics[scale=0.45]{img/polyDFT.pdf} }
-	\subfigure[\texttt{netherlands\_osm}]{ \includegraphics[scale=0.45]{img/netherlands_osm.pdf} }
-	
-	\subfigure[\texttt{cage13}]{ \includegraphics[scale=0.45]{img/cage13.pdf} }
-	\subfigure[\texttt{italy\_osm}]{ \includegraphics[scale=0.45]{img/italy_osm.pdf} }
-	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns3}
-\end{figure}
+%\begin{figure}[h]
+%	\centering
+%	\subfigure[\texttt{lpi\_ceria3d}]{ \includegraphics[scale=0.45]{img/lpi_ceria3d.pdf} \label{fig:lpi_ceria3d}}
+%	\subfigure[\texttt{dfl001}]{ \includegraphics[scale=0.45]{img/dfl001.pdf} }
+%	
+%	\subfigure[\texttt{delaunay\_n15}]{ \includegraphics[scale=0.45]{img/delaunay_n15.pdf} }
+%	\subfigure[\texttt{deltaX}]{ \includegraphics[scale=0.45]{img/deltaX.pdf} }
+%	
+%	\subfigure[\texttt{cre\_b}]{ \includegraphics[scale=0.45]{img/cre_b.pdf} }
+%	\subfigure[\texttt{tbdmatlab}]{ \includegraphics[scale=0.45]{img/tbdmatlab.pdf} }
+%	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns1}
+%\end{figure}
+%
+%\begin{figure}[h]
+%	\centering
+%	\subfigure[\texttt{nug30}]{ \includegraphics[scale=0.45]{img/nug30.pdf} }
+%	\subfigure[\texttt{coAuthorsCiteseer}]{ \includegraphics[scale=0.45]{img/coAuthorsCiteseer.pdf} }
+%
+%	\subfigure[\texttt{bcsstk30}]{ \includegraphics[scale=0.45]{img/bcsstk30.pdf} }
+%	\subfigure[\texttt{bcsstk32}]{ \includegraphics[scale=0.45]{img/bcsstk32.pdf} }
+%	
+%	\subfigure[\texttt{wave}]{ \includegraphics[scale=0.45]{img/wave.pdf} }
+%	\subfigure[\texttt{tbdlinux}]{ \includegraphics[scale=0.45]{img/tbdlinux.pdf} }
+%	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns2}
+%\end{figure}
+%
+%\begin{figure}[h]
+%	\centering
+%	\subfigure[\texttt{rgg\_n\_2\_18\_s0}]{ \includegraphics[scale=0.45]{img/rgg_n_2_18_s0.pdf} }
+%	\subfigure[\texttt{belgium\_osm}]{ \includegraphics[scale=0.45]{img/belgium_osm.pdf} }
+%	
+%	\subfigure[\texttt{polyDFT}]{ \includegraphics[scale=0.45]{img/polyDFT.pdf} }
+%	\subfigure[\texttt{netherlands\_osm}]{ \includegraphics[scale=0.45]{img/netherlands_osm.pdf} }
+%	
+%	\subfigure[\texttt{cage13}]{ \includegraphics[scale=0.45]{img/cage13.pdf} }
+%	\subfigure[\texttt{italy\_osm}]{ \includegraphics[scale=0.45]{img/italy_osm.pdf} }
+%	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns3}
+%\end{figure}
 
 \section{Preliminary selection of the best heuristics} \label{sec:preliminary_tests}
 
@@ -151,7 +151,7 @@ Table \ref{tab:preliminary_po} summarizes the results of this preliminary analys
 	\renewcommand{\arraystretch}{1.2}
 	\begin{tabular}{|l||c|c|c|c|c||c|}
 		\hline
-		\multirow{2}{*}{\textbf{Heuristic}} &  \multicolumn{5}{|c||}{\textbf{Matrix}} & \multirow{2}{*}{$\rho$} \\ \cline{2-6}
+		\multirow{2}{*}{\textbf{Heuristic}} &  \multicolumn{5}{c||}{\textbf{Matrix}} & \multirow{2}{*}{$\rho$} \\ \cline{2-6}
 		& \texttt{dfl001} & \texttt{nug30} & \texttt{bcsstk30} & \texttt{tbdlinux} & \texttt{rgg\_n\_2\_18\_s0} & \\ \hline
 		medium-grain & 590 & 36262 & 552 & 8135 & 910 & 1.0 \\ \hline %2445
 		\verb|po_localview|& \textbf{571} & 36665 & \textbf{598} & 8327 & 1160  & 1.07 \\  %2609.2
@@ -289,6 +289,7 @@ Luckily enough, the heuristics introduced in Chapters \ref{chap:methods} and \re
 
 In Table \ref{tab:iterations}, we show the results of multiple iterations for some of the selected heuristic of Section \ref{sec:preliminary_pa}. We replaced the matrix \verb|rgg_n_2_18_s0| with the matrix \verb|delaunay_n15| because, as seen previously, the heuristics which computed the maximum independent set failed to return a solution.
 
+We use a simplified notation for the heuristics in this table: \verb|pa_row| and \verb|pa_col| instead, respectively, of \verb|pa_unsorted_concat_row| and \verb|pa_unsorted_concat_col|, and, likewise, we use \verb|pa_simple| instead of \verb|pa_sorted_w_simple|.
 
 \begin{sidewaystable}[h]
 	\centering
@@ -297,37 +298,59 @@ In Table \ref{tab:iterations}, we show the results of multiple iterations for so
 		\hline
 		\multirow{2}{*}{\textbf{Matrix}} &\multirow{2}{*}{\textbf{Heuristic}} & \multicolumn{11}{c|}{\textbf{Iterations}} \\ \cline{3-13} 
 		&& 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\ \hline
-		\multirow{5}{*}{\texttt{dfl001}}		&\verb|pa_unsorted_concat_row| & 598 & 631 & 696 & 759 & 806 & 798 & 837 & 818 & 855 & 881 & 874 \\ 
-		&\verb|pa_unsorted_concat_col| &  587&  590 & 594 & 586 & 596 & 593 & 595 & 594 & 594 & 602 & 596 \\ 
-		&\verb|pa_sorted_w_simple| & 589 & 602 & 601 & 597 & 587 & 602 & 593 & 591 & 602 & 600 & 594 \\
+		\multirow{5}{*}{\texttt{dfl001}}		&\verb|pa_row| & 598 & 631 & 696 & 759 & 806 & 798 & 837 & 818 & 855 & 881 & 874 \\ 
+		&\verb|pa_col| &  587&  590 & 594 & 586 & 596 & 593 & 595 & 594 & 594 & 602 & 596 \\ 
+		&\verb|pa_simple| & 589 & 602 & 601 & 597 & 587 & 602 & 593 & 591 & 602 & 600 & 594 \\
 		&\verb|pa_is_1| & 599 & 593 & 586 & 597 & 592 & 598 & 607 & 592 & 587 & 587  & 601 \\
 		&\verb|pa_is_3| & 597 & 600 & 594 & 589 & 600 & 601 & 592 & 594 & 594 & 593 & 590 \\
 		\hline
-		\multirow{5}{*}{\texttt{nug30}}		&\verb|pa_unsorted_concat_row| & 	36308 & 41522 & 58016 & 57194 & 60054 & 60361 & 62408 & 63244 & 63699 & 64994 & 66534 \\ 
-		&\verb|pa_unsorted_concat_col| & 36059 & 32965&  31550 & 31335 & 31390 & 31009 & 30881 & 30709 & 30437 & 30924 & 31345 \\
-		&\verb|pa_unsorted_w_simple| & 37158 & 37051 & 37515 & 37723 & 37389 & 37732 & 37683 & 37660 & 37613 & 37491 & 37681 \\
+		\multirow{5}{*}{\texttt{nug30}}		&\verb|pa_row| & 	36308 & 41522 & 58016 & 57194 & 60054 & 60361 & 62408 & 63244 & 63699 & 64994 & 66534 \\ 
+		&\verb|pa_col| & 36059 & 32965&  31550 & 31335 & 31390 & 31009 & 30881 & 30709 & 30437 & 30924 & 31345 \\
+		&\verb|pa_simple| & 37158 & 37051 & 37515 & 37723 & 37389 & 37732 & 37683 & 37660 & 37613 & 37491 & 37681 \\
 		&\verb|pa_is_1| & 	36649 & 36828 & 36849 & 36976 & 36856 & 36894 & 36970 & 37105 & 36851 & 36989 & 36440 \\
 		&\verb|pa_is_3| & 35793 & 36191 & 35975 & 36190 & 36054 & 36219 & 36235 & 36432 & 36159 & 35671 & 36020 \\ \hline
-		\multirow{5}{*}{\texttt{bcsstk30}}		&\verb|pa_unsorted_concat_row| &  562 & 670 & 581&  638 &  599 &  604 &  674 &  727&   584&   673 &  607 \\ 
-		&\verb|pa_unsorted_concat_col| & 540 &  620 & 624 & 603 & 676 & 662 & 682 & 685 & 586 & 630 & 595 \\ 
-		&\verb|pa_sorted_w_simple| &544 & 677 & 554 & 543 & 543 & 546 & 541 & 541 & 534 & 544 & 528 \\
+		\multirow{5}{*}{\texttt{bcsstk30}}		&\verb|pa_row| &  562 & 670 & 581&  638 &  599 &  604 &  674 &  727&   584&   673 &  607 \\ 
+		&\verb|pa_col| & 540 &  620 & 624 & 603 & 676 & 662 & 682 & 685 & 586 & 630 & 595 \\ 
+		&\verb|pa_simple| &544 & 677 & 554 & 543 & 543 & 546 & 541 & 541 & 534 & 544 & 528 \\
 		&\verb|pa_is_1| & 562 & 574 & 563 & 614 & 570 & 567 & 593 & 693 & 612 & 646 & 595 \\
 		&\verb|pa_is_3| &542 & 658 & 626 & 727 & 597 & 646 & 672 & 618 & 669 & 616 & 626 \\ \hline
-		\multirow{5}{*}{\texttt{tbdlinux}}		&\verb|pa_unsorted_concat_row| & 8023 & 7365  & 7996  & 7977  & 8402  & 9527 & 10127 & 11141 & 11846 & 12059 & 12327 \\ 
-		&\verb|pa_unsorted_concat_col| & 8108 & 10040  & 9447  & 9614  & 9732  & 9872  & 9955 & 10079 & 10171 & 10268 & 10327 \\ 
-		&\verb|pa_sorted_w_simple| & 8044 & 8027 & 8002 & 7964 & 7958 & 7964 & 7957 & 7951 & 7934 & 7979 & 7956 \\
+		\multirow{5}{*}{\texttt{tbdlinux}}		&\verb|pa_row| & 8023 & 7365  & 7996  & 7977  & 8402  & 9527 & 10127 & 11141 & 11846 & 12059 & 12327 \\ 
+		&\verb|pa_col| & 8108 & 10040  & 9447  & 9614  & 9732  & 9872  & 9955 & 10079 & 10171 & 10268 & 10327 \\ 
+		&\verb|pa_simple| & 8044 & 8027 & 8002 & 7964 & 7958 & 7964 & 7957 & 7951 & 7934 & 7979 & 7956 \\
 		&\verb|pa_is_1| & 8055 & 7343 & 7361 & 7360 & 7343 & 7375 & 7330 & 7365 & 7357 & 7331 & 7358 \\
 		&\verb|pa_is_3| & 8069 & 7432 & 7426 & 7446 & 7445 & 7432 & 7444 & 7440 & 7461 & 7431 & 7443 \\ \hline
-		\multirow{5}{*}{\texttt{delaunay\_n15}}		&\verb|pa_unsorted_concat_row| & 312 & 363 &  350 &  358 &  349 &  353 &  357 &  354  & 359 &  360 &  360 \\ 
-		&\verb|pa_unsorted_concat_col| & 315 & 354 & 359 & 352 & 355 & 350 & 361 & 352 & 355 & 364 & 357 \\ 
-		&\verb|pa_sorted_w_simple| & 313 & 340 & 333 & 339 & 329 & 330 & 326 & 335 & 337 & 331 & 339 \\
+		\multirow{5}{*}{\texttt{delaunay\_n15}}		&\verb|pa_row| & 312 & 363 &  350 &  358 &  349 &  353 &  357 &  354  & 359 &  360 &  360 \\ 
+		&\verb|pa_col| & 315 & 354 & 359 & 352 & 355 & 350 & 361 & 352 & 355 & 364 & 357 \\ 
+		&\verb|pa_simple| & 313 & 340 & 333 & 339 & 329 & 330 & 326 & 335 & 337 & 331 & 339 \\
 		&\verb|pa_is_1| & 308 & 362 & 374 & 371 & 364 & 362 & 369 & 364 & 364 & 360 & 369 \\
 		&\verb|pa_is_3| & 305 & 357 & 363 & 364 & 369 & 362 & 379 & 375 & 361 & 374 & 369 \\\hline
 		\end{tabular}
 	\caption{Multiple iterations of the four selected partion-aware heuristics. The numbers shown are the rounded arithmetic means of each iteration over 10 repeats of the experiment. Iteration 0 stands for the initial partitioning obtained with the medium-grain model.} \label{tab:iterations}
 \end{sidewaystable}
 
-From the table, it seems there is no clear advantage in performing 10 iterations over just one, except for the combination \verb|pa_unsorted_concat_col| and \verb|nug30|. In particular, in the other interesting combinations (\verb|pa_is_1| and \verb|pa_is_3| for the matrix \verb|tbdlinux|, for example), we can see that the communication volume, after improving quickly in the first iteration from the initial partitioning, stays at the same levels. In most of the other cases, 10 iterations do not improve significantly the value attained at the first iteration, or improve it at all.
+Figure \ref{fig:iterations} shows the contents of Table \ref{tab:iterations} in a graphical way: each communication volume has been normalized w.r.t. the initial partitioning, in order to better understand whether there is an improvement or not, over 10 iterations of the heuristic.
+
+\begin{figure}[h]
+	\centering
+	\subfigure[\texttt{dfl001}]{ \includegraphics[scale=0.6]{img/iter_dfl.pdf} }
+	\subfigure[\texttt{nug30}]{ \includegraphics[scale=0.6]{img/iter_nug30.pdf} }
+\end{figure}
+
+\begin{figure}[h]
+\centering
+	\subfigure[\texttt{bcsstk30}]{ \includegraphics[scale=0.6]{img/iter_bcs.pdf} }
+	\subfigure[\texttt{tbdlinux}]{ \includegraphics[scale=0.6]{img/iter_tbdlinux.pdf} }
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\subfigure[\texttt{delaunay\_n15}]{ \includegraphics[scale=0.6]{img/iter_delaunay.pdf} }
+	\caption{Graphical visualization of Table \ref{tab:iterations}. Each value has been normalized w.r.t. the first iteration. } \label{fig:iterations}
+\end{figure}
+
+It seems there is no clear advantage in performing 10 iterations over just one, except for the combination \verb|pa_unsorted_concat_col| and \verb|nug30|: but even in this case, after improving the first two iterations, the communication value somewhat stagnates around 30500-31000.
+
+For some of pairs heuristic-matrix which produced good results in Section \ref{sec:preliminary_pa}, (namely \verb|pa_is_1| and \verb|pa_is_3| for the matrix \verb|tbdlinux|), we can see that the communication volume, after improving quickly in the first iteration from the initial partitioning, stays at the same levels. In most of the other cases, 10 iterations do not improve significantly the value attained at the first iteration, or they even make it significantly worse.
 
 \section{Analysis of the performance of the best heuristics through the test matrices} \label{sec:final_tests}
 
@@ -403,14 +426,15 @@ Table \ref{tab:final_pa} shows the final results for the partition-aware heurist
 	\verb|polyDFT| & 3643 & 3616 & 3732 & 3607 & 3732 &  3607 & 3725 & 3729 & 3648 & \textbf{3508} & 3629 & 3515 \\
 	\verb|netherlands_osm| & 204 & 190 & \textbf{175} & 191 & 204 & 190 & 191 & 199 & 194 & 199 & 192 & 210 \\
 	\verb|cage13| & 45845 & 54155 & 45405 & 52251 & 45405 & 52251 & 45686 & 49784 & \textbf{45252} & 57117 & 45314 & 57181\\
-	\verb|italy_osm| & 254 & 278 & 262 & 278 &262 & 278 & 279 & 284 & & & &  \\ \hline
-	\multicolumn{1}{|r|}{$\rho$}	& 1.0  & 1.08 & 1.0  & 1.08 & 1.0  & 1.04 & 1.0  & 1.04 & 1.0  & & 1.0  & \\ \hline
+	\verb|italy_osm| & 254 & 278 & 262 & 278 &262 & 278 & 279 & 284 & 267 & 277 & &  \\ \hline
+	\multicolumn{1}{|r|}{$\rho$}	& 1.0  & 1.08 & 1.0  & 1.08 & 1.0  & 1.04 & 1.0  & 1.04 & 1.0  & 1.05 & 1.0  & \\ \hline
+	%IS1 1397 1461
 		\end{tabular}
-	\caption{Results of the selected partition-aware heuristics with the test matrices.} \label{tab:final_pa}
+	\caption{Results of the selected partition-aware heuristics with the test matrices. For each matrix, we highlighted the lowest communication volume found.} \label{tab:final_pa}
 \end{sidewaystable}
 
 From the table, it appears that the properties of the matrices used for our tests were well balanced, as the final value of $\rho$ for the heuristics \verb|pa_row| and \verb|pa_col| is the same, as we already observed how these two heuristics show opposite behavior. In this case, it means that there is no clear advantage for either heuristic for the matrices considered. Moreover, resulting in a 8\% higher communication volume than \verb|medium-grain| we confirmed our expectation: simple concatenation of rows and columns is an interesting choice. This is more evident from the good results showed by the \verb|pa_localbest| heuristic: as predicted, its average communication volume is lower than each of its parts, being only 4\% worse than \verb|medium-grain|. A similarly good result was attained also by the other method of the same family, \verb|pa_simple|.
 
-The main consequence of of this series of experiment is that none of the examined heuristics was found to be generally better than medium-grain: even the heuristics that employed the computation of the maximum independent set resulted in, respectively, a X\% and Y\% higher communication volume. 
+The main consequence of of this series of experiment is that none of the examined heuristics was found to be generally better than medium-grain: even the heuristics that employed the computation of the maximum independent set resulted in, respectively, a 5\% and Y\% higher communication volume. 
 
 However, the algorithms \verb|pa_localbest|, \verb|pa_is_1| and \verb|pa_is_3| produced very interesting results with (strongly) rectangular matrices. In particular, if we were to consider only such matrices (i.e. \verb|lpi_ceria3d|, \verb|dfl001|, \verb|deltaX|, \verb|cre_b|, \verb|tbdmatlab|, \verb|nug_30| and \verb|tbdlinux|) we would obtain much better results: the value of $\rho$ for these heuristics would respectively be of 0.99, 0.99 and 0.98, showing that indeed these schemes perform better (albeit slightly) than \verb|medium-grain|. This other alternative finding shows that the independent set approach devised in Chapter \ref{chap:independent_set} is indeed wortwhile of deeper investigation, as we will explain in more detail in Chapter \ref{chap:conclusions}.

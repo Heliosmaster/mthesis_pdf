@@ -253,7 +253,7 @@ Lastly, these inequality also imply that $C$ is the vertex cover of minimum card
 
 We have shown that there are close relationships between the maximum matching, minimum vertex cover and maximum independent set. Now, the problem is shifted toward finding an efficient way of computing the maximum matching. In the next section we will describe the Hopcroft-Karp algorithm, which is a simple extension of Algorithm \ref{alg:konig}.
 
-\subsection{The Hopcroft-Karp algorithm for bipartite matching}
+\subsection{The Hopcroft-Karp algorithm for bipartite matching} \label{sec:hopcroft_karp}
 
 The Hopcroft-Karp algorithm \cite{hopcroft_karp}, devised in 1973, is an efficient scheme for finding a maximum independent set on bipartite graphs, with a running time of $\mathcal{O}\left( |E|\sqrt{|V|} \right)$. This is a considerable improvement over the famous Ford-Fulkerson algorithm of 1956, which, for bipartite graphs, has a running time of $\mathcal{O}\left( |V||E| \right)$. We can do a comparison between these two algorithms, even though the latter is technically meant for the maximum flow problems, because a bipartite graph can be modified in such a way that a maximum flows corresponds to a maximum matching in the original graph.
 
