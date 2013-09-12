@@ -90,7 +90,7 @@ These matrices are mainly from the University of Florida Sparse Matrix Collectio
 	\caption{Matrices used in our experiments, sorted by number of nonzeros.} \label{tab:matrices}
 \end{table}
 
-In Figures \ref{fig:patterns1}, \ref{fig:patterns2} and \ref{fig:patterns3}, we show the sparsity patterns of the test matrices. The images were obtained using the \verb|spy| function of MATLAB.
+In Figure \ref{fig:patterns3} we show the sparsity patterns of the test matrices. The images were obtained using the \verb|spy| function of MATLAB.
 
 \begin{figure}[h]
 	\centering
@@ -102,7 +102,6 @@ In Figures \ref{fig:patterns1}, \ref{fig:patterns2} and \ref{fig:patterns3}, we 
 	
 	\subfigure[\texttt{cre\_b}]{ \includegraphics[scale=0.45]{img/cre_b.pdf} }
 	\subfigure[\texttt{tbdmatlab}]{ \includegraphics[scale=0.45]{img/tbdmatlab.pdf} }
-	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns1}
 \end{figure}
 
 \begin{figure}[h]
@@ -115,7 +114,6 @@ In Figures \ref{fig:patterns1}, \ref{fig:patterns2} and \ref{fig:patterns3}, we 
 	
 	\subfigure[\texttt{wave}]{ \includegraphics[scale=0.45]{img/wave.pdf} }
 	\subfigure[\texttt{tbdlinux}]{ \includegraphics[scale=0.45]{img/tbdlinux.pdf} }
-	\caption{Sparsity patterns of the test matrices.} \label{fig:patterns2}
 \end{figure}
 
 \begin{figure}[h]
@@ -181,11 +179,11 @@ In the table there is no result for the heuristic \verb|po_is| and the  matrix \
 
 The first method shown in the table, discussed in Section \ref{sec:localview}, shows the best results among these partition-oblivious heuristics. This is not surprising, as such algorithm is quite similar to the one originally proposed in \cite{mediumgrain}; \verb|po_localview| performs slightly worse (7\%, on average) than \verb|medium-grain| because the latter also includes an iterative refinement procedure \cite[Section 3.3]{mediumgrain}: after the partitioning is performed, the matrix $B$ is constructed by assigning all the nonzeros that belong to processor 0 to $A_r$ and the ones that belong to processor 1 to $A_c$, then the corresponding hypergraph is created and a single run of the Kernighan-Lin heuristic is performed; this procedure (which does not increase the communication value) is repeated until there are no more improvements, then the roles of $A_r$ and $A_c$ are inverted and the procedure is restarted. This fairly cheap scheme, computationally speaking, is repeated several times, until no further reduction can be obtained. 
 
-From the table, it appears that the framework discussed in Section \ref{sec:hot_restart} is not particularly effective in this case: some methods result even in twice the communication volume, on average; the \verb|po_sorted_w_simple| and \verb|po_sorted_nw_simple| heuristics produce the best results with a communication volume, respectively, 13\% and 14\% worse than the reference value. Moreover, it appears that mixing rows and columns in the priority vector is not advisable: for the matrices \verb|dfl001| and \verb|ug_30|, for example, we obtain a communication volume 3-5 times higher than \verb|medium-grain|. 
+From the table, it appears that the framework discussed in Section \ref{sec:hot_restart} is not particularly effective in this case: some methods result even in twice the communication volume, on average; the \verb|po_sorted_w_simple| and \verb|po_sorted_nw_simple| heuristics produce the best results with a communication volume, respectively, 13\% and 14\% worse than the reference value. Moreover, it appears that mixing rows and columns in the priority vector is not advisable: for the matrices \verb|dfl001| and \verb|nug30|, for example, we obtain a communication volume 3-5 times higher than \verb|medium-grain|. 
 
-The heuristic that employs the computation of the maximum independent set on the full matrix produces interesting results, especially with the matrix \verb|nug30|: the communication volume is, on average, 16\% lower than the one obtained with the medium-grain method; with the other matrices (in particular \verb|tbdlinux|), however, the results are not as satisfactory.
+Computing the maximum independent on the full matrix seems to be an interesting approach, especially with \verb|nug30|: the communication volume is, on average, 16\% lower than the one obtained with the medium-grain method; with the other matrices (in particular \verb|tbdlinux|), however, the results are not as satisfactory.
 
-From this preliminary testing, we should choose the heuristic \verb|po_localview| and \verb|po_is| for further testing in Section \ref{sec:final_tests}
+Because of these preliminary results, it appears that it is interesting to test more thoroughly the heuristics \verb|po_localview| and \verb|po_is|, in Section \ref{sec:final_tests}.
 
 \subsection{Partition-aware heuristics} \label{sec:preliminary_pa}
 
@@ -271,25 +269,25 @@ From the table, it appears that the approaches discussed in Section \ref{sec:sbd
 
 Regarding the framework discussed in Section \ref{sec:hot_restart}, differently from the partition-oblivious case, it seems that mixing rows and columns does not produce a sharp decrease in the quality of the solutions, albeit being far from being a good result: if no sorting is performed, the communication volume is on average 18\% and 13\% higher (depending on the mixing strategy), whereas with sorting we have a 10\% and 16\% worse solution.
 
-Moreover, it appears that moving the indices with one nonzero at the back of our priority vector (denoted by \verb|w| in the heuristics) or not (denoted by \verb|nw|) does not yield a substantial difference; in addition, there is no clear advantage of one strategy over the other, and therefore, should we decide to consider these methods for further testing, only one of the two strategies should be picked.
+Moreover, it appears that moving the indices with one nonzero at the back of our priority vector (denoted by \verb|w| in the heuristics) or not (denoted by \verb|nw|) does not yield a substantial difference; in addition, there is no clear advantage of one strategy over the other. Therefore, should we decide to consider these methods for further testing, only one of the two strategies should be picked.
 
-The good results produced by the heuristics \verb|pa_unsorted_concat_row| and \verb|pa_unsorted_concat_col| (and their sorted counterparts, which do not produce a significantly different result) are a bit surprising: we expected that a more elaborate strategy (for example, sorting and mixing of rows and columns) would yield a lower communication volume than the simple concatenation of rows and columns. These two methods, especially for strongly rectangular matrices, produce fairly low communication volumes, if we start the concatenation with the longer dimension. If there are more rows than columns, for example, it means that the rows are in general shorter, and therefore, by giving them high priority, we have a higher chance that keeping all of their nonzero together will not cause communication also for the columns. From another point of view, we could interpret this heuristic in the light of Chapter \ref{chap:independent_set}: the set of indices of the rows (or the columns) is in fact an independent set, as it is obvious that two rows (or columns) do not share any nonzero; this means that, in these two heuristics, we are roughly doing the same as in Section \ref{sec:is_vector}, albeit not as targeted to cut and uncut indices. 
+The good results produced by the heuristics \verb|pa_unsorted_concat_row| and \verb|pa_unsorted_concat_col| (and their sorted counterparts, which are not significantly different) are a bit surprising: we expected that a more elaborate strategy (for example, sorting and mixing of rows and columns) would yield a lower communication volume than a simple concatenation. These two methods, especially for strongly rectangular matrices, produce fairly low communication volumes, if we start the concatenation with the longer dimension. If there are more rows than columns, for example, it means that the rows are in general shorter, and therefore, by giving them high priority, we have a higher chance that keeping all of their nonzero together will not cause communication also for the columns. From another point of view, we could interpret this heuristic in the light of Chapter \ref{chap:independent_set}: the set of indices of the rows (or the columns) is in fact an independent set, as it is obvious that two rows (or columns) do not share any nonzero; this means that, in these two heuristics, we are roughly doing the same as in Section \ref{sec:is_vector}, albeit not as targeted to cut and uncut indices. 
 
-The behavior of these two heuristics is also consistent with the size of the matrix: if one produces good results, the other performs much worse. This suggest us that these two schemes could be merged in a single method, \verb|pa_localbest|, which internally decides which one of the two is to be used, based on the number of rows and columns of the matrix. This is very similar to the \verb|localbest| method (hence the name) employed by Mondriaan, in which the size of the matrix determines whether the row-net or the colum-net method is applied.
+The behavior of these two heuristics is also consistent with the size of the matrix: if one produces good results, the other performs much worse. This suggest us that these two schemes could be merged in a single method, \verb|pa_localbest|, which internally decides which method to use, based on the number of rows and columns of the matrix. This approach is very similar to the \verb|localbest| method (hence the name) already employed by Mondriaan, in which the size of the matrix determines whether the row-net or the colum-net method is applied.
 
-The computation of the maximum independent set on the uncut indices seems to be an effective strategy for a fully iterative partitioning scheme, especially the heuristic \verb|po_is_1|. The average of the partitionings is indeed very close to the one obtained with the medium-grain model (rounded up, only 1\% higher) and we have a definite improvement for the matrix \verb|tbdlinux|, where the communication volume is 8\% lower.
+The computation of the maximum independent set on the uncut indices, seems to be an effective strategy for a fully iterative partitioning scheme. The average of the partitionings is indeed very close to the one obtained with the medium-grain model (rounded up, only 1\% higher) and we have a definite improvement for the matrix \verb|tbdlinux|, where the communication volume is 8\% lower.
 
-In general, we can see how with these partition-aware heuristics the results are better than with the partition-oblivious ones: the value of $\rho$ is, in general, closer to 1. This means that, in order to select the best of partition-aware methods, we need to be stricter: \verb|pa_unsorted_concat_row| and \verb|pa_unsorted_concat_col| (for which we will drop the label \verb|unsorted_concat|, as \verb|row| or \verb|col| is sufficient to distinguish from the others), the \verb|pa_localbest| scheme defined as above, \verb|pa_sorted_w_simple| (which we will denote simply by \verb|pa_simple|), \verb|pa_is_1| and \verb|pa_is_3| are selected for further testing in Section \ref{sec:final_tests}.
+In general, we can see how with these partition-aware heuristics the results are better than with the partition-oblivious ones as the value of $\rho$ is closer to 1. Therefore, to perform an effective selection, we need to be stricter: \verb|pa_unsorted_concat_row| and \verb|pa_unsorted_concat_col| (for which we will drop the label \verb|unsorted_concat|, as \verb|row| or \verb|col| is sufficient to distinguish from the others), the \verb|pa_localbest| scheme defined as above, \verb|pa_sorted_w_simple| (which we will denote simply by \verb|pa_simple|), \verb|pa_is_1| and \verb|pa_is_3| are selected for further testing in Section \ref{sec:final_tests}.
 
 \section{Number of iterations} \label{sec:iter_max}
 
-The parameter $iter_{max}$ of Algorithm \ref{alg:framework} is of vital importance for the running time of our iterative method: our research motivation, for the partition-aware heuristics, is to trade computation time for solution quality, but efficiency is also a fundamental goal. An iterative scheme in which each iteration is only a slight improvement on the previous one (which means that the heuristic needs a high value of $iter_{max}$ to attain a low communication value), is less desirable than a scheme that attains a similarly low communication value in just one or two iterations. Note that this reasoning only applies to partition-aware heuristics, as the partition-oblivious ones are not fully iterative: $iter_{max}$, in this case, means that a number of independent iterations is performed.
+The parameter $iter_{max}$ of Algorithm \ref{alg:framework} is of vital importance for the running time of our iterative method: our research motivation, for the partition-aware heuristics, is to trade computation time for solution quality, but efficiency is also a fundamental goal. An iterative scheme in which each iteration is only a slight improvement on the previous one (which means a higher value of $iter_{max}$ is needed to attain a low communication value), is less desirable than a scheme that requires just one or two iterations. Note that this reasoning only applies to partition-aware heuristics, as the partition-oblivious ones are not fully iterative: $iter_{max}$, in this case, means that a number of independent iterations is performed.
 
-Luckily enough, the heuristics introduced in Chapters \ref{chap:methods} and \ref{chap:independent_set} fall, more or less, in this last category: whenever a good improvement over initial partitioning can be achieved, it usually happens in the first iteration; the solution quality, over the next few ones, either remains more or less constant, or gets worse. This is the main reason why in Section \ref{sec:preliminary_tests}, for the partition-aware heuristics, we set the parameter $iter_{max}$ to 1, other than conveniently saving computation time.
+Luckily enough, the heuristics introduced in Chapters \ref{chap:methods} and \ref{chap:independent_set} are quite fast at showing their potential: whenever an improvement over the initial partitioning can be achieved, it usually happens in the first iteration; the solution quality, over the next few ones, either remains more or less constant, or gets worse. This is the main reason why in Section \ref{sec:preliminary_tests}, for the partition-aware heuristics, we set the parameter $iter_{max}$ to 1, other than conveniently saving computation time.
 
 In Table \ref{tab:iterations}, we show the results of multiple iterations for some of the selected heuristic of Section \ref{sec:preliminary_pa}. We replaced the matrix \verb|rgg_n_2_18_s0| with the matrix \verb|delaunay_n15| because, as seen previously, the heuristics which computed the maximum independent set failed to return a solution.
 
-We use a simplified notation for the heuristics in this table: \verb|pa_row| and \verb|pa_col| instead, respectively, of \verb|pa_unsorted_concat_row| and \verb|pa_unsorted_concat_col|, and, likewise, we use \verb|pa_simple| instead of \verb|pa_sorted_w_simple|.
+As already argued in Section \ref{sec:preliminary_pa}, we simplify the notation for the considered heuristics: \verb|pa_row| and \verb|pa_col| instead, respectively, of \verb|pa_unsorted_concat_row| and \verb|pa_unsorted_concat_col|, and likewise we use \verb|pa_simple|, instead of \verb|pa_sorted_w_simple|.
 
 \begin{sidewaystable}[h]
 	\centering
@@ -328,7 +326,7 @@ We use a simplified notation for the heuristics in this table: \verb|pa_row| and
 	\caption{Multiple iterations of the four selected partion-aware heuristics. The numbers shown are the rounded arithmetic means of each iteration over 10 repeats of the experiment. Iteration 0 stands for the initial partitioning obtained with the medium-grain model.} \label{tab:iterations}
 \end{sidewaystable}
 
-Figure \ref{fig:iterations} shows the contents of Table \ref{tab:iterations} in a graphical way: each communication volume has been normalized w.r.t. the initial partitioning, in order to better understand whether there is an improvement or not, over 10 iterations of the heuristic.
+In Figure \ref{fig:iterations} these results are depicted graphically; moreover, to better convey the significance of the data, each communication volume has been normalized w.r.t. iteration 0.
 
 \begin{figure}[h]
 	\centering
@@ -348,15 +346,13 @@ Figure \ref{fig:iterations} shows the contents of Table \ref{tab:iterations} in 
 	\caption{Graphical visualization of Table \ref{tab:iterations}. Each value has been normalized w.r.t. the first iteration. } \label{fig:iterations}
 \end{figure}
 
-It seems there is no clear advantage in performing 10 iterations over just one, except for the combination \verb|pa_unsorted_concat_col| and \verb|nug30|: but even in this case, after improving the first two iterations, the communication value somewhat stagnates around 30500-31000.
+It seems there is no clear advantage in performing 10 iterations over just one, except for the combination \verb|pa_unsorted_concat_col| and \verb|nug30|: even in this case, after an improvement over the first two iterations, the communication value stagnates around 30500-31000.
 
-For some of pairs heuristic-matrix which produced good results in Section \ref{sec:preliminary_pa}, (namely \verb|pa_is_1| and \verb|pa_is_3| for the matrix \verb|tbdlinux|), we can see that the communication volume, after improving quickly in the first iteration from the initial partitioning, stays at the same levels. In most of the other cases, 10 iterations do not improve significantly the value attained at the first iteration, or they even make it significantly worse.
+In most of the other cases, it appears that there is no advantage in performing 10 consecutive iterations over just one: improvements are found immediately, or not at all.
 
 \section{Analysis of the performance of the best heuristics through the test matrices} \label{sec:final_tests}
 
-In Section \ref{sec:preliminary_tests} we selected the most interesting heuristic for the final round of tests. In this section, we will check the quality of these methods for all of the matrices discussed in Section \ref{sec:test_matrices}.
-
-The testing is performed exactly as before: 20 initial partitionings, and for each 5 runs of a single iteration of the considered heuristic. The means are computed as in Section \ref{sec:preliminary_tests}.
+In Section \ref{sec:preliminary_tests} we selected the most interesting heuristics for the final round of tests. In this section, we will check the quality of these methods for all of the matrices in our test bed. Our testing methodology is the same as before: 20 initial partitionings and, for each, 5 runs of a single iteration of the considered heuristic. The means are computed as in Section \ref{sec:preliminary_tests}.
 
 \subsection{Partition-oblivious heuristics}
 
@@ -393,15 +389,15 @@ The results for the partition-oblivious heuristics can be found in Table \ref{ta
 \caption{Results of the selected partition-oblivious heuristics with the test matrices. For each matrix, the best found average partitioning is highlighted.} \label{tab:final_po}
 \end{table}
 
-First of all, we can see that the value of $\rho$ attained by the heuristic \verb|po_localview| is indeed very similar to the one obtained in Section \ref{sec:preliminary_tests}, which suggests us that the preliminary matrices were indeed a good sample of the whole test set, at least for this heuristic. Regarding \verb|po_is|, instead, we can see that now the final value of $\rho$ is much higher: this is to be explained from the fact that in the preliminary tests one of the matrices did not yield any result, and therefore the average was computed only on four matrices, and among those there was the matrix for which this heuristic performs best, \verb|nug30|, which therefore had a lot of weight. Now that there is a wide variety of matrices, the good result attained for \verb|nug30| has a lower weight, and the performance of this method with the other matrices are not particularly satisfactory.
+First of all, we can see that the value of $\rho$ attained by the heuristic \verb|po_localview| is indeed very similar to the one obtained in Section \ref{sec:preliminary_tests}, which suggests us that the preliminary matrices were indeed a good sample of the whole test set (at least for this heuristic). Regarding \verb|po_is|, instead, we can see that now the final value of $\rho$ is much higher: this is to be explained from the fact that in the preliminary tests one of the matrices did not yield any result, and therefore the average was computed only on four matrices, and among those there was \verb|nug30|, and the exceptionally good result obtained with it had a lot of weight in the average. Now that there is a wide variety of matrices, such good result has much less influence, and the performance of this method with the other matrices are not particularly satisfactory.
 
 It is interesting to note that this heuristic that employs the computation of the independent set has somewhat of an erratic behavior: in a few matrices (\verb|nug30|, \verb|polyDFT|) the communication value is the lowest among the three methods considered (respectively 16\% and 5\% lower than the second best method, \verb|medium-grain|), whereas on other matrices (\verb|lpi_ceria3d|, \verb|tbdlinux|, \verb|coAuthorsCiteseer|) the final solution is much worse.
 
-It it interesting to highlight a particular result of the table: we marked with the symbol $*$ the solution attained by \verb|po_is| for the matrix \verb|polyDFT| because, for every initial partitioning with medium-grain, each independent iteration with the heuristic produced the same communication value of 3456, the lowest recorded. This suggest that either this value is a local optima in which it is particulary easy to get stuck with, or the optimal value.
+It it interesting to highlight a particular result of the table: we marked with the symbol $*$ the solution attained by \verb|po_is| for the matrix \verb|polyDFT| because, for every initial partitioning with medium-grain, each independent iteration with the heuristic produced the same communication value of 3456, the lowest recorded in general. This suggest that either this value is a local optima hard to escape from, or either the optimal value.
 
 \subsection{Partition-aware heuristics}
 
-Table \ref{tab:final_pa} shows the final results for the partition-aware heuristics, with all the matrices from Section \ref{sec:test_matrices}. We used simplified labels for the considered heuristics, as there is no possible confusion among those. \verb|pa_row| and \verb|pa_col| represent, respectively, \verb|pa_unsorted_concat_row| and \verb|pa_unsorted_concat_col|, whereas \verb|pa_simple| represents \verb|pa_sorted_w_simple|.
+Table \ref{tab:final_pa} shows the final results for the partition-aware heuristics, with all the matrices from Section \ref{sec:test_matrices}. Also in this case we use simplified labels for the considered heuristics, as there is no possible confusion: \verb|pa_row| and \verb|pa_col| represent, respectively, \verb|pa_unsorted_concat_row| and \verb|pa_unsorted_concat_col|, whereas \verb|pa_simple| represents \verb|pa_sorted_w_simple|.
 
 \begin{sidewaystable}[h]
 	\begin{tabular}{|l|c|c||c|c||c|c||c|c||c|c||c|c|}
@@ -426,15 +422,16 @@ Table \ref{tab:final_pa} shows the final results for the partition-aware heurist
 	\verb|polyDFT| & 3643 & 3616 & 3732 & 3607 & 3732 &  3607 & 3725 & 3729 & 3648 & \textbf{3508} & 3629 & 3515 \\
 	\verb|netherlands_osm| & 204 & 190 & \textbf{175} & 191 & 204 & 190 & 191 & 199 & 194 & 199 & 192 & 210 \\
 	\verb|cage13| & 45845 & 54155 & 45405 & 52251 & 45405 & 52251 & 45686 & 49784 & \textbf{45252} & 57117 & 45314 & 57181\\
-	\verb|italy_osm| & 254 & 278 & 262 & 278 &262 & 278 & 279 & 284 & 267 & 277 & &  \\ \hline
-	\multicolumn{1}{|r|}{$\rho$}	& 1.0  & 1.08 & 1.0  & 1.08 & 1.0  & 1.04 & 1.0  & 1.04 & 1.0  & 1.05 & 1.0  & \\ \hline
+	\verb|italy_osm| & 254 & 278 & 262 & 278 &262 & 278 & 279 & 284 & 267 & 277 & 255 & 283  \\ \hline
+	\multicolumn{1}{|r|}{$\rho$}	& 1.0  & 1.08 & 1.0  & 1.08 & 1.0  & 1.04 & 1.0  & 1.04 & 1.0  & 1.05 & 1.0  & 1.08 \\ \hline
 	%IS1 1397 1461
+	%IS3 1386 1502
 		\end{tabular}
 	\caption{Results of the selected partition-aware heuristics with the test matrices. For each matrix, we highlighted the lowest communication volume found.} \label{tab:final_pa}
 \end{sidewaystable}
 
-From the table, it appears that the properties of the matrices used for our tests were well balanced, as the final value of $\rho$ for the heuristics \verb|pa_row| and \verb|pa_col| is the same, as we already observed how these two heuristics show opposite behavior. In this case, it means that there is no clear advantage for either heuristic for the matrices considered. Moreover, resulting in a 8\% higher communication volume than \verb|medium-grain| we confirmed our expectation: simple concatenation of rows and columns is an interesting choice. This is more evident from the good results showed by the \verb|pa_localbest| heuristic: as predicted, its average communication volume is lower than each of its parts, being only 4\% worse than \verb|medium-grain|. A similarly good result was attained also by the other method of the same family, \verb|pa_simple|.
+From the table, it appears that the properties of the matrices used for our tests were well balanced, as the final value of $\rho$ for the heuristics \verb|pa_row| and \verb|pa_col| is the same (we already observed how these two heuristics show opposite behavior). Moreover, as they are, on average, only 8\% worse than \verb|medium-grain|m we confirmed our expectation: simple concatenation of rows and columns is an interesting choice. This is even more evident with \verb|pa_localbest|: as predicted, its average communication volume is lower than the one of its parts, being only 4\% worse than \verb|medium-grain|. A similarly good result was attained also by the other method of the same family, \verb|pa_simple|.
 
-The main consequence of of this series of experiment is that none of the examined heuristics was found to be generally better than medium-grain: even the heuristics that employed the computation of the maximum independent set resulted in, respectively, a 5\% and Y\% higher communication volume. 
+The main consequence of of this series of experiment is that none of the examined heuristics was found to be generally better than medium-grain: even the heuristics that employed the computation of the maximum independent set resulted in, respectively, a 5\% and 8\% higher communication volume. 
 
-However, the algorithms \verb|pa_localbest|, \verb|pa_is_1| and \verb|pa_is_3| produced very interesting results with (strongly) rectangular matrices. In particular, if we were to consider only such matrices (i.e. \verb|lpi_ceria3d|, \verb|dfl001|, \verb|deltaX|, \verb|cre_b|, \verb|tbdmatlab|, \verb|nug_30| and \verb|tbdlinux|) we would obtain much better results: the value of $\rho$ for these heuristics would respectively be of 0.99, 0.99 and 0.98, showing that indeed these schemes perform better (albeit slightly) than \verb|medium-grain|. This other alternative finding shows that the independent set approach devised in Chapter \ref{chap:independent_set} is indeed wortwhile of deeper investigation, as we will explain in more detail in Chapter \ref{chap:conclusions}.
+However, the algorithms \verb|pa_localbest|, \verb|pa_is_1| and \verb|pa_is_3| produced very interesting results with (strongly) rectangular matrices. In particular, if we were to consider only such matrices (i.e. \verb|lpi_ceria3d|, \verb|dfl001|, \verb|deltaX|, \verb|cre_b|, \verb|tbdmatlab|, \verb|nug30| and \verb|tbdlinux|) we would obtain much better results: the value of $\rho$ for these heuristics would respectively be of 0.99, 0.99 and 0.98, showing that indeed these schemes perform better (albeit slightly) than \verb|medium-grain|. This other alternative finding shows that the independent set approach devised in Chapter \ref{chap:independent_set} is indeed wortwhile of deeper investigation, as we will explain in more detail in Chapter \ref{chap:conclusions}.
