@@ -1,8 +1,8 @@
 \chapter{Strategies for splitting a matrix $A$ into $A_r$ and $A_c$} \label{chap:methods}
 
-The main goal of this thesis is to find efficient ways of splitting our original matrix $A$ into $A_r$ and $A_c$, in order to use the medium-grain model.
+The main goal of this thesis is to find efficient ways of splitting our original matrix $A$ into $A_r$ and $A_c$, in order to use the medium-grain method.
 
-We are interested in both improving the initial partitioning of $A$, and a fully iterative method; therefore, we will make the distinction between methods that don't need an initial partitioning (\emph{partition-oblivious} methods), and are therefore suitable for the first case, and methods that do require an initial partitioning (\emph{partition-aware} methods), to be used in a fully iterative scheme. Most of the time the same algorithm can be used for both purposes, albeit with slight modifications.  Before we proceed and analyze the details of the examined heuristics, we can make a few observations, to better understand the general principles behind these algorithms.
+We are interested in both improving the initial partitioning of $A$, and a fully iterative method; therefore, we will make the distinction between methods that do not need an initial partitioning (\emph{partition-oblivious} methods), and are therefore suitable for the first case, and methods that do require an initial partitioning (\emph{partition-aware} methods), to be used in a fully iterative scheme. Most of the time the same algorithm can be used for both purposes, albeit with slight modifications.  Before we proceed and analyze the details of the examined heuristics, we can make a few observations, to better understand the general principles behind these algorithms.
 
 If we are interested in an initial partitioning into $A_r$ and $A_c$ that will yield a good communication volume, we already have some information about their quality before the actual partitioning is performed. We can indeed compute an upper bound on the communication cost: if a complete row of $A$ is assigned to $A_r$ (or a full column is assigned to $A_c$), we are sure that those nonzeros will be assigned to the same processor, and we already discussed in Section \ref{sec:par_matvec} how this results in no communication for that row (or column). This can give us the idea of trying to keep, as much as possible, full rows and columns together, although it is impossible to do it all the time (because a given nonzero cannot be assigned to both $A_r$ and $A_c$).
 
@@ -32,7 +32,7 @@ The partition-oblivious version of this heuristic is given in Algorithm \ref{alg
 		\ForAll{$a_{ij} \in A$}
 		\If{$nz_r(i)<nz_c(j)$}
 		\State assign $a_{ij}$ to $A_r$
-		\ElsIf{$nz(j)<nz(i)$}
+		\ElsIf{$nz_c(j)<nz_r(i)$}
 		\State assign $a_{ij}$ to $A_c$
 		\Else
 		\State assign $a_{ij}$ to $A_w$
@@ -67,7 +67,7 @@ The partition aware variant of this heuristic is given explicitly in Algorithm \
 		\Else
 		\If{$nz_r(i)<nz_c(j)$}
 		\State assign $a_{ij}$ to $A_r$
-		\ElsIf{$nz(j)<nz(i)$}
+		\ElsIf{$nz_c(j)<nz_r(i)$}
 		\State assign $a_{ij}$ to $A_c$
 		\Else
 		\State assign $a_{ij}$ to $A_w$
@@ -82,7 +82,7 @@ In Chapter \ref{chap:experimental_results}, when we are going to perform numeric
 
 \section{Assignment of blocks of nonzeros} \label{sec:sbd}
 
-Instead of assigning nonzeros individually as in Section \ref{sec:localview}, we can take a more coarse-grained approach and try to assign at the same time a greater amount of nonzeros to either $A_r$ or $A_c$. In particular, we will discuss how to exploit the Separated Block Diagonal (SBD) form of the partitioned matrix $A$ and introduce a further iteration of this concept, discussing the Separated Block Diagonal of order 2 (SBD2) form of the matrix. Moreover, the heuristics described in this section are all partition-aware, and take as input a partitioned matrix.
+Instead of assigning nonzeros individually as in Section \ref{sec:localview}, we can take a more coarse-grained approach and try to assign at the same time a block of nonzeros to either $A_r$ or $A_c$. In particular, we will discuss how to exploit the Separated Block Diagonal (SBD) form of the partitioned matrix $A$ and introduce a further iteration of this concept, discussing the Separated Block Diagonal of order 2 (SBD2) form of the matrix. Moreover, the heuristics described in this section are all partition-aware, and take as input a partitioned matrix.
 
 As throughout this section the permutations of matrices will be fundamental, we adopt a simplified notation: given a vector $I$ with row indices and a vector $J$ with column indices, we denote as $A(I,J)$ the submatrix of $A$ with only the rows in $I$ and only the columns in $J$ (following the order in which they appear in the vectors). With this notation, for example, $A([1,\dots,m],[1 \dots n]) = A$. Furthermore, if $I_1$ and $I_2$ are both vectors of indices, with $(I_1,I_2)$ we denote the simple concatenation of these vectors.
 
@@ -199,7 +199,7 @@ In Chapter \ref{chap:experimental_results}, we will refer to the algorithm descr
 
 \subsection{Using the Separated Block Diagonal form of order 2 of $A$} \label{sec:sbd2}
 
-The proposed SBD2 form of a partitioned matrix $A$ is an extension of the SBD form: given a partitioned matrix $A$, we compute the Separate Block Diagonal form of $A$ of order 2 by separating, in $\dot{A}_{10}$ and $\dot{A}_{12}$ the empty and non-empty columns, and in $\dot{A}_{01}$ and $\dot{A}_{21}$ the empty and non-empty rows. Then all the other blocks, except the central one, are permuted and split up accordingly. This procedure is better shown in Algorithm \ref{alg:sbd2}. 
+The proposed SBD2 form of a partitioned matrix $A$ is an extension of the SBD form: given a partitioned matrix $A$, we compute the Separate Block Diagonal form of $A$ of order 2 by separating, in $\dot{A}_{10}$ and $\dot{A}_{12}$ the empty and non-empty columns, and in $\dot{A}_{01}$ and $\dot{A}_{21}$ the empty and non-empty rows. Then all the other blocks, except the central one, are permuted and split up accordingly. This procedure is shown in Algorithm \ref{alg:sbd2}. 
 
 \begin{algorithm}[h]
 	\begin{algorithmic}
@@ -298,11 +298,13 @@ Figure \ref{fig:sbd2} shows the process of obtaining this matrix $\ddot{A}$ star
 
 To better understand the interesting properties of the newly created parts of the matrix, let us introduce the concept of \emph{neighbor}: given the nonzero $a_{ij}$ we say that $a_{kl}$ is a neighbor if $k = i \vee l = j$; in other words, neighbors of a given nonzero are the ones that lie in the same row or in the same column.
 
-Now, let us consider, for sake of brevity, just the top-left corner of $\ddot{A}$: nonzeros in $\ddot{A}_{00}$ are uncut in the rows and columns and whose neighbors are uncut also in the other, non-shared, dimension. Similarly, nonzeros in $\ddot{A}_{01}$ do not have any neighbor (w.r.t. their row) with cut columns but have neighbors (w.r.t their column) with cut rows. And similarly, with the roles of rows and columns reversed, for $\ddot{A}_{10}$. This exact same reasoning applies also for the bottom-right corner, with the appropriate adaptation of indices.
+Now, let us consider, for the sake of brevity, just the top-left corner of $\ddot{A}$: nonzeros in $\ddot{A}_{00}$ are uncut in the rows and columns and whose neighbors are uncut also in the other, non-shared, dimension. Similarly, nonzeros in $\ddot{A}_{01}$ do not have any neighbor (w.r.t. their row) with cut columns but have neighbors (w.r.t their column) with cut rows. And similarly, with the roles of rows and columns reversed, for $\ddot{A}_{10}$. This exact same reasoning applies also for the bottom-right corner, with the appropriate adaptation of indices.
 
 The size of these parts, and more generally of all of the blocks of $\ddot{A}$, is again highly dependent on the structure of the matrix, as shown in Figure \ref{fig:sbd2-2}.
 
-\begin{figure}[h]
+\clearpage
+
+\begin{figure}[H]
 	\centering
 	\subfigure[\texttt{impcol\_b}]{ \includegraphics[scale=0.5]{img/sbd2_impcol_b.pdf} \label{fig:sbd2_impcol_b}}\hspace{1cm} 
 	\subfigure[\texttt{cage6}]{ \includegraphics[scale=0.5]{img/sbd2_cage6.pdf} \label{fig:sbd2_cage6} }
@@ -335,13 +337,13 @@ In Chapter \ref{chap:experimental_results}, we will refer to the algorithm descr
 
 In this section, instead of describing a generating scheme that takes as input the matrix $A$ and produces as output $A_r$ and $A_c$, we will introduce an improvement scheme, which operates on already existing $A_r$ and $A_c$ and tries to refine them such that the upper bound on the communication volume is lowered.
 
-At the beginning of this chapter, we mentioned how it is convenient to have full rows assigned to $A_r$ and full columns assigned to $A_c$, in order to avoid communication; a good strategy to produce good $A_r$ and $A_c$, could then be to maximize such full assignments. The proposed heuristic does essentially this, by trying to swap the assignment of nonzeros from $A_r$ to $A_c$ and viceversa, trying to obtain that full rows are assigned to $A_r$ and full columns are assigned to $A_c$. In order to achieve both of these goals with a unique algorithm, it is convenient to reason in terms of the matrix $B$ as in \eqref{eq:Bmatrix}. If we maximize the number of empty rows of $B$, we are effectively emptying rows of $A_r^T$ (i.e. emptying columns of $A_r$, therefore fully assigning nonzeros in them to $A_c$) and of $A_c$, thus assigning full rows to $A_r$.
+At the beginning of this chapter, we mentioned how it is convenient to have complete rows assigned to $A_r$ and complete columns assigned to $A_c$, in order to avoid communication; a good strategy to produce good $A_r$ and $A_c$, could then be to maximize such complete assignments. The proposed heuristic does essentially this, by trying to swap the assignment of nonzeros from $A_r$ to $A_c$ and viceversa, trying to obtain that complete rows are assigned to $A_r$ and complete columns are assigned to $A_c$. In order to achieve both of these goals with a unique algorithm, it is convenient to reason in terms of the matrix $B$ as in \eqref{eq:Bmatrix}. If we maximize the number of empty rows of $B$, we are effectively emptying rows of $A_r^T$ (i.e. emptying columns of $A_r$, therefore completelyassigning nonzeros in them to $A_c$) and of $A_c$, thus complete rows to $A_r$.
 
 This improvement heuristic falls into the category of \emph{local search} algorithms: we start from a configuration (an assignment of nonzeros to $A_r$ and $A_c$) and perform a search on the neighborhood, defined as the set of configurations which differ only by the assignment of a single nonzero. By performing this small swap, we can easily fall in a local optimum situation: a few nonzeros (depending on the structure of the matrix) are continuously swapped between $A_r$ and $A_c$. 
 
-We can add a little hill-climbing capability to our heuristic by adding a little buffer: we pre-determine $l_{max}$, the maximum amount of worsening allowed, and, after this threshold is reached, we start considering only strictly improving solution. In order to have a meaningful threshold, it might be convenient to have it relative to the amount of rows/columns of $B$, or to its nonzeros. The higher this threshold is, the more capability we have of escaping local optima, but at the cost of slowing down considerably the improvement (even potentially arresting it) of our solution.
+We can add a little hill-climbing capability to our heuristic by adding a small buffer: we pre-determine $l_{max}$, the maximum amount of worsening allowed, and, after this threshold is reached, we start considering only strictly improving solutions. In order to have a meaningful threshold, it might be convenient to have it relative to the number of rows/columns of $B$, or to its nonzeros. The higher this threshold is, the more capability we have of escaping local optima, but at the cost of slowing down considerably the improvement (even potentially arresting it) of our solution.
 
-For the choice of the neighbor configuration to consider, it is convenient to consider the row of $B$ with a diagonal element (which corresponds to a split row/column of $A$) with the minimum number of nonzeros: our immediate goal, which in reality spans over a few moves of our local search, is to fully assign the nonzeros of this row of $B$; we consider the minimum because each time we swap we might slightly worsen the solution.
+For the choice of the neighbor configuration to consider, it is convenient to consider the row of $B$ with a diagonal element (which corresponds to a split row/column of $A$) with the minimum number of nonzeros: our immediate goal, which in reality spans over a few moves of our local search, is to completely assign the nonzeros of this row of $B$; we consider the minimum because each time we swap we might slightly worsen the solution.
 
 A more explicit overview on this local search improvement scheme is described in Algorithm \ref{alg:globalview}:
 
@@ -350,9 +352,9 @@ A more explicit overview on this local search improvement scheme is described in
 		\Require{$A_r$, $A_c$, $l_{max}$, $iter_{max}$}
 		\Ensure{$A_r'$, $A_c'$}
 		\State $l := 0$
-		\State Compute $B$ following the medium-grain model
+		\State Compute initial $B$ following the medium-grain method 
 		\For{$it=1,\dots,iter_{max}$}
-		\State $\displaystyle i := \argmin_{k \in \{1,\dots,m+n\}\text{ s.t. }B(k,k) \neq 0} nz_r(k)$
+		\State $\displaystyle i := \argmin_{k \in \{0,\dots,m+n-1\}\text{ s.t. }B(k,k) \neq 0} nz_r(k)$
 		\ForAll{$j \neq i$ such that $B(i,j) \neq 0$}
 		\If{$B(j,j) \neq 0$} 
 		\State $B(i,j) = 0$
@@ -370,8 +372,8 @@ A more explicit overview on this local search improvement scheme is described in
 		\State $l = l-1$
 		\EndIf
 		\EndFor
-		\State $A_r' := B([1,\dots,n],[n+1,\dots,m+n])^T$
-		\State $A_c' := B([n+1,\dots,m+n],[1,\dots,n])$	
+		\State $A_r' := B([0,\dots,n-1],[n,\dots,m+n-1])^T$
+		\State $A_c' := B([n,\dots,m+n-1],[0,\dots,n-1])$	
 	\end{algorithmic}
 	\caption{Local search refinement of $A_r$ and $A_c$} \label{alg:globalview}
 \end{algorithm}
@@ -382,7 +384,7 @@ As this is a scheme that relies on existing $A_r$ and $A_c$ and aims at improvin
 
 In Section \ref{sec:localview} we discussed how to assign each nonzero independently, whereas in Section \ref{sec:sbd} we examined the possibility of exploiting a little the structure of the matrix, in order to assign more nonzeros at once. Keeping this direction, there is some other structure of $A$ that can lead to a better assignment: partial assignment of rows and columns.
 
-The main idea behind this heuristic is that, every time we assign a nonzero to $A_r$, we know that it is convenient that also all the other nonzeros in the same row are assigned to it; conversely, if a nonzero is assigned to $A_c$, all the nonzeros in its column should stick with it. Therefore, we ideally want to keep together rows and columns as much as possible; but, as already discussed, there is always the problem that a nonzero cannot be assigned to both $A_r$ and $A_c$, we can only reason in term of partial assigment of the row/column. 
+The main idea behind this heuristic is that, every time we assign a nonzero to $A_r$, we know that it is convenient that also all the other nonzeros in the same row are assigned to it; conversely, if a nonzero is assigned to $A_c$, all the nonzeros in its column should stick with it. Therefore, we ideally want to keep together rows and columns as much as possible; but, as already discussed, there is always the problem that a nonzero cannot be assigned to both $A_r$ and $A_c$, so that we can only reason in term of partial assigment of the row/column. 
 
 Throughout this section we will stop distinguishing between rows and columns of a matrix and reason in term of \textbf{indices} in the set $\{0,\dots,m+n-1\}$: following the natural ordering, the $m$ rows are mapped to $0,\dots,m-1$ and the $n$ columns to $m,\dots,m+n-1$.
 
@@ -401,7 +403,7 @@ A more explicit formulation of this procedure is given in Algorithm \ref{alg:ove
 		\If{$v_i < m$}
 		\State Add the nonzeros of row $i$ to $A_r$
 		\Else
-		\State Add the nonzeros of column $i$ to $A_c$
+		\State Add the nonzeros of column $i-m$ to $A_c$
 		\EndIf
 		\EndFor
 	\end{algorithmic}
@@ -417,9 +419,9 @@ It is possible also to give an alternative formulation for this algorithm in whi
 		\State $A_r := A_c: = \varnothing$
 		\For{$i=0,\dots,m+n-1$}
 		\If{$v_i < m$}
-		\State Add the unmarked nonzeros of the row $i$ of $A$ to $A_r$
+		\State Add the unmarked nonzeros of row $i$ of $A$ to $A_r$
 		\Else
-		\State Add the unmarked nonzeros of the column $i$ of $A$ to $A_c$
+		\State Add the unmarked nonzeros of column $i-m$ of $A$ to $A_c$
 		\EndIf
 		\State Mark nonzeros of index $i$ as ``evaluated''
 		\EndFor
@@ -427,7 +429,7 @@ It is possible also to give an alternative formulation for this algorithm in whi
 	\caption{Alternative formulation of Algorithm \ref{alg:overpainting}.} \label{alg:overpainting-2}
 \end{algorithm}
 
-In this formulation, every assignment to $A_r$ and $A_c$ is final, but with the added complexity of checking which nonzeros of the considered index are still to be assigned, and only work with them.
+In this formulation, every assignment to $A_r$ and $A_c$ is final, but with the added complexity of checking which nonzeros of the considered index are still to be assigned, and only working with them.
 
 Lastly, another different formulation is possible: we consider individually each nonzero $a_{ij}$ and see whether in $v$ $i < j$ (where the $<$ symbol is to be intended as ``$i$ precedes $j$'' and not as the comparison of the values) or the other way around; in the first case, the row has more priority and we assign $a_{ij}$ to $A_r$, otherwise we assign it to $A_c$. Note that, since we have to perform $N$ lookups on the vector $v$, this is a more expensive formulation of the same algorithm.
 
@@ -450,11 +452,11 @@ Each one of the generating schemes can be summarized in three main steps:
 Now, we give a more detailed explanation of each of those steps. 
 
 \begin{itemize}
-	\item \textbf{usage of previous partitioning}: if we are considering \emph{partition aware generating schemes}, we separate the set of uncut indices (i.e. indices which correspond to uncut rows or columns) from the  cut indices. We consider the simple concatenation of uncut indices and cut indices, in this order, and the next steps are performed on each of these parts. If, instead, we are considering a \emph{partition oblivious scheme}, the subsequent operations are performed on the set $\{0,\dots,m+n-1\}$.
+	\item \textbf{usage of previous partitioning}: if we are considering \emph{partition-aware generating schemes}, we separate the set of uncut indices (i.e. indices which correspond to uncut rows or columns) from the  cut indices. We consider the simple concatenation of uncut indices and cut indices, in this order, and the next steps are performed on each of these parts. If, instead, we are considering a \emph{partition-oblivious scheme}, the subsequent operations are performed on the set $\{0,\dots,m+n-1\}$.
 
 	\item \textbf{sorting}: we can either keep the set from the previous step untouched (therefore preserving the natural order of indices) or perform a sorting with respect to the number of nonzeros. The sorting is done in ascending order, as a short row/column is more likely to fit completely in a good partitioning because it does not yield many cut columns/rows.
 
-		In addition, we can refine a bit our sorting: we could move the indices which have only one nonzero to the back, because no matter our assignment of such nonzero, that index will not be cut and it is best to try to keep also the other dimension uncut. 
+In addition, we can refine a bit our sorting: we could move the indices which have only one nonzero to the back, because no matter our assignment of such a nonzero, that index will not be cut and it is best to try to keep also the other dimension uncut. 
 
 	\item \textbf{internal ordering}: as the last step, we want to finalize our vector $v$ by deciding more precisely the position of each index. The strategies considered, which often depend internally on an additional parameter, are the following:
 
@@ -469,15 +471,15 @@ Now, we give a more detailed explanation of each of those steps.
 
 				where with $c$ we denote a generic column and with $r$ a generic row. To obtain a more even distribution, we always start with the greater dimension.
 			\item \textbf{random} (only in case of no sorting): we randomize the ordering of the indices;
-			\item \textbf{simple} (only in case of sorting): we let the sorting decide completely the ordering, and the vector is left as is.
+			\item \textbf{simple} (only in case of sorting): we let the sorting decide completely the ordering, and the vector is left as-is.
 		\end{itemize}
 \end{itemize}
 
 As the complete description of a generating scheme is somewhat lengthy, we use a simplified notation and adopt the following abbreviations:
 
 \begin{itemize}
-	\item \verb|PO|: partition oblivious
-	\item \verb|PA|: partition aware
+	\item \verb|PO|: partition-oblivious
+	\item \verb|PA|: partition-aware
 	\item \verb|sorted| and \verb|unsorted|: sorting w.r.t. the number of nonzeros is performed or not
 	\item \verb|w| and \verb|nw|: all the indices with only 1 nonzero are moved to the back or not
 	\item \verb|simple|: the sorted vector is left as-is
@@ -490,7 +492,7 @@ As the complete description of a generating scheme is somewhat lengthy, we use a
 	\item \verb|random|: the order of the indices is randomized
 \end{itemize}
 
-With this notation, the name \verb|po_sorted_nw_mix_spr| stands for ``partition oblivious generating scheme, with indices sorted by number of nonzeros, without moving the indices with 1 nonzero to the back, with forced mixing of rows and columns, in a spread fashion''. This is just one of the many possibilities, which are convenient to visualize using a directed graph, as shown in Figure \ref{fig:digraph}; a generating scheme is simply a path from START to END. 
+With this notation, the name \verb|po_sorted_nw_mix_spr| stands for ``partition-oblivious generating scheme, with indices sorted by number of nonzeros, without moving the indices with 1 nonzero to the back, with forced mixing of rows and columns, in a spread fashion''. This is just one of the many possibilities, which are convenient to visualize using a directed graph, as shown in Figure \ref{fig:digraph}; a generating scheme is simply a path from START to END. 
 
 \begin{figure}[h]
 	\begin{center}

@@ -2,7 +2,7 @@
 
 With the framework introduced in Section \ref{sec:hot_restart}, we basically translated the problem of the assignment of nonzeros to $A_r$ and $A_c$ (which is already another formulation of the matrix partitioning problem with the medium grain model) to the problem of an efficient computation of a permutation of the indices $\{0,\dots,m+n-1\}$. In this chapter, we will propose a method for this vector computation problem which relies on concepts of the field of graph theory.
 
-The main idea is somewhat similar to the principle that led us to the development of the Separated Block Diagonal form of order 2 in Section \ref{sec:sbd2}. In that particular form of a partitioned matrix, the blocks $\ddot{A}_{00}$ and $\ddot{A}_{44}$ are interesting, as they contain ``independent'' nonzeros. More specifically, those rows and columns are fully assigned to a processor, and whose nonzeros do not have any neighbor (a nonzero in the same row or column) which has a cut column/row. The analogue of this concept of independendence, is now to be defined carefully: we want find a subset of the indices $\{0,\dots,m+n-1\}$ which does not cause any communication, whenever we fully assign its rows to $A_r$ and its columns to $A_c$. With this definition, our goal is clear: we want to assign as many nonzeros as possible in this way, obtaining a low upper bound on the communication volume, which can be computed during the creation of $A_r$ and $A_c$.
+The main idea is somewhat similar to the principle that led us to the development of the Separated Block Diagonal form of order 2 in Section \ref{sec:sbd2}. In that particular form of a partitioned matrix, the blocks $\ddot{A}_{00}$ and $\ddot{A}_{44}$ are interesting, as they contain ``independent'' nonzeros. More specifically, those rows and columns are fully assigned to a processor, and whose nonzeros do not have any neighbor (a nonzero in the same row or column) which has a cut column/row. The analogue of this concept of independence, is now to be defined carefully: we want to find a subset of the indices $\{0,\dots,m+n-1\}$ which does not cause any communication, whenever we fully assign its rows to $A_r$ and its columns to $A_c$. With this definition, our goal is clear: we want to assign as many nonzeros as possible in this way, obtaining a low upper bound on the communication volume, which can be computed during the creation of $A_r$ and $A_c$.
 
 To do so, we can employ a well studied object in graph theory: the \textbf{maximum independent set}. However, this requires a correct translation of our sparse matrix into a graph, described in Section \ref{sec:is_graph}. In Section \ref{sec:is_comp}, we delve a little more into the graph theory required and describe the actual algorithm used to compute a maximum independent set in such a graph. In Section \ref{sec:is_vector}, finally, we give a few different possibilities for computing the priority vector $v$ using the concepts and algorithms just introduced.
 
@@ -97,10 +97,10 @@ The following lemma explicitly gives us the relation between a vertex cover and 
 
 As the decision variant of the problem of finding a minimum vertex cover is NP-complete \cite[Theorem 3.3]{np_book}, it follows from this lemma that also finding a maximum independent set in a graph is NP-complete; the main consequence of this result is that we cannot solve this problem directly for a generic graph, as it would be as hard as our original matrix partitioning problem. Luckily, we are dealing with a particular kind of graph, a bipartite graph, which simplifies greatly the computations of a maximum independent set.
 
-Before exploiting the bipartiteness of our graph, we need to make an additional observation: Lemma \ref{lemma:is} states that, in a generic graph, the vertex cover problem and independent set cover are complementary. Therefore, computing a maximum independent set is equivalent to computing a minimum vertex cover. This equivalence is particularly useful in our case, because another mathematical object can be related: the maximum matching.
+Before exploiting the bipartiteness of our graph, we need to make an additional observation: Lemma \ref{lemma:is} states that, in a generic graph, the vertex cover problem and independent set cover are complementary. Therefore, computing a maximum independent set is equivalent to computing a minimum vertex cover. This equivalence is particularly useful in our case, because another mathematical object can be related to the minimum vertex cover as well: the maximum matching.
 
 \begin{definition}[Matching]
-	Let $G=(V,E)$ be a graph. A \emph{matching} $M \subseteq E$ is a set of edges such that at most one edge is incident to each vertex $v \in V$. We say that a vertex $v \in V$ is matched by $M$ if an edge in $M$ is incident to $v$. A \emph{maximum} matching is a matching of maximum cardinality.
+	Let $G=(V,E)$ be a graph. A \emph{matching} $M \subseteq E$ is a set of edges such that at most one edge from $M$ is incident to each vertex $v \in V$. We say that a vertex $v \in V$ is matched by $M$ if an edge in $M$ is incident to $v$. A \emph{maximum} matching is a matching of maximum cardinality.
 \end{definition}
 
 In particular, because we are in a bipartite graph, we can employ K\H{o}nig's Theorem \cite{konig}:
@@ -228,7 +228,7 @@ In Figure \ref{fig:konig}, we can visualize an example of Algorithm \ref{alg:kon
 		\foreach \x in {0,1,2} { \node[vertex,orange] at (c\x) {};}
 	\end{tikzpicture}
 	}
-	\caption{Example of the actions performed in Algorithm \ref{alg:konig} for the graph of Figure \ref{fig:bipartite_graph}. The red vertices are in the set $T$. In the last image the organge vertices belong to a minimum vertex cover. Lemma \ref{lemma:is} can quickly be checked, as the black vertices are indeed an independent set.} \label{fig:konig}
+	\caption{Example of the actions performed in Algorithm \ref{alg:konig} for the graph of Figure \ref{fig:bipartite_graph}. The red vertices are in the set $T$. In the last image the orange vertices belong to a minimum vertex cover. Lemma \ref{lemma:is} can quickly be checked, as the black vertices are indeed a maximum independent set.} \label{fig:konig}
 \end{figure}
 
 With the following lemma, we will prove the correctness of Algorithm \ref{alg:konig} and K\H{o}nig's Theorem.
@@ -237,27 +237,25 @@ With the following lemma, we will prove the correctness of Algorithm \ref{alg:ko
 	Let $G=(L\cup R,E)$ be a bipartite graph and let $M$ be a maximum matching. The subset of vertices $C$ obtained following Algorithm \ref{alg:konig} is the minimum vertex cover. In addition, we have that $|C| = |M|$.
 \end{lemma}
 \begin{proof}
-First of all, we will prove that $C$ is a vertex cover: assume it is not, which means that there is an edge $e = (i,j) \in E$ with $i,j \notin C$, which implies that $i \in L \cap T$ and $j \in R \setminus T$, because the graph is bipartite. 
+First of all, we will prove that $C$ is a vertex cover: assume it is not, which means that there is an edge $e = (i,j) \in E$ with $i,j \notin C$ ($i \in L$, $j \in R$), which implies that $i \in L \cap T$ and $j \in R \setminus T$, because the graph is bipartite. 
 	
 We now have two possibilities: either $e \notin M$ or $e \in M$.  In the first case, because $i \in T$ and $e$ can be traversed (it goes from $L$ to $R$ in the directed graph), $j$ can be reached and thus $j \in T$, a contradiction. In the second case, we have that $i$ is matched and belongs to $T$: this means that it was reached by traversing the matched edge, which implies that $j \in T$, again a contradiction. Since in both cases we get to a contradiction, $C$ is indeed a vertex cover of $G$.
 
-Now, we will prove that $|C| \leq |M|$, by showing that every vertex in $C$ is matched. It is clear that every vertex in $L \setminus T$ is matched, by definition of $T$. Suppose there is a unmatched vertex $v \in R \cap T$: since $v \in T$, it means that it was reached from a unmatched vertex $u$ in $L$, thus the path from $u$ to $v$ is augmenting, which would imply that the matching $M$ is not of maximum cardinality, a contradiction. Moreover, note that there are no edges in the matching between $L \setminus T$ and $R \cap T$ (otherwise, as shown previously, the endpoint in $L$ would also be in $T$).
+Now, we will prove that $|C| \leq |M|$, by showing that every vertex in $C$ is matched. It is clear that every vertex in $L \setminus T$ is matched, by definition of $T$. Suppose there is a unmatched vertex $v \in R \cap T$: since $v \in T$, it means that it was reached from an unmatched vertex $u$ in $L$, thus the path from $u$ to $v$ is augmenting, which would imply that the matching $M$ is not of maximum cardinality, a contradiction. Moreover, note that there are no edges in the matching between $L \setminus T$ and $R \cap T$ (otherwise, as shown previously, the endpoint in $L$ would also be in $T$).
 
-Therefore we have that all the vertices in $C$ are matched and the edges of the matching are distinct, which implies that $|C| \leq |M|$. Furthermore, for any matching $M'$ and vertex cover $C'$ is true that $|M'| \leq |C'|$ as there is at least one endpoint in $C'$ for every edge in $M'$. So we have that $|C| = |M|$, proving Theorem \ref{th:konig}.
+Therefore we have that all the vertices in $C$ are matched and the edges of the matching are distinct, which implies that $|C| \leq |M|$. Furthermore, for any matching $M'$ and vertex cover $C'$ it is true that $|M'| \leq |C'|$ as there is at least one endpoint in $C'$ for every edge in $M'$. So we have that $|C| = |M|$, proving K\H{o}nig's Theorem, along the way.
 
 Lastly, these inequality also imply that $C$ is the vertex cover of minimum cardinality: assume it is not, i.e. we have that $C'$ is a vertex cover with $|C'| < |C|$. Now, if we consider the maximum matching $M$, the inequalities give us that $|M| \leq |C'| < |C| \leq |M|$, a contradiction. $C$ is then the minimum vertex cover.
 
 \end{proof}
 
-
-
 We have shown that there are close relationships between the maximum matching, minimum vertex cover and maximum independent set. Now, the problem is shifted toward finding an efficient way of computing the maximum matching. In the next section we will describe the Hopcroft-Karp algorithm, which is a simple extension of Algorithm \ref{alg:konig}.
 
 \subsection{The Hopcroft-Karp algorithm for bipartite matching} \label{sec:hopcroft_karp}
 
-The Hopcroft-Karp algorithm \cite{hopcroft_karp}, devised in 1973, is an efficient scheme for finding a maximum independent set on bipartite graphs, with a running time of $\mathcal{O}\left( |E|\sqrt{|V|} \right)$. This is a considerable improvement over the famous Ford-Fulkerson algorithm of 1956, which, for bipartite graphs, has a running time of $\mathcal{O}\left( |V||E| \right)$. We can do a comparison between these two algorithms, even though the latter is technically meant for the maximum flow problems, because a bipartite graph can be modified in such a way that a maximum flows corresponds to a maximum matching in the original graph.
+The Hopcroft-Karp algorithm \cite{hopcroft_karp}, devised in 1973, is an efficient scheme for finding a maximum independent set on bipartite graphs, with a running time of $\mathcal{O}\left( |E|\sqrt{|V|} \right)$. This is a considerable improvement over the famous Ford-Fulkerson algorithm of 1956, which, for bipartite graphs, has a running time of $\mathcal{O}\left( |V||E| \right)$. We can compare these two algorithms, even though the latter is technically meant for maximum flow problems, because a bipartite graph can be modified in such a way that a maximum flow corresponds to a maximum matching in the original graph.
 
-Both algorithms relies on the concepts of augmenting paths, introduced in the previous section in Definition \ref{def:augmenting_path}.
+Both algorithms rely on the concept of augmenting paths, introduced in the previous section in Definition \ref{def:augmenting_path}.
 
 The main idea of the Hopcroft-Karp algorithm is to find these augmenting paths to progressively increase the size of the matching, as outlined in Algorithm \ref{alg:hopcroft-karp}. The fact that in the main loop we augment the matching over several augmenting paths simultaneously gives us the $\sqrt{|V|}$ factor in the running time, instead of a simple $|V|$.
 
@@ -275,12 +273,12 @@ The main idea of the Hopcroft-Karp algorithm is to find these augmenting paths t
 	\caption{Basic outline of the Hopcroft-Karp algorithm} \label{alg:hopcroft-karp}
 \end{algorithm}
 
-The core of this algorithm is substantially Algorithm \ref{alg:konig}: instead of starting from a maximum matching $M$ to compute the set $T$ (from which follows immediately a minimum vertex cover $C$), we construct the matching and the $T$ progressively, as follows:
+The core of this algorithm is substantially Algorithm \ref{alg:konig}: instead of starting from a maximum matching $M$ to compute the set $T$ (from which follows immediately a minimum vertex cover $C$), we construct the matching and the set $T$ progressively, as follows:
 
 \begin{enumerate}
 	\item we construct the directed graph as in Algorithm \ref{alg:directed_graph};
 	\item we perform a breadth-first search (following the directed edges) starting from the unmatched vertices in $L$, which terminates when unmatched vertices in $R$ are reached. $l_M$ is the length of these shortest augmenting paths;
-	\item the maximal set of vertex-disjoint shortest augmenting paths is computed: we start from an unmatched vertex in $R$ reached in the previous step and perform a depth-first search. Whenever we reach a unmatched vertex in $L$ it means that we found an augmenting path $P$, because we were following the directed edges constructed in the first step. We then add this path to $P$ and resume with the next depth-first search. 
+	\item the maximal set of vertex-disjoint shortest augmenting paths is computed: we start from an unmatched vertex in $R$ reached in the previous step and perform a depth-first search. Whenever we reach an unmatched vertex in $L$ it means that we found an augmenting path $P$, because we were following the directed edges constructed in the first step. We then add this path to $P$ and resume with the next depth-first search. 
 \end{enumerate}
 
 If we use the Hopcroft-Karp algorithm in our sparse graph constructed as in Section \ref{sec:is_graph}, the running time can be even considerably better than the theoretical one: if there are no particularly dense rows and columns, the graph is far from being strongly connected, as each vertex in the graph has just a handful of edges, resulting in fast search phases.
@@ -318,3 +316,5 @@ Now, for a partitioned matrix, let $U$ denote the set of uncut indices, and $C$ 
 \end{enumerate}
 
 Note that, by construction, we do not expect these three strategies to be radically different in practice: if at the previous iteration the partitioning was done well, $U$ will be quite big, resulting in similar priority vectors.
+
+In Chapter \ref{chap:experimental_results} we will refer to these three differe heuristic, respectively, as \verb|po_is_1|, \verb|po_is_2| and \verb|po_is_3|.

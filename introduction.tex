@@ -25,7 +25,7 @@ As mentioned, the systems considered are large, with sparse matrices with thousa
 
 It is an important goal then to be able to perform such computations in the least amount of time possible: however, as there is a natural tradeoff between power consumption and the speed of the processing units \cite{rabaey1996digital}, it is not feasible to rely only on fast CPUs, but rather focus on parallelism and employ a large number of them with lower processing speed (and, as a result, with fairly low energy requirements).
 
-To describe an efficient way of performing parallel sparse matrix-vector multiplications, we follow the approach described in \cite{BSP}: before the actual computation takes place, the sparse matrix is distributed among the $p$ processors, creating a \textbf{partitioning} of the set of the nonzeros: $A$ is split into $A_0,\dots,A_{p-1}$ disjoint subsets. Moreover, also the input vector $v$ and the output vector $u$ are distributed among the $p$ processors (note that their distribution might not necessarily be the same, and usually it is not).
+To describe an efficient way of performing parallel sparse matrix-vector multiplications, we follow the approach described in \cite{BSP}: before the actual computation takes place, the sparse matrix is distributed among the $p$ processors, creating a \textbf{partitioning} of the set of the nonzeros: $A$ is split into disjoint subsets $A_0,\dots,A_{p-1}$. Moreover, also the input vector $v$ and the output vector $u$ are distributed among the $p$ processors (note that their distribution might not necessarily be the same, and often it is not).
 
 Figure \ref{fig:partition} shows a possible partitioning of a $9 \times 9$ matrix with 18 nonzeros. As the actual values of the nonzeros are not important, we only show the sparsity pattern (a colored cell means that there is a nonzero in that position). The two colors denote, respectively, the two resulting subsets of nonzeros. 
 
@@ -82,11 +82,11 @@ After this distribution, every processor has to compute its local contribution t
 	\caption{Parallel sparse matrix-vector multiplication.} \label{alg:matvec}
 \end{algorithm}
 
-In reality there is also a fourth phase, in which each processor sums up all the contributions received in phase (2) for all of its owned components of $u$; this is a small sum with negligible computational cost and for this reason it has been omitted from the algorithm. 
+In reality there is also a fourth phase, in which each processor sums up all the contributions received in phase (2) for all of its owned components of $u$; this is a small phase with negligible computational cost compared to phase (2) and for this reason it has been omitted from the algorithm. 
 
-Note that we assume that all of the nonzero values are represented with the same amount of bits. Doing so, we can focus excusively on the coordinates of the nonzeros, omitting completely their values, as it does not the cost of a parallel sparse matrix-vector multiplication.
+Note that we assume that all of the nonzero values are represented with the same amount of bits. Doing so, we can focus excusively on the coordinates of the nonzeros, omitting completely their values, as it does not influence the cost of a parallel sparse matrix-vector multiplication.
 
-Figure \ref{fig:communication} shows an example of the communication involved in supersteps (0) and (2), for the example partitioning shown in Figure \ref{fig:partition}: the vertical arrows represent the fan-out, while the horizontal arrows represent the fan-in; the color of an arrow indicates which processor is sending data. 
+Figure \ref{fig:communication} shows an example of the communication involved in phases, or supersteps (0) and (2), for the example partitioning shown in Figure \ref{fig:partition}: the vertical arrows represent the fan-out, while the horizontal arrows represent the fan-in; the color of an arrow indicates which processor is sending data. 
 
 \begin{figure}[h]
 	\centering
@@ -218,7 +218,7 @@ As we can see, the communication volume $V$ depends entirely on the matrix $A$ a
 
 The problem of distributing the nonzeros of a matrix in order to minimize the communication volume, or, in short, the matrix partitioning problem, can also be viewed from the graph theory point of view. We recall that a (unweighted, undirected) graph $G=(V,E)$ is a set of vertices (or nodes) $V$ and edges $E$ which connect them. 
 
-The graph partitioning problem has been used in the past to model the load balancing in parallel computing: data are represented as vertices, while their connections (the dependencies) are represented with edges. For a more rigorous definition of the graph partitioning problem, we follow the notation given in \cite{hypergraph_model},  performing the simplification in which all the edges have unitary weight. Given the graph $G=(V,E)$ we say that $(V_0,\dots,V_{p-1})$ is a $p$-way partitioning of $G$ if all these subsets are nonempty, mutually disjoint and their union is the whole set of nodes $V$. 
+The graph partitioning problem has been used in the past to model the load balancing in parallel computing: data are represented as vertices, while their connections (the dependencies) are represented with edges. For a more rigorous definition of the graph partitioning problem, we follow the notation given in \cite{hypergraph_model},  performing the simplification in which all the edges have unitary weight. Given the graph $G=(V,E)$ we say that $(V_0,\dots,V_{p-1})$ is a $p$-way partition of $G$ if all these subsets are nonempty, mutually disjoint and their union is the whole set of nodes $V$. 
 
 Moreover, we can consider a balance criterion similar to \eqref{eq:balance}:
 \begin{align}
@@ -234,11 +234,11 @@ However, despite all the similarities between the matrix partitioning problem an
 
 A hypergraph is simply a generalization of a graph: we do not consider edges that connect two nodes, but rather \emph{hyperedges} (or \emph{nets}), which are subsets of nodes. Apart from considering only non-empty hyperedges, note that there is no other restriction on their cardinality.
 
-Hypergraphs, and in particular the hypergraph partitioning problem are already well known in literature: they have a natural application in the designing of integrated circuits (VLSI), in finding efficient storage of large databases on disks, and data mining \cite{vlsi}, as well as urban transportation design and study of propositional logic \cite{papa_hypergraph}.
+Hypergraphs, and in particular the hypergraph partitioning problem are already well known in literature: they have a natural application in the design of integrated circuits (VLSI), in finding efficient storage of large databases on disks, and data mining \cite{vlsi}, as well as urban transportation design and study of propositional logic \cite{papa_hypergraph}.
 
 Because of this extensive application basis, translating our matrix partitioning problem to a hypergraph partitioning problem seems quite convenient, as all the methods already developed can be analyzed and employed also in our case.
 
-Figure \ref{fig:hypergraph} shows an example of such a hypergraph. Each colored set represents a different hyperedge; we can see that we can have hyperedges which contain only one node.
+Figure \ref{fig:hypergraph} shows an example of a hypergraph. Each colored set represents a different hyperedge; we can see that we can have hyperedges which contain only one node.
 
 \begin{figure}[h]
 	\centering
@@ -293,9 +293,9 @@ On a higher level, one of the benefits of this decomposition model is easy to un
 
 \section{Earlier work} \label{sec:earlier_work} 
 
-Among the models used to translate matrix partitioning into hypergraph partitioning, we already mentioned row-net and column-net \cite{hypergraph_model}, proposed in 1999, and a more recent fine-grained approach \cite{hypergraph_finegrain}, proposed in 2001. New models are relatively rare, and recently Pelt and Bisseling proposed the \textbf{medium-grain} model \cite{mediumgrain}.  As this model is at the base of our work, a more detailed explanation will be given in Section \ref{sec:mediumgrain}.
+Among the models used to translate matrix partitioning into hypergraph partitioning, we already mentioned row-net and column-net \cite{hypergraph_model}, proposed in 1999, and a more recent fine-grained approach \cite{hypergraph_finegrain}, proposed in 2001. 
 
-In addition to these models, there has been some research effort towards the creation of more sofisticated methods, which often comprise several stages and combine different models.
+In addition to these models, there has been some research effort towards the creation of more sofisticated methods, which often comprise several stages and combine different models. Recently Pelt and Bisseling proposed the \textbf{medium-grain} method \cite{mediumgrain}.  As this method is at the base of our work, a more detailed explanation will be given in Section \ref{sec:mediumgrain}.
 
 For example, Uçar and Aykanat \cite{hypergraph_revisiting} first employ an elementary 1-dimensional hypergraph model, and then they transform it in several ways to different hypergraph models suitable for both symmetric and unsymmetric matrix partitionings; it is important to note that these models also include the input and output vectors, and therefore a few extra vertices are added to the hypergraph.
 
@@ -304,7 +304,7 @@ A different 2-dimensional approach is given by the \emph{coarse-grain} method \c
 Moreover, Vastenhouw and Bisseling proposed a 2-dimensional recursive method for data distribution \cite{mondriaan}; this greedy method splits recursively a rectangular matrix into 2 parts.
 At each step of the recursion, there is the choice on the direction to be taken in the next step: two different strategies are proposed, alternating splitting directions or simply trying to split both vertically and horizontally and taking greedily the best of the two.
 
-Besides these general purpose models and methods, it is also possible to take into account the structure of the matrix to be partitioned: Hu, Maguire and Blake present in \cite{hu2000} an algorithm for nonsymmetric matrices that performs rows and columns permutations, getting a bordered block diagonal form and then trying to assign matrix rows such that the number of cut columns is minimized.
+Besides these general purpose models and methods, it is also possible to take into account the structure of the matrix to be partitioned: Hu, Maguire, and Blake present in \cite{hu2000} an algorithm for nonsymmetric matrices that performs row and column permutations, obtaining a bordered block diagonal form and then trying to assign matrix rows such that the number of cut columns is minimized.
 
 In general, as there is such a wide variety of different methods and models, it might be difficult to choose the best one, given a matrix to partition. {\c{C}}ataly{\"u}rek, Aykanat, and U{\c{c}}ar propose a partitioning recipe \cite{catalyurek_recipe} that chooses a partitioning method according to some matrix characteristics.
 
@@ -316,13 +316,13 @@ To solve large instances, all these partitioners use a multi-level method: the l
 
 Finally, these existing software partitioners are all based on \emph{recursive bisection}: instead of partitioning the hypergraph directly into the desired number of parts, they execute a sequence of bisections of the partitions. This is a good simplification in the sense that it just suffices to find good algorithms for bipartitioning, and also because splitting a hypergraph in just two parts is much easier; there is however one major flaw with this approach: using this recursive bisection  we might not be able to reach the same quality of a solution as with direct splitting into the desired number of parts. This flaw is, however, often ignored and direct splitters into more than two parts are rare.
 
-\section{Medium-grain model} \label{sec:mediumgrain}
+\section{Medium-grain method} \label{sec:mediumgrain}
 
 All of the possible ways of translating the matrix partitioning problem into a hypergraph partitioning problem have different advantages and drawbacks: the 1-dimensional ones, row-net and colum-net, eliminate completely one source of communication but are somewhat too restrictive; fine-grain, on the contrary, does not provide any kind of limitation on the choices for the partitioning, but the resulting hypergraph is often too big to manage.
 
-A new model has recently been proposed by Pelt and Bisseling \cite{mediumgrain}, which can be described as a sort of middle ground between the 1-dimensional models and fine-grain model. The resulting partitioning is 2-dimensional by design (thus avoiding the limitations of the row-net and column-net models), but it still imposes that clusters of nonzeros from the same rows and columns are assigned to the same processor, thus reducing the size of the final hypergraph, avoiding the main disadvantage of the fine-grain model.
+A new method has recently been proposed by Pelt and Bisseling \cite{mediumgrain}, which can be described as a sort of middle ground between the 1-dimensional models and fine-grain model. The resulting partitioning is 2-dimensional by design (thus avoiding the limitations of the row-net and column-net models), but it still imposes that clusters of nonzeros from the same rows and columns are assigned to the same processor, thus reducing the size of the final hypergraph, avoiding the main disadvantage of the fine-grain model.
 
-The key of the medium-grain model lies into the splitting of our original matrix $A$ in two parts, $A_r$ and $A_c$, such that $A_r + A_c = A$. Then, we proceed to construct the auxiliary block-matrix $B$, of size $(m+n) \times (m+n)$, defined as
+The key of the medium-grain method lies into the splitting of our original matrix $A$ in two parts, $A_r$ and $A_c$, such that $A_r + A_c = A$. Then, we proceed to construct the auxiliary block-matrix $B$, of size $(m+n) \times (m+n)$, defined as
 
 \begin{align}
 	B:=	\begin{bmatrix}
@@ -380,7 +380,7 @@ Figure \ref{fig:mediumgrain-1} illustrates this process for a $3 \times 6$ recta
 		\node at (64,-2) {row-net};
 		\node at (64,-4) {model};
 	\end{tikzpicture}
-	\caption{Example of the construction of the matrix $B$ from a $6 \times 12$ matrix $A$, for which the sets $A_r$ and $A_c$ were previously established and colored differently. In the resulting matrix, the dummy nonzeros are depicted in black.}
+	\caption{Example of the construction of the matrix $B$ from a $6 \times 12$ matrix $A$, for which the sets $A_r$ and $A_c$ were previously established and colored differently. In the resulting matrix, the added diagonal nonzeros are depicted in black. Not all diagonal elements are needed, because of empty rows and columns in $A_r$ and $A_c$.}
 	\label{fig:mediumgrain-1}
 \end{figure}
 
@@ -448,11 +448,11 @@ The usefulness of $A_c$ and $A_r$ is clear if we consider that we use the row-ne
 
 The diagonal elements of $B$ are used only to compute the communication volume. Let us consider the $k$th column of $A$; the corresponding nonzeros can be found in the $k$th column of $A_c$  and in the $k$th row of $A_r^T$. If both these parts are nonempty, i.e. the $k$th column of $A$ was not fully assigned to either $A_r$ or $A_c$, we need to be careful when we compute the communication volume of a given partitioning: if these parts are to different processors, communication is needed in Algorithm \ref{alg:matvec}.
 
-Therefore the diagonal nonzero $B_{k,k}$, assigned by the row-net model to the same processor as the $k$th column of $A_c$, that belongs to same row of $B$ as the $k$th row of $A_r$, has the purpose of ensuring a correct computation of the communication volume \cite[Th.~3.1]{mediumgrain}. Note that, implementation-wise, there is no need to have the complete diagonal of $B$: we put a nonzero if and only if the corresponding row of $A_r^T$ and column of $A_c$ are both nonempty.
+Therefore the diagonal nonzero $B_{k,k}$, assigned by the row-net model to the same processor as the $k$th column of $A_c$, that belongs to the same row of $B$ as the $k$th row of $A_r$, has the purpose of ensuring a correct computation of the communication volume \cite[Th.~3.1]{mediumgrain}. Note that, implementation-wise, there is no need to have the complete diagonal of $B$: we put a nonzero if and only if the corresponding row of $A_r^T$ and column of $A_c$ are both nonempty.
 
-Experimental results, performed with both the Mondriaan and PaToH packages seem to confirm that this model has indeed some advantages compared to the column-net, row-net and fine-grain models, both regarding partitioning time and solution quality. Because of these good results, it is our goal to investigate further the properties of this model, following two possible directions.
+Experimental results, performed with both the Mondriaan and PaToH packages seem to confirm that this medium-grain method has indeed some advantages compared to the column-net, row-net and fine-grain models, both regarding partitioning time and solution quality. Because of these good results, it is our goal to investigate further the properties of this method, following two possible directions.
 
-First of all, as the outcome of the medium-grain model depends remarkably on the initial split of $A$ into $A_r$ and $A_c$, it is interesting to investigate the quality of the algorithm originally proposed in \cite{mondriaan} to achieve this initial partitioning; secondly, we will try to develop a fully iterative method that employs the medium-grain model, where a full multi-level partitioning is performed at each iteration and computation time is traded for solution quality.
+First of all, as the outcome of the medium-grain method depends remarkably on the initial split of $A$ into $A_r$ and $A_c$, it is interesting to investigate the quality of the algorithm originally proposed in \cite{mondriaan} to achieve this initial partitioning; secondly, we will try to develop a fully iterative method that employs the medium-grain method, where a full multi-level partitioning is performed at each iteration and computation time is traded for solution quality.
 
 Both these research directions share an important part: we just need to develop efficient methods to compute from the given matrix $A$ the matrices $A_r$ or $A_c$ required for the medium grain model, either from scratch or starting from an already existing partitioning (later in the work we will talk, respectively, about \emph{partition-oblivious} and \emph{partition-aware} algorithms). 
 
