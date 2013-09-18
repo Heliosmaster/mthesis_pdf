@@ -386,7 +386,7 @@ The results for the partition-oblivious heuristics can be found in Table \ref{ta
 \begin{table}[h]
 	\renewcommand{\arraystretch}{1.3}
 	\centering
-	\begin{tabular}{|l|x{2.8cm}|x{2.8cm}|x{2.8cm}|}
+	\begin{tabular}{|l|x{2.6cm}|x{2.6cm}|x{2.6cm}|}
 		\hline
 		\multirow{2}{*}{\textbf{Matrix}} & \multicolumn{3}{c|}{\textbf{Heuristic}} \\ \cline{2-4}
 		& \texttt{medium-grain} &  \texttt{po\_localview} & \texttt{po\_is} \\\hline
@@ -462,52 +462,54 @@ The main consequence of this series of experiments is that none of the examined 
 
 However, the algorithms \verb|pa_localbest|, \verb|pa_is_1| and \verb|pa_is_3| produced very interesting results with (strongly) rectangular matrices. In particular, if we were to consider only such matrices (i.e. \verb|lpi_ceria3d|, \verb|dfl001|, \verb|deltaX|, \verb|cre_b|, \verb|tbdmatlab|, \verb|nug30| and \verb|tbdlinux|) we would obtain much better results: the value of $\rho$ for these heuristics would respectively be of 0.99, 0.99 and 0.98, showing that indeed these schemes perform better (albeit slightly) than \verb|medium-grain|. This other alternative finding shows that the independent set approach devised in Chapter \ref{chap:independent_set} is indeed worthy of deeper investigation, as we will discuss in more detail in Chapter \ref{chap:conclusions}.
 
-\section{Results with an iterative refinement of the final partitionings} \label{sec:iter_refinement}
+\section{Results with iterative refinement of the final partitionings} \label{sec:iter_refinement}
 
-In Section \ref{sec:preliminary_po} we argued that the results of the medium-grain method were better than the one we achieved with \verb|po_localview| also because the former employed an iterative refinement procedure \cite{mediumgrain}.
+In Section \ref{sec:preliminary_po} we argued that the results of the medium-grain method were better than the one we achieved with \verb|po_localview| because, among other things, the former employed an iterative refinement procedure \cite{mediumgrain}, outlined as follows.
 
-After partitioning the matrix $A$ into two sets, $A_0$ and $A_1$, we can use these sets to create the matrix $B$ of the medium-grain method: for example, $A_r := A_0$ and $A_c := A_1$. Now, we do not use this matrix $B$ as in the medium-grain method to obtain a new partitioning, but instead we aim at improving the current one.
+After partitioning the matrix $A$ into two sets, $A_0$ and $A_1$, we can use these sets to create the matrix $B$ of the medium-grain method: for example, $A_r := A_0$ and $A_c := A_1$. Now, we do not use this matrix $B$ as in the medium-grain method to obtain a new partitioning, but instead we aim at improving the current one. To encode the current partitioning in this matrix $B$ (thus retaining the same communication volume and load balance), we assign its first $n$ columns (thus, the columns of $A_c$) to a single processor and likewise for the other $m$ columns (i.e. the ones of $A_r^T$). 
 
-To encode the current partitioning in this matrix $B$ (thus retaining the same communication volume and load balance), we assign its first $n$ columns (thus, the columns of $A_c$) to a single processor and likewise for the other $m$ columns (i.e. the ones of $A_r^T$). Then, the hypergraph is created from this matrix $B$ and a single run of the Kernighan-Lin method (with the improvements of Fiduccia and Mattheyses) is performed. The most important point to observe is that the Kernighan-Lin method is monotonically non-increasing: the communication volume is either lowered or remains at the same value.
+Then, the hypergraph is created from this matrix $B$ and a single run of the Kernighan-Lin method (with the improvements of Fiduccia and Mattheyses) is performed. After a step of such refinement is performed, we can repeat the whole procedure and use the obtained partitioning to compute a new matrix $B$. Once the communication volume does not improve anymore, we create the matrix $B$ by swapping the roles of $A_0$ and $A_1$ and restart the whole process. This is repeated several times (continuously swapping the roles of $A_0$ and $A_1$) until no further improvement is obtained.
 
-After a step of such refinement is performed, we can repeat the whole procedure and use the obtained partitioning to compute a new matrix $B$. Once the communication volume does not improve anymore, we create the matrix $B$ by swapping the roles of $A_0$ and $A_1$ and restart the whole process. This is repeated several times (continuously swapping the roles of $A_0$ and $A_1$) until no further improvement is obtained.
+Note that, as the Kernighan-Lin method is monotonically non-increasing, during this whole procedure the communication volume is either lowered or remains at the same value. These few steps are therefore an effective way of refining the current partitioning.
 
-It is interesting then to investigate the impact of this iterative refinement procedure not only on the medium-grain method (which we use to compute the initial partitioning), but also with our algorithms. Therefore, we refine also the partitioning obtained with both partition-oblivious and partition-aware types of heuristics.
+It is interesting then to investigate the impact of this iterative refinement procedure not only on the medium-grain method (which we use to compute the initial partitionings), but also with our algorithms.
 
-Table \ref{tab:po_ir} and \ref{tab:pa_ir} correspond to Table \ref{tab:final_po} and \ref{tab:final_pa}, respectively.
+In this perspective, Table \ref{tab:po_ir} and \ref{tab:pa_ir} correspond to Table \ref{tab:final_po} and \ref{tab:final_pa}.
 
 \begin{table}[h]
 	\renewcommand{\arraystretch}{1.3}
 	\centering
-	\begin{tabular}{|l|x{2.8cm}|x{2.8cm}|x{2.8cm}|}
+	\begin{tabular}{|l|x{2.6cm}|x{2.6cm}|x{2.6cm}|}
 		\hline
 		\multirow{2}{*}{\textbf{Matrix}} & \multicolumn{3}{c|}{\textbf{Heuristic}} \\ \cline{2-4}
 		& \texttt{medium-grain} &  \texttt{po\_localview} & \texttt{po\_is} \\\hline
-		\verb|lpi_ceria3d| & 222 136 \\ 
-		\verb|dfl001| & 594 586 \\
-		\verb|delaunay_n15| & 310 318\\
-		\verb|deltaX| &  236 216 \\
-		\verb|cre_b| & 556 597 \\
-		\verb|tbdmatlab| & 3903 4718 \\
-		\verb|nug30| & 36215 29110 \\
-		\verb|coAuthorsCiteseer| & 9501 10484 \\
-		\verb|bcsstk30| & 541 613 \\
-		\verb|bcsstk32| & 864 1039 \\
-		\verb|wave| & 4712 4727 \\
-		\verb|tbdlinux| & 8047 13253 \\
-		\verb|rgg_n_2_18_s0| & \\
-		\verb|belgium_osm| & 233 258 \\
-		\verb|polyDFT| &  3701 3456 \\
-		\verb|netherlands_osm| & 193 200\\
-		\verb|cage13| & 45177 50831\\
-		\verb|italy_osm| & 279 283\\ \hline
+		\verb|lpi_ceria3d| &  222 & 243 & \textbf{136} \\ 
+		\verb|dfl001| &  594 & \textbf{577} & 586 \\
+		\verb|delaunay_n15| &  \textbf{310} & 327 & 318\\
+		\verb|deltaX|  & 236 & 220 & \textbf{216} \\
+		\verb|cre_b| &  \textbf{556} & 589 & 597 \\
+		\verb|tbdmatlab| &  \textbf{3903} & 4199 & 4718 \\
+		\verb|nug30| &  36215 & 37738 & \textbf{29110} \\
+		\verb|coAuthorsCiteseer| & \textbf{9501} & 10210 & 10484 \\
+		\verb|bcsstk30| &  \textbf{541} & 755 & 613 \\
+		\verb|bcsstk32| &  \textbf{864} & 940 & 1039 \\
+		\verb|wave| &  \textbf{4712} & 5311 & 4727 \\
+		\verb|tbdlinux| &  \textbf{8047} & 8278 & 13253 \\
+		\verb|rgg_n_2_18_s0| &  \textbf{902} & 1003 & - \\
+		\verb|belgium_osm| &  \textbf{233} & 249 & 258 \\
+		\verb|polyDFT|  & 3701 & 3701 & \textbf{3456} \\
+		\verb|netherlands_osm| &  \textbf{193} & 196 & 200\\
+		\verb|cage13| &  \textbf{45177} & 51753 & 50831\\
+		\verb|italy_osm| &  \textbf{279} & 300 & 283 \\ \hline
 	% 1371 & 1468 &&& 1488 & 1826
-		\multicolumn{1}{|r|}{$\rho$}	& 1.0 &  & 1.04 \\ \hline
+		\multicolumn{1}{|r|}{$\rho$}	& 1.0 & 1.07  & 1.06 \\ \hline
 	\end{tabular}
 	\caption{Results of the partition-oblivious heuristics with iterative refinement. For each matrix, the best found average partitioning is highlighted.} \label{tab:po_ir}
 \end{table}
 
-We can see that with the partion-oblivious heuristics, and in particular \verb|po_is|, the iterative refinement procedure considerably improves the final result. We can indeed see that the average communication volume is, for \verb|po_localview|, only X\% higher than \verb|medium-grain|, whereas for \verb|po_is| we have a value 4\% worse than our reference.
+We can see that with the heuristic \verb|po_is|, the iterative refinement procedure considerably improves the final result, as the average communication volume is only 6\% higher than \verb|medium-grain| (down from 22\%).
+
+With the other partition-oblivious heuristic, however, the results hardly improved, even if theoretically the average communication volume should have been closer to the one of \verb|medium-grain|. This discrepancy might be explained in the fact that, in reality, in the default algorithm for the medium-grain method, the assignment of nonzero to $A_r$ or $A_c$ works in a slightly different way: as outlined in Algorithm \ref{alg:localview-po}, in our heuristic \verb|po_localview|, we assign such nonzero to the shorter dimension (and break ties uniformly), whereas on \verb|medium-grain| the assignment of the nonzeros that are alone in a row or a column, and only with those, is reversed. This is the same reasoning for the parameters \verb|w| and \verb|nw| in Section \ref{sec:hot_restart}. In our experiments, we concluded that this operation was not particularly effective, whereas in the case of this partition-oblivious heuristics it has a great beneficial effect.
 
 \begin{sidewaystable}[ph!]
 		\centering
@@ -539,18 +541,22 @@ We can see that with the partion-oblivious heuristics, and in particular \verb|p
 	\caption{Results of the selected partition-aware heuristics with iterative refinement. The best found partitioning for each matrix is highlighted. Similarly as before, the column ``initial'' represents the average of the initial partitionings computed with \texttt{medium-grain}, whereas ``final'' represents the average of the final partitionings for that heuristic.} \label{tab:pa_ir}
 \end{sidewaystable}
 \pagebreak 
-The results shown in this table are indeed very interesting, as it seems that the iterative refinement procedure improves considerably our final results. For almost every algorithm, the average of the final partitionings was very close to the one obtained with the medium-grain method. Furthermore, we can see that \verb|pa_localbest| has a communication volume, on average, 1\% lower than \verb|medium-grain|.
 
-If, similarly as before, we were to consider only the results for rectangular matrices, the value of $\rho$ for \verb|pa_localview|, \verb|pa_is_1| and \verb|pa_is_3| would be, respectively, of 0.98, 0.96 and 0.96, showing that there is also in this case an improvement.
+The results shown in Table \ref{tab:pa_ir} are indeed very interesting, as it seems that the iterative refinement procedure improves considerably our final results. For almost every algorithm, the average of the final partitionings was very close to the one obtained with the medium-grain method. Furthermore, we can see that \verb|pa_localbest| has a communication volume, on average, 1\% lower than \verb|medium-grain|.
 
-Finally, in order to better understand the effectiveness of the iterative refinement procedure, we can consider the geometric mean of the communication volume obtained for each algorithm with iterative refinement, and normalize it w.r.t. the same value obtained without iterative refinement, obtaining a value $\rho'$. The results of this comparison are outlined in Table \ref{tab:comparison_ir}.
+
+Interestingly, comparing Table \ref{tab:pa_ir} and Table \ref{tab:final_pa}, it seems that using iterative refinement has a bigger impact in the matrices for which we had previously a less than satisfactory results. As an example, consider the heuristic \verb|pa_localbest| and the matrices \verb|nug30| and \verb|tbdlinux|: without iterative refinement, the communication values were, respectively, 8\% worse and 8\% better than \verb|medium-grain|; with iterative refinement, instead, the communication values are respectively 1\% worse and 8\% better than the medium-grain method. We can clearly see that the results which were already very good, did not improve considerably, but the overall performance of the heuristic improved greatly because we mitigated the impact of the bad results.
+
+The same observation can be made by considering only the results for rectangular matrices: the value of $\rho$ for \verb|pa_localview|, \verb|pa_is_1| and \verb|pa_is_3| is now, respectively, of 0.98, 0.96 and 0.96. It is clear that for these matrices iterative refinement produces an improvement, although not as noticeable as with all the matrices.
+
+Now, we can look at the results from the point of view of the proposed heuristics, rather than the matrices involved in the testing. For example, we can consider the geometric mean of the communication volume obtained for each algorithm with iterative refinement, and normalize it w.r.t. the same value obtained without iterative refinement, obtaining a value $\rho'$. The results of this comparison are outlined in Table \ref{tab:comparison_ir}.
 
 \begin{table}[H]
 	\centering
 	\begin{tabular}{|l|c|}\hline
 		Heuristic & $\rho'$ \\ \hline
-		\verb|po_localview|  & \\
-		\verb|po_is_0| & 0.79 \\ \hline
+		\verb|po_localview|  & 0.99 \\
+		\verb|po_is| & 0.79 \\ \hline
 		\verb|pa_row| & 0.94 \\
 		\verb|pa_col| & 0.94 \\
 		\verb|pa_localbest| & 0.95 \\
@@ -561,4 +567,4 @@ Finally, in order to better understand the effectiveness of the iterative refine
 	\caption{Comparison of the geometric means of the communication volume for each heuristic, with and without iterative refinement. The values are normalized w.r.t. the first column. In the Table we distinguished between partition-oblivous and partition-aware heuristics.} \label{tab:comparison_ir}
 \end{table}
 
-First of all, from the table it is clear the effectiveness of this procedure, as all the results are lower than 1; secondly, it is interesting to observe how the various heuristics benefit differently from such iterative refinement.
+Also from this table, the effectiveness of the iterative refinement procedure is clear, as all the results are lower than 1. Moreover, it is interesting to observe how the various heuristics benefit differently from such iterative refinement. To this extent, the partition-oblivious heuristics are the ones that exhibits the most variability in the improvement: \verb|po_localview| is only marginally improved (1\% better), whereas \verb|po_is| has a communication volume 21\% lower than without iterative refinement of the final partitionings.
