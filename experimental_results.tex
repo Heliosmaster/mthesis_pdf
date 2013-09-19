@@ -535,15 +535,14 @@ With the other partition-oblivious heuristic, however, the results hardly improv
 		\verb|polyDFT| &  3619 & 3619 & 3637 & 3567 & 3637 & 3567 & 3642 & 3670 & 3639 & \textbf{3488} & 3733 & 3530 \\
 		\verb|netherlands_osm| & 193 & 192 & 196 & 187 & 196 & \textbf{187} & 206 & 194 & 237 & 204 & 212 & 194 \\
 		\verb|cage13| &  45275 & 49039 & 45581 & 49274 & \textbf{45275} & 49039 & 45419 & 49196 & 45389 & 50147 & 45304 & 50361 \\
-		\verb|italy_osm| &  269 & 280 & \textbf{228} & 265 & 228 & 265 & 295 & 284 & 272 & 278 & & \\ \hline
-		\multicolumn{1}{|r|}{$\rho$}	&  1.00 & 1.02 & 1.00 & 1.01 & 1.00 & 0.99 & 1.00 & 1.02 & 1.00 & 1.01 & 1.00 & \\  \hline
+		\verb|italy_osm| &  269 & 280 & \textbf{228} & 265 & 228 & 265 & 295 & 284 & 272 & 278 & 278 & 278 \\ \hline
+		\multicolumn{1}{|r|}{$\rho$}	&  1.00 & 1.02 & 1.00 & 1.01 & 1.00 & 0.99 & 1.00 & 1.02 & 1.00 & 1.01 & 1.00 & 1.01 \\  \hline
 	\end{tabular}
 	\caption{Results of the selected partition-aware heuristics with iterative refinement. The best found partitioning for each matrix is highlighted. Similarly as before, the column ``initial'' represents the average of the initial partitionings computed with \texttt{medium-grain}, whereas ``final'' represents the average of the final partitionings for that heuristic.} \label{tab:pa_ir}
 \end{sidewaystable}
 \pagebreak 
 
 The results shown in Table \ref{tab:pa_ir} are indeed very interesting, as it seems that the iterative refinement procedure improves considerably our final results. For almost every algorithm, the average of the final partitionings was very close to the one obtained with the medium-grain method. Furthermore, we can see that \verb|pa_localbest| has a communication volume, on average, 1\% lower than \verb|medium-grain|.
-
 
 Interestingly, comparing Table \ref{tab:pa_ir} and Table \ref{tab:final_pa}, it seems that using iterative refinement has a bigger impact in the matrices for which we had previously a less than satisfactory results. As an example, consider the heuristic \verb|pa_localbest| and the matrices \verb|nug30| and \verb|tbdlinux|: without iterative refinement, the communication values were, respectively, 8\% worse and 8\% better than \verb|medium-grain|; with iterative refinement, instead, the communication values are respectively 1\% worse and 8\% better than the medium-grain method. We can clearly see that the results which were already very good, did not improve considerably, but the overall performance of the heuristic improved greatly because we mitigated the impact of the bad results.
 
@@ -562,7 +561,7 @@ Now, we can look at the results from the point of view of the proposed heuristic
 		\verb|pa_localbest| & 0.95 \\
 		\verb|pa_simple| & 0.98 \\
 		\verb|pa_is_1| & 0.97 \\
-		\verb|pa_is_3| &  \\ \hline
+		\verb|pa_is_3| & 0.95 \\ \hline
 	\end{tabular}
 	\caption{Comparison of the geometric means of the communication volume for each heuristic, with and without iterative refinement. The values are normalized w.r.t. the first column. In the Table we distinguished between partition-oblivous and partition-aware heuristics.} \label{tab:comparison_ir}
 \end{table}
