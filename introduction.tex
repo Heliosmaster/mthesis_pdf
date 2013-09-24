@@ -126,12 +126,14 @@ Figure \ref{fig:communication} shows an example of the communication involved in
 
 As our main interest is to \textbf{minimize} the time spent by the parallel machine computing this sparse matrix-vector multiplication, we need to compute explicitly the cost of Algorithm \ref{alg:matvec}: we can immediately note that such an algorithm, which follows the Bulk Synchronous Parallel model \cite{bsp_paper}, consists of two communication supersteps separated by a computation superstep.
 
-The time spent by a parallel machine in a computation superstep is exactly the time taken by the processor that finishes last: more formally, the time cost of step (1):
+The time spent (in the sense of number of operations performed) by a parallel machine in a computation superstep is exactly the time taken by the processor that finishes last: more formally, the time cost of step (1):
 
 \begin{align}
 	T_{(1)} = \max_{0 \leq s < p } |A_s|.
 	\label{eq:T_comp}
 \end{align}
+
+where $|A_s|$ denotes the size of $A_s$, the part of $A$ assigned to processor $s$.
 
 It is easy to understand that, in order to have efficient parallelization, the computation load has to be distributed evenly. Usually, however, it is not possible to achieve a perfect load balance (e.g. when dividing an odd number of computations among an even number of processors) and we have to reason in terms of an allowed imbalance $\varepsilon$. Consequently, we impose the following hard constraint about the maximum size of the subsets of nonzeros assigned to each processor, according to \cite[eq.~4.27]{BSP}:
 
@@ -196,7 +198,7 @@ Previously, we claimed that the matrix and both the vectors have to be partition
 
 If a full column of our matrix $A$ is assigned to the same processor, we can freely assign the corresponding component of $v$ to the same processor, eliminating completely one source of communication (namely, the fan-out for that column). The same reasoning can be done for the rows. This simplification is possible because imposing a hard constraint similar to \eqref{eq:balance} also to the vector distribution is not helpful, as it only affects the time of linear vector operations outside the matrix-vector multiplication, which are in generally much cheaper \cite[Sec.~3]{mondriaan}. 
 
-We can describe more formally the communications cost, following the notation of \cite[Def.~2.1]{mondriaan}: let $A_0,\dots,A_{p-1}$ be a $p$-way (with $p \geq 1$) partitioning of the sparse matrix $A$ of size $m \times n$. Let $\lambda_i$ denote the number of processors which have a nonzero of row $i$ and let $\mu_j$ be the number of processors that have a nonzero of column $j$; note that, because we assumed that all the rows and columns are nonempty, $\lambda_i, \mu_j \geq 1$. Then the total time costs for the communication steps in our Algorithm \ref{alg:matvec} are:
+We can describe more formally the communication costs, following the notation of \cite[Def.~2.1]{mondriaan}: let $A_0,\dots,A_{p-1}$ be a $p$-way (with $p \geq 1$) partitioning of the sparse matrix $A$ of size $m \times n$. Let $\lambda_i$ denote the number of processors which have a nonzero of row $i$ and let $\mu_j$ be the number of processors that have a nonzero of column $j$; note that, because we assumed that all the rows and columns are nonempty, $\lambda_i, \mu_j \geq 1$. Then the total time costs for the communication steps in our Algorithm \ref{alg:matvec} are:
 
 \begin{align}
 	\begin{aligned}
