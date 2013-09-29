@@ -361,7 +361,7 @@ $\dot{A}_{01}$, $\dot{A}_{10}$, $\dot{A}_{12}$, $\dot{A}_{21}$ can be easily ass
 
 
 \begin{frame}{Assignment of blocks of nonzeros}
-	\begin{minipage}{6cm}
+	\begin{minipage}{5.5cm}
 	\begin{figure}[h]
 	\centering
 	\begin{tikzpicture}[scale=0.35,font=\footnotesize]
@@ -405,11 +405,11 @@ $\dot{A}_{01}$, $\dot{A}_{10}$, $\dot{A}_{12}$, $\dot{A}_{21}$ can be easily ass
 \only<2->{
 \begin{align*}
 	\begin{bmatrix}
-		R & R & & & \\
-		C & R/C & R & & \\
-		& C & M & C & \\
-		& & R & R/C & C \\
-		& & & R & C \\
+		A_r & A_r & & & \\
+		A_c & A_r/A_c & A_r & & \\
+		& A_c & M & A_c & \\
+		& & A_r & A_r/A_c & A_c \\
+		& & & A_r & A_c \\
 	\end{bmatrix}
 \end{align*}
 
@@ -485,7 +485,9 @@ In this form, other than having information on nonzeros (rows/columns cut/uncut)
 We need to reason in terms of \textbf{partial assignment}:
 
 	\begin{itemize}
-		\item	computation of a \textbf{priority vector}: a permutation of the indices $\{0,\dots,m+n-1\}$ (indices $\{0,\dots,m-1\}$ correspond to rows, $\{m,\dots,m+n-1\}$ to columns);
+		\item	computation of a \textbf{priority vector}:
+			
+			a permutation of the indices $\{0,\dots,m+n-1\}$ (indices $\{0,\dots,m-1\}$ correspond to rows, $\{m,\dots,m+n-1\}$ to columns).
 		\item \textbf{overpainting algorithm}.
 	\end{itemize}
 \end{frame}

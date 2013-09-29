@@ -4,7 +4,7 @@ Partial assignment of rows and columns seems an interesting idea, but we want to
 
 \vspace{0.3cm}
 
-\textbf{Goal}: Find the biggest subset (in terms of nonzeros) of $\{0,\dots,m+n-1\}$ which can be assigned completely (i.e. full rows and full columns) without causing communication.
+\textbf{Goal}: Find the biggest subset of $\{0,\dots,m+n-1\}$ which can be assigned completely (i.e. full rows and full columns) without causing communication.
 
 \vspace{0.3cm}
 
@@ -58,13 +58,9 @@ Graph theory approach: translating the sparsity pattern of $A$ in a particular w
 	A \emph{maximum} independent set is an independent set of $G$ with maximum cardinality. 
  \end{definition}
 
- \begin{definition}
- 	A \emph{vertex cover} is a subset $V' \subseteq V$ such that $\forall (u,v) \in E$ we have $u \in V' \vee v \in V'$, i.e. at least one of the endpoints of any edge is in the cover. A \emph{minimum} vertex cover is a vertex cover of $G$ with minimum cardinality.
-\end{definition}
-
 \begin{itemize}
-	\item A maximum independent set is exactly what we are looking for;
-	\item Immediate to see that independent set and vertex cover are complementary
+	\item A maximum independent set our desider object;
+	\item the complementary of a (maximum) independent set is a (minimum) vertex cover
 \end{itemize}
 
 \end{frame}

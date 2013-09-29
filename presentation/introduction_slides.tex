@@ -210,6 +210,12 @@ The matrix partitioning can be viewed from the graph theory point of view:
 \end{itemize}
 
 Further iteration: exact modeling of the matrix partitioning problem through \textbf{hypergraph partitioning}.
+
+\begin{itemize}
+	\item A partition of a hypergraph is simply the partition of the set of vertices $V$ into $V_0,\dots,V_{p-1}$.
+	\item A hyperedge $e = \{v_{e_1},\dots,v_{e_k}\}$ is \textbf{cut} if two of its vertices belong to different sets of the partition.
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}{Hypergraph partitioning}
@@ -252,12 +258,6 @@ Further iteration: exact modeling of the matrix partitioning problem through \te
 
 \end{frame}
 
-\begin{frame}{Hypergraph partitioning}
-
-A partition of a hypergraph is simply the partition of the set of vertices $V$ into $V_0,\dots,V_{p-1}$.
-
-A hyperedge $e = \{v_{e_1},\dots,v_{e_k}\}$ is \textbf{cut} if two of its vertices belong to different sets of the partition.
-\end{frame}
 
 \begin{frame}{Hypergraph partitioning}
 
@@ -276,7 +276,7 @@ As hypergraph partitioning consists in assignment of the vertices, columns/rows 
 
 \begin{frame}{Hypergraph partitioning}
 	\begin{itemize}
-		\item 2-dimensional (each nonzero independent)
+		\item 2-dimensional
 			\begin{itemize}
 					\vspace{0.2cm}
 				\item \textbf{fine grain}: nonzeros of $A$ are vertices, rows and columns are hyperedges. The nonzero $a_{ij}$ is placed in the hyperedges $i$ and $j$
@@ -290,7 +290,7 @@ As hypergraph partitioning consists in assignment of the vertices, columns/rows 
 
 					\vspace{0.2cm}
 
-					Middle ground between 1-dimensional models and fine grain: good compromise between the size of the hypergraph and freedom during the partitioning.
+					Good compromise between the size of the hypergraph and freedom during the partitioning.
 
 			\end{itemize}
 	\end{itemize}
