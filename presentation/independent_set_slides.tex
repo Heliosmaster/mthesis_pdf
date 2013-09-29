@@ -1,0 +1,155 @@
+\begin{frame}{Independent set formulation}
+
+Partial assignment of rows and columns seems an interesting idea, but we want to reduce, as much as possible, the number of cut rows/columns.
+
+\vspace{0.3cm}
+
+\textbf{Goal}: Find the biggest subset (in terms of nonzeros) of $\{0,\dots,m+n-1\}$ which can be assigned completely (i.e. full rows and full columns) without causing communication.
+
+\vspace{0.3cm}
+
+Graph theory approach: translating the sparsity pattern of $A$ in a particular way, we are looking for a \textbf{maximum independent set}.
+
+\end{frame}
+
+\begin{frame}{Construction of the graph}
+	We construct the bipartite graph $G=(L \cup R,E)$ as follows:
+
+\begin{itemize}\itemsep=0.3cm
+		\item Rows and columns are vertices
+		\begin{itemize}\itemsep=0.2cm
+			\item $L = \{r_0,\dots,r_{m-1}\}$
+		\item $R = \{c_0,\dots,c_{n-1}\}$
+		\end{itemize}
+
+		\item Edges correspond to nonzeros: $e = (i,j) \iff a_{ij} \neq 0$
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Construction of the graph}
+\begin{figure}[h]
+	\centering
+	\begin{tikzpicture}[scale=0.35]
+		\foreach \x / \y in {1/1,1/3,2/2,4/5,4/4,7/3,8/5,6/7,9/1} { \fill[myred] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+		\foreach \x / \y in {1/2,2/3,3/6,3/9,6/6,5/1,7/8,8/7,9/2} { \fill[myblue] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+%		\draw[semithick] (0,-9) grid (9,0);
+		\draw[thick] (0,-9) rectangle (9,0);
+
+		\draw[myarrow,thick] (10,-4.5) -- (13,-4.5);
+
+		\foreach \x in {0,...,8} { 
+			\node[vertex,label=left:\(r_{\x}\)] (r\x) at (16,{3.5-2*\x}) {}; 
+			\node[vertex,label=right:\(c_{\x}\)] (c\x) at (26,{3.5-2*\x}) {};
+			\node at (-1,{-\x-0.5}) {\x};
+			\node at (\x+0.5,1) {\x};
+		}
+
+		\foreach \x / \y in {0/0,0/2,1/1,3/4,3/3,6/2,7/4,5/6,8/0} { \draw[myred] (r\x) -- (c\y);}
+		\foreach \x / \y in {0/1,1/2,2/5,2/8,5/5,4/0,6/7,7/6,8/1} { \draw[myblue] (r\x) -- (c\y);} 
+	\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Maximum independent set}
+ \begin{definition}
+		An \emph{independent set} is a subset $V' \subseteq V$ such that $ \forall u,v \in V'$, $(u,v) \notin E$.
+	A \emph{maximum} independent set is an independent set of $G$ with maximum cardinality. 
+ \end{definition}
+
+ \begin{definition}
+ 	A \emph{vertex cover} is a subset $V' \subseteq V$ such that $\forall (u,v) \in E$ we have $u \in V' \vee v \in V'$, i.e. at least one of the endpoints of any edge is in the cover. A \emph{minimum} vertex cover is a vertex cover of $G$ with minimum cardinality.
+\end{definition}
+
+\begin{itemize}
+	\item A maximum independent set is exactly what we are looking for;
+	\item Immediate to see that independent set and vertex cover are complementary
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Maximum independent set}
+	In general, computing a maximum independent set is as hard as partitioning the matrix (both NP-hard problems).
+
+But, luckily, our graph is bipartite:
+
+	\begin{itemize}
+		\item K\H{o}nig's Theorem: on bipartite graphs, maximum matchings and minimum vertex covers have the same size;
+		\item Hopcroft-Karp algorithm: $\mathcal{O}\left(N\sqrt{m+n}\right)$ algorithm to compute a maximum matching on a bipartite graph
+	\end{itemize}
+
+In our case it is not very demanding to compute a maximum independent set.
+
+\end{frame}
+
+\begin{frame}{Hopcroft-Karp algorithm}
+Devised by John Hopcroft and Richard Karp in 1973.
+
+\begin{algorithm}[H]
+	\footnotesize 
+	\begin{algorithmic}
+		\Require{Bipartite graph $G=(L \cup R,E)$}
+		\Ensure{Maximum matching $M$}
+		\State $M \gets \varnothing$
+		\Repeat
+		\State $l_M \gets$ length of the shortest augmenting path, using the matching $M$
+		\State $P \gets \{ P_1,\dots,P_k \}$, a maximal set of vertex-disjoint shortest augmenting paths of length $l_M$
+		\State $M \gets M \oplus (P_1 \cup \dots \cup P_k )$
+		\Until{ $P=\varnothing$}
+	\end{algorithmic}
+\end{algorithm}
+
+In practice, we also progressively compute the minimum vertex cover alongside.
+
+\end{frame}
+
+\begin{frame}{Hopcroft-Karp algorithm}
+
+	The inner loop is as follows:
+
+	\begin{enumerate}
+\item We construct the directed graph $(L \cup R, D)$ from $M$:
+\begin{itemize}
+	\item edges in the matching go from $R$ to $L$
+	\item edges not in the matching go from $L$ to $R$
+\end{itemize}
+\item \textbf{breadth-first search} from unmatched vertices in $L$, which terminates when unmatched vertices in $R$ are reached. 
+
+	$l_M$ is the length of these shortest augmenting paths;
+\item \textbf{depth-first search} from an unmatched vertex in $R$ from the previous step, terminates whenever we reach an unmatched vertex in $L$, the path found is augmenting. 
+	
+We resume with the next depth-first search from another unmatched vertex in $R$.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Hopcroft-Karp algorithm}
+\begin{itemize}\itemsep=0.4cm
+		\item The size of the matching increases in every iteration
+		\item The matching is augmented over several paths simultaneously ($\sqrt{m+n}$ factor in running time)
+		\item The actual running time is usually better than the theoretical one: our matrices are sparse and the graphs is sparse as well, which means fast search phases.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Maximum independent set}
+
+	Given the set of indices $I$, let $S_I$ denote the maximum independent set computed on the matrix $A(I)$.
+
+	One partition-oblivious heuristic to compute $v$: 
+
+	\begin{enumerate}
+		\item let $I = \{0,\dots,m+n-1\}$, then $v := (S_I,I \setminus S_I)$
+	\end{enumerate}
+
+
+	For partition-aware heuristics, let $U$ be the set of uncut indices, $C$ be the set of cut indices; we have three possibilities:
+
+	\begin{enumerate}
+	\item we compute $S_U$ and have $v := (S_U,U \setminus S_U, C)$;
+	\item we compute $S_U$, $S_C$ and have $v := (S_U, U \setminus S_U, S_C, C \setminus S_C)$;
+	\item we compute $S_U$, then we define $U' := U \setminus S_U$ and compute $S_{C \cup U'}$, having $v:= (S_U, S_{C \cup U'}, (C \cup U') \setminus S_{C \cup U'})$.
+
+	\end{enumerate}
+\end{frame}
+
+
