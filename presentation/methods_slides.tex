@@ -4,7 +4,7 @@
 
 A few general principles to guide us in the construction of the heuristics:
 
-\begin{itemize}
+\begin{itemize}\itemsep=0.5cm
 	\item short rows/columns (w.r.t. the number of nonzeros) are more likely to be uncut in a good partitioning 
 	\item if a row/column is uncut, the partitioner decided at the previous iteration that it was convenient to do so. 
 		
@@ -431,7 +431,7 @@ $\dot{A}_{01}$, $\dot{A}_{10}$, $\dot{A}_{12}$, $\dot{A}_{21}$ can be easily ass
 
 \vspace{0.4cm}
 
-In this form, other than having information on nonzeros (rows/columns cut/uncut), we also have informations on their neighbors (nonzeros in the same row and column).
+In this form, other than having information on nonzeros (rows/columns cut/uncut), we also have information on their neighbors (nonzeros in the same row and column).
 
 \end{frame}
 
@@ -487,7 +487,7 @@ We need to reason in terms of \textbf{partial assignment}:
 	\begin{itemize}
 		\item	computation of a \textbf{priority vector}:
 			
-			a permutation of the indices $\{0,\dots,m+n-1\}$ 
+			a permutation of the indices $\{0,\dots,m+n-1\}$ (decreasing priority) 
 			\begin{itemize}
 				\item  $\{0,\dots,m-1\}$ correspond to rows;
 				\item  $\{m,\dots,m+n-1\}$ to columns.

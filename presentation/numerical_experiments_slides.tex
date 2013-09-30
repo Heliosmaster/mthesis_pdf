@@ -4,11 +4,11 @@
 		\begin{algorithmic}
 			\Require{Sparse matrix $A$}
 			\Ensure{Partitioning for the matrix $A$}
-			\State Partition $A$ with Mondriaan using the default options and the medium-grain method
+			\State Partition $A$ with Mondriaan using the medium-grain method
 			\For{$i=1,\dots,iter_{max}$}
 			\State Use any of the heuristics described previously to compute $A_r$ and $A_c$
-			\State construct $B$ from $A_r$ and $A_c$
-			\State Partition $B$ with Mondriaan using the default options and the row-net model
+			\State Construct $B$ from $A_r$ and $A_c$
+			\State Partition $B$ with Mondriaan using the row-net model
 			\State Re-construct $A$ with the new partitioning
 			\EndFor
 		\end{algorithmic}
@@ -22,13 +22,13 @@
 
 	All of the heuristics have been implemented following these steps:
 
-	\begin{enumerate}
+\begin{enumerate}\itemsep=0.3cm
 		\item MATLAB prototyping
 		\item Core C implementation (MATLAB compatibility through MEX files)
 		\item Full C implementation
 	\end{enumerate}
 
-	The Hopcroft-Karp algorithm for the maximum indipendent set computation was implemented in the Python programming language.
+	The Hopcroft-Karp algorithm for the maximum independent set computation was implemented in the Python programming language.
 
 \end{frame}
 
@@ -70,11 +70,11 @@
 	\begin{itemize}
 		\item In general, results are much worse than medium-grain method.
 		\item Mixing rows and columns in partial assignment is a bad idea
-		\item Individual assignment of nonzero best strategy (7\% worse than medium-grain)
-		\item Maximum independent set computation yields interesting results (16\% lower communication volume in one matrix, but in general 12\% worse than medium-grain)
+		\item Individual assignment of nonzero (\texttt{po\_localview}) is the best strategy (7\% worse than medium-grain)
+		\item Maximum independent set computation (\texttt{po\_is}) yields interesting results (16\% lower communication volume in one matrix, but in general 12\% worse than medium-grain)
 	\end{itemize}
 
-	2 heuristics (\texttt{po\_localview} and \texttt{po\_is}) selected for deeper investigation.
+	2 heuristics selected for deeper investigation.
 
 \end{frame}
 
@@ -85,19 +85,18 @@
 	\begin{itemize}
 		\item Results closer to medium-grain efficiency
 		\item SBD and SBD2 forms are not worthwile, nor individual assignment of nonzeros
-		\item Mixing rows and columns is still not a good idea, but less damaging
 		\item Refinement in sorting does not yield a substantial difference
-		\item Unsorted concatenation of rows and columns produces good results with rectangular matrices: they can be combined into a \texttt{localbest} heuristic
-		\item Maximum independent set strategy very close to medium-grain, even better in a few matrices
+		\item Unsorted concatenation of rows and columns (\texttt{pa\_row} and \texttt{pa\_col}) produces good results with rectangular matrices: they can be combined into a \texttt{po\_localbest} heuristic (which tries both and picks the best)
+		\item Maximum independent set strategies (\texttt{pa\_is\_1} and \texttt{pa\_is\_3}) are very close to medium-grain, even better in a few matrices
 	\end{itemize}
 
-	5 heuristics (\texttt{pa\_row}, \texttt{pa\_col}, \texttt{pa\_simple}, \texttt{pa\_is\_1}, \texttt{pa\_is\_3}) selected for deeper investigation.
+	5 heuristics selected for deeper investigation.
 
 \end{frame}
 
 \begin{frame}{Number of iterations}
 	\begin{textblock}{170}(15,40)
-		We are developing a fully iterative scheme: how many iterations do we execute?
+		We are developing a fully iterative scheme: how many iterations do we have to execute?
 
 		We run the 5 partition-aware selected heuristics for 10 consecutive iterations for each matrix
 
@@ -141,7 +140,6 @@
 	Partition-aware heuristics:
 
 	\begin{itemize}
-		\item Results similar to preliminary selections: preliminary matrices were good representatives
 		\item Concatenation interesting strategy:
 			\begin{itemize}
 				\item \texttt{pa\_row} and \texttt{pa\_col} 8\% worse than medium-grain
@@ -154,7 +152,11 @@
 \end{frame}
 
 \begin{frame}{Iterative refinement}
+	\vspace{-0.2cm}
+
 	Is there something we can do to improve the results?
+	
+	\vspace{0.2cm}
 
 	Medium-grain employs a procedure of \textbf{iterative refinement}:
 

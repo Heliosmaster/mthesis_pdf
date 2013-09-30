@@ -58,9 +58,9 @@ Graph theory approach: translating the sparsity pattern of $A$ in a particular w
 	A \emph{maximum} independent set is an independent set of $G$ with maximum cardinality. 
  \end{definition}
 
-\begin{itemize}
-	\item A maximum independent set our desider object;
-	\item the complementary of a (maximum) independent set is a (minimum) vertex cover
+\begin{itemize}\itemsep=0.3cm
+	\item Our desired object is the maximum independent set
+	\item The complement of a (maximum) independent set is a (minimum) vertex cover
 \end{itemize}
 
 \end{frame}
@@ -70,7 +70,7 @@ Graph theory approach: translating the sparsity pattern of $A$ in a particular w
 
 But, luckily, our graph is bipartite:
 
-	\begin{itemize}
+	\begin{itemize}\itemsep=0.3cm
 		\item K\H{o}nig's Theorem: on bipartite graphs, maximum matchings and minimum vertex covers have the same size;
 		\item Hopcroft-Karp algorithm: $\mathcal{O}\left(N\sqrt{m+n}\right)$ algorithm to compute a maximum matching on a bipartite graph
 	\end{itemize}
@@ -79,33 +79,33 @@ In our case it is not very demanding to compute a maximum independent set.
 
 \end{frame}
 
-\begin{frame}{Hopcroft-Karp algorithm}
-Devised by John Hopcroft and Richard Karp in 1973.
-
-We start with an empty matching and increase its size in every iteration:
-
-\begin{enumerate}
-\item We construct the directed graph $(L \cup R, D)$ from $M$:
-\begin{itemize}
-	\item edges in the matching go from $R$ to $L$
-	\item edges not in the matching go from $L$ to $R$
-\end{itemize}
-\item \textbf{breadth-first search} from unmatched vertices in $L$, which terminates when unmatched vertices in $R$ are reached. 
-
-	$l_M$ is the length of these shortest augmenting paths;
-\item \textbf{depth-first search} from an unmatched vertex in $R$ from the previous step, terminates whenever we reach an unmatched vertex in $L$, the path found is augmenting. 
-	
-We resume with the next depth-first search from another unmatched vertex in $R$.
-\end{enumerate}
-\end{frame}
-
-\begin{frame}{Hopcroft-Karp algorithm}
-\begin{itemize}\itemsep=0.4cm
-		\item For practical purposes, the minimum vertex cover is constructed along the matching;
-		\item the matching is augmented over several paths simultaneously ($\sqrt{m+n}$ factor in running time);
-		\item the actual running time is usually better than the theoretical one: our matrices are sparse and the graphs is sparse as well, which means fast search phases.
-	\end{itemize}
-\end{frame}
+%\begin{frame}{Hopcroft-Karp algorithm}
+%Devised by John Hopcroft and Richard Karp in 1973.
+%
+%We start with an empty matching and increase its size in every iteration:
+%
+%\begin{enumerate}
+%\item We construct the directed graph $(L \cup R, D)$ from $M$:
+%\begin{itemize}
+%	\item edges in the matching go from $R$ to $L$
+%	\item edges not in the matching go from $L$ to $R$
+%\end{itemize}
+%\item \textbf{breadth-first search} from unmatched vertices in $L$, which terminates when unmatched vertices in $R$ are reached. 
+%
+%	$l_M$ is the length of these shortest augmenting paths;
+%\item \textbf{depth-first search} from an unmatched vertex in $R$ from the previous step, terminates whenever we reach an unmatched vertex in $L$, the path found is augmenting. 
+%	
+%We resume with the next depth-first search from another unmatched vertex in $R$.
+%\end{enumerate}
+%\end{frame}
+%
+%\begin{frame}{Hopcroft-Karp algorithm}
+%\begin{itemize}\itemsep=0.4cm
+%		\item For practical purposes, the minimum vertex cover is constructed along the matching;
+%		\item the matching is augmented over several paths simultaneously ($\sqrt{m+n}$ factor in running time);
+%		\item the actual running time is usually better than the theoretical one: our matrices are sparse and the graphs is sparse as well, which means fast search phases.
+%	\end{itemize}
+%\end{frame}
 
 \begin{frame}{Maximum independent set}
 
@@ -120,12 +120,9 @@ We resume with the next depth-first search from another unmatched vertex in $R$.
 
 	For partition-aware heuristics, let $U$ be the set of uncut indices, $C$ be the set of cut indices; we have three possibilities:
 
-	\begin{enumerate}
+\begin{enumerate}\itemsep=0.3cm
 	\item we compute $S_U$ and have $v := (S_U,U \setminus S_U, C)$;
 	\item we compute $S_U$, $S_C$ and have $v := (S_U, U \setminus S_U, S_C, C \setminus S_C)$;
 	\item we compute $S_U$, then we define $U' := U \setminus S_U$ and compute $S_{C \cup U'}$, having $v:= (S_U, S_{C \cup U'}, (C \cup U') \setminus S_{C \cup U'})$.
-
 	\end{enumerate}
 \end{frame}
-
-

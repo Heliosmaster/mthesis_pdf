@@ -205,7 +205,7 @@ Exact modeling of the matrix partitioning problem through \textbf{hypergraph par
 
 \begin{itemize}
 	\item A partition of a hypergraph is simply the partition of the set of vertices $V$ into $V_0,\dots,V_{p-1}$.
-	\item A hyperedge $e = \{v_{e_1},\dots,v_{e_k}\}$ is \textbf{cut} if two of its vertices belong to different sets of the partition.
+	\item A hyperedge $e = \{v_1,\dots,v_k\}$ is \textbf{cut} if two of its vertices belong to different sets of the partition.
 \end{itemize}
 
 \end{frame}
@@ -344,7 +344,7 @@ As hypergraph partitioning consists in assignment of the vertices, columns/rows 
 
 \begin{itemize}
 
-	\visible<2->{\item Initial split of $A$ into $A^c$ and $A^r$}
+	\visible<2->{\item Initial split of $A$ into $A_c$ and $A_r$}
 	\visible<3->{	\item Construction of the $(m+n)\times (m+n)$ matrix $B$ (with dummy diagonal elements)}
 	\end{itemize}
 
@@ -402,7 +402,7 @@ As hypergraph partitioning consists in assignment of the vertices, columns/rows 
 	\visible<2->{
 \begin{itemize}
 
-\item Partitioning of $B$ with the row-net model (column are kept together)
+\item Partitioning of $B$ with the row-net model (columns are kept together)
 	\end{itemize}
 }
 \end{frame}
@@ -510,12 +510,10 @@ As hypergraph partitioning consists in assignment of the vertices, columns/rows 
 	\item Development of a fully iterative scheme: lowering the communication value by using information on the previous partitioning 
 \end{itemize}
 
-These directions can be combined: we can try to find efficient ways of splitting $A$ into $A_r$ and $A_c$, distinguishing between
+These directions can be combined: we can try to find efficient ways of splitting $A$ into $A_r$ and $A_c$, distinguishing between:
 
 \begin{itemize}
 	\item \emph{partition-oblivious} heuristics: no prior information is required
 	\item \emph{partition-aware} heuristics: requirement of $A$ already partitioned
 \end{itemize}
 \end{frame}
-
-
