@@ -82,29 +82,9 @@ In our case it is not very demanding to compute a maximum independent set.
 \begin{frame}{Hopcroft-Karp algorithm}
 Devised by John Hopcroft and Richard Karp in 1973.
 
-\begin{algorithm}[H]
-	\footnotesize 
-	\begin{algorithmic}
-		\Require{Bipartite graph $G=(L \cup R,E)$}
-		\Ensure{Maximum matching $M$}
-		\State $M \gets \varnothing$
-		\Repeat
-		\State $l_M \gets$ length of the shortest augmenting path, using the matching $M$
-		\State $P \gets \{ P_1,\dots,P_k \}$, a maximal set of vertex-disjoint shortest augmenting paths of length $l_M$
-		\State $M \gets M \oplus (P_1 \cup \dots \cup P_k )$
-		\Until{ $P=\varnothing$}
-	\end{algorithmic}
-\end{algorithm}
+We start with an empty matching and increase its size in every iteration:
 
-In practice, we also progressively compute the minimum vertex cover alongside.
-
-\end{frame}
-
-\begin{frame}{Hopcroft-Karp algorithm}
-
-	The inner loop is as follows:
-
-	\begin{enumerate}
+\begin{enumerate}
 \item We construct the directed graph $(L \cup R, D)$ from $M$:
 \begin{itemize}
 	\item edges in the matching go from $R$ to $L$
@@ -121,9 +101,9 @@ We resume with the next depth-first search from another unmatched vertex in $R$.
 
 \begin{frame}{Hopcroft-Karp algorithm}
 \begin{itemize}\itemsep=0.4cm
-		\item The size of the matching increases in every iteration
-		\item The matching is augmented over several paths simultaneously ($\sqrt{m+n}$ factor in running time)
-		\item The actual running time is usually better than the theoretical one: our matrices are sparse and the graphs is sparse as well, which means fast search phases.
+		\item For practical purposes, the minimum vertex cover is constructed along the matching;
+		\item the matching is augmented over several paths simultaneously ($\sqrt{m+n}$ factor in running time);
+		\item the actual running time is usually better than the theoretical one: our matrices are sparse and the graphs is sparse as well, which means fast search phases.
 	\end{itemize}
 \end{frame}
 

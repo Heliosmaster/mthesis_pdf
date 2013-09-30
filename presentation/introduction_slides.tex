@@ -72,13 +72,12 @@ Local view of the matrix for every processor:
 
 
 \begin{frame}{Parallel matrix-vector multiplication algorithm}
-		Parallel sparse matrix-vector multiplication is made (essentially) by 4 phases:
+		Parallel sparse matrix-vector multiplication is made (essentially) by 3 phases:
 
 	\begin{enumerate}[I)]\itemsep=0.4cm
 			\item \textbf{fan-out}%: each processor receives the required elements of $\vec{v}$ from the others (according to its distribution)
 			\item \textbf{local multiplication}%: where the actual computation is performed
 			\item \textbf{fan-in}%: where each processor sends his contributions to the other processors according to the distribution of $\vec{u}$
-			\item \textbf{sum of all the contributions}
 		\end{enumerate}
 \end{frame}
 
@@ -202,14 +201,7 @@ Local view of the matrix for every processor:
 
 \begin{frame}{Hypergraph partitioning}
 
-The matrix partitioning can be viewed from the graph theory point of view:
-
-\begin{itemize}
-	\item Data represented as \emph{vertices}
-	\item Connections represented as \emph{edges}
-\end{itemize}
-
-Further iteration: exact modeling of the matrix partitioning problem through \textbf{hypergraph partitioning}.
+Exact modeling of the matrix partitioning problem through \textbf{hypergraph partitioning}.
 
 \begin{itemize}
 	\item A partition of a hypergraph is simply the partition of the set of vertices $V$ into $V_0,\dots,V_{p-1}$.
