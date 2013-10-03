@@ -1,6 +1,6 @@
 \chapter{Introduction} \label{chap:introduction}
 \section{Parallel sparse matrix-vector multiplication} \label{sec:par_matvec}
-Matrices are one of the most important mathematical objects, as they can be used to represent a wide variety of data in many scientific disciplines: they can encode the structure of a graph, define Markov chains with finitely many states, or possibly represent linear combinations of quantum states or also the behaviour of electronic components. 
+Matrices are one of the most important mathematical objects, as they can be used to represent a wide variety of data in many scientific disciplines: they can encode the structure of a graph, define Markov chains with finitely many states, or possibly represent linear combinations of quantum states or also the behavior of electronic components. 
 
 In most real-world computations, the systems considered are usually of large size and involve \textbf{sparse} matrices, because the variables at hand are usually connected to a limited number of others (for example, a large graph in which each node has just a handful of incident edges); therefore, the matrices involved have the vast majority of entries equal to 0. More formally, let us consider a matrix of size $m \times n$ with $N$ nonzeros. We say that the matrix is sparse if $ N \ll mn $. Without loss of generality, we assume that each row and column has at least one nonzero (otherwise those rows and columns can easily be removed from the problem).
 
@@ -84,7 +84,7 @@ After this distribution, every processor has to compute its local contribution t
 
 In reality there is also a fourth phase, in which each processor sums up all the contributions received in phase (2) for all of its owned components of $u$; this is a small phase with negligible computational cost compared to phase (2) and for this reason it has been omitted from the algorithm. 
 
-Note that we assume that all of the nonzero values are represented with the same amount of bits. Doing so, we can focus excusively on the coordinates of the nonzeros, omitting completely their values, as it does not influence the cost of a parallel sparse matrix-vector multiplication.
+Note that we assume that all of the nonzero values are represented with the same amount of bits. Doing so, we can focus exclusively on the coordinates of the nonzeros, omitting completely their values, as it does not influence the cost of a parallel sparse matrix-vector multiplication.
 
 Figure \ref{fig:communication} shows an example of the communication involved in phases, or supersteps (0) and (2), for the example partitioning shown in Figure \ref{fig:partition}: the vertical arrows represent the fan-out, while the horizontal arrows represent the fan-in; the color of an arrow indicates which processor is sending data. 
 
@@ -194,7 +194,7 @@ Two possible partitionings of this matrix into two sets are given in Figure \ref
 	\caption{Different partitionings of the matrix from Figure \ref{fig:checkered_matrix}. Red and blue squares represent nonzeros assigned to the two different processors.} \label{fig:checkered_partitions}
 \end{figure}
 
-Previously, we claimed that the matrix and both the vectors have to be partitioned: in reality it is sufficient to consider only the problem of distributing the nonzeroes, and the partitioning of the vector can be executed according to this: because of the structure of the communication supersteps in Algorithm \ref{alg:matvec}, communication is required if and only if the rows/columns of the matrices are \emph{cut}, i.e. assigned to more than one processor.
+Previously, we claimed that the matrix and both the vectors have to be partitioned: in reality it is sufficient to consider only the problem of distributing the nonzeros, and the partitioning of the vector can be executed according to this: because of the structure of the communication supersteps in Algorithm \ref{alg:matvec}, communication is required if and only if the rows/columns of the matrices are \emph{cut}, i.e. assigned to more than one processor.
 
 If a full column of our matrix $A$ is assigned to the same processor, we can freely assign the corresponding component of $v$ to the same processor, eliminating completely one source of communication (namely, the fan-out for that column). The same reasoning can be done for the rows. This simplification is possible because imposing a hard constraint similar to \eqref{eq:balance} also to the vector distribution is not helpful, as it only affects the time of linear vector operations outside the matrix-vector multiplication, which are in generally much cheaper \cite[Sec.~3]{mondriaan}. 
 
@@ -230,7 +230,7 @@ Moreover, we can consider a balance criterion similar to \eqref{eq:balance}:
 
 where $\varepsilon$, similarly as before, represents the allowed imbalance.
 
-Now, given a partition $(V_0,\dots,V_{p-1})$ of the graph $G$, we say that the edge $e=(i,j)$ is \emph{cut} if $i \in V_k, j \in V_l$, with $k \neq l$; otherwise, it is said to be \emph{uncut}. Previously, we claimed that communication during the parallel matrix-vector multiplication can be avoided if a row/column is uncut, and here the goal is the same: we want to minimize the \emph{cutsize}, i.e. the number of edges cut.
+Now, given a partition $(V_0,\dots,V_{p-1})$ of the graph $G$, we say that the edge $e=(i,j)$ is \emph{cut} if $i \in V_k, j \in V_l$, with $k \neq l$; otherwise, it is said to be \emph{uncut}. Previously, we claimed that communication during the parallel matrix-vector multiplication can be avoided if a row/column is uncut, and here the goal is the same: we want to minimize the \emph{cut size}, i.e. the number of edges cut.
 
 However, despite all the similarities between the matrix partitioning problem and the graph partitioning one, it has been shown \cite{hypergraph_model} that this cut-edge metric is not an accurate representation of the communication volume. Additional criticism \cite{hendrickson_emperor} comes from the fact that the graph partitioning approach can only handle square symmetric matrices, even though it has been shown to be a good enough approximation in that case \cite{zoltan_worth-it}. Moreover, it was also shown \cite{hendrickson_kolda} that these disadvantages hold for all application of graph partitioning in parallel computing, and not only our problem of matrix partitioning for sparse matrix-vector multiplication. An exact way of modeling the matrix partitioning problem is through the concept of hypergraph partitioning \cite{hypergraph_model}.
 
@@ -283,7 +283,7 @@ Our modified balance constraint is as follows:
 	\label{eq:balance_columnet}
 \end{align}
 
-The \textbf{row-net} model is similar to the one just described (as can be guessed from the name): it is exactly the transposed of the colum-net model, in the sense that now rows are hyperedges and columns are vertices of the hypergraph. The reasoning just described applies also to this model, with the little modification that now the weight of a vertex is the number of nonzeros in that column.
+The \textbf{row-net} model is similar to the one just described (as can be guessed from the name): it is exactly the transposed of the column-net model, in the sense that now rows are hyperedges and columns are vertices of the hypergraph. The reasoning just described applies also to this model, with the little modification that now the weight of a vertex is the number of nonzeros in that column.
 
 We see how the column-net model and row-net model have the advantage of fully assigning a row (or a column) to a processor; this has the advantage of eliminating completely one source of communication in our parallel sparse matrix-vector multiplication algorithm (respectively, the fan-in and fan-out). However, this advantage can easily become a weakness, because now the partitioning is forcedly 1-dimensional, and this is usually too strong of a restriction.
 
@@ -297,7 +297,7 @@ On a higher level, one of the benefits of this decomposition model is easy to un
 
 Among the models used to translate matrix partitioning into hypergraph partitioning, we already mentioned row-net and column-net \cite{hypergraph_model}, proposed in 1999, and a more recent fine-grained approach \cite{hypergraph_finegrain}, proposed in 2001. 
 
-In addition to these models, there has been some research effort towards the creation of more sofisticated methods, which often comprise several stages and combine different models. Recently Pelt and Bisseling proposed the \textbf{medium-grain} method \cite{mediumgrain}.  As this method is at the base of our work, a more detailed explanation will be given in Section \ref{sec:mediumgrain}.
+In addition to these models, there has been some research effort towards the creation of more sophisticated methods, which often comprise several stages and combine different models. Recently Pelt and Bisseling proposed the \textbf{medium-grain} method \cite{mediumgrain}.  As this method is at the base of our work, a more detailed explanation will be given in Section \ref{sec:mediumgrain}.
 
 For example, Uçar and Aykanat \cite{hypergraph_revisiting} first employ an elementary 1-dimensional hypergraph model, and then they transform it in several ways to different hypergraph models suitable for both symmetric and unsymmetric matrix partitionings; it is important to note that these models also include the input and output vectors, and therefore a few extra vertices are added to the hypergraph.
 
@@ -320,7 +320,7 @@ Finally, these existing software partitioners are all based on \emph{recursive b
 
 \section{Medium-grain method} \label{sec:mediumgrain}
 
-All of the possible ways of translating the matrix partitioning problem into a hypergraph partitioning problem have different advantages and drawbacks: the 1-dimensional ones, row-net and colum-net, eliminate completely one source of communication but are somewhat too restrictive; fine-grain, on the contrary, does not provide any kind of limitation on the choices for the partitioning, but the resulting hypergraph is often too big to manage.
+All of the possible ways of translating the matrix partitioning problem into a hypergraph partitioning problem have different advantages and drawbacks: the 1-dimensional ones, row-net and column-net, eliminate completely one source of communication but are somewhat too restrictive; fine-grain, on the contrary, does not provide any kind of limitation on the choices for the partitioning, but the resulting hypergraph is often too big to manage.
 
 A new method has recently been proposed by Pelt and Bisseling \cite{mediumgrain}, which can be described as a sort of middle ground between the 1-dimensional models and fine-grain model. The resulting partitioning is 2-dimensional by design (thus avoiding the limitations of the row-net and column-net models), but it still imposes that clusters of nonzeros from the same rows and columns are assigned to the same processor, thus reducing the size of the final hypergraph, avoiding the main disadvantage of the fine-grain model.
 

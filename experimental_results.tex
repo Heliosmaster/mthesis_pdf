@@ -72,7 +72,7 @@ These matrices are mainly from the University of Florida Sparse Matrix Collectio
 		\verb|lpi_ceria3d| 									& 3576 		& 4400 		& 21178 & Netlib Linear Programming \\
 		\verb|dfl001| 											& 12230 	& 6071 		& 35632 & Netlib Linear Programming \\ 
 		\verb|delaunay_n15| $\dagger$ 			& 32768 	& 32768 	& 196548 & Delaunay triangulations of random points in plane \\ 
-		\verb|deltaX| 											& 68600 	& 21961 	& 247424 & High fillin with exact partial pivoting \\
+		\verb|deltaX| 											& 68600 	& 21961 	& 247424 & High fill-in with exact partial pivoting \\
 		\verb|cre_b| 												& 9648 		& 77137 	& 260785 & Netlib Linear Programming \\ 
 		\verb|tbdmatlab| 										& 19859 	& 5979 		& 430171 & Term-by-document matrix \\ 
 		\verb|nug30|												& 52260 	& 379350 	& 1567800 & Netlib Linear Programming \\ 
@@ -563,7 +563,7 @@ Now, we can look at the results from the point of view of the proposed heuristic
 		\verb|pa_is_1| & 0.97 \\
 		\verb|pa_is_3| & 0.95 \\ \hline
 	\end{tabular}
-	\caption{Comparison of the geometric means of the communication volume for each heuristic, with and without iterative refinement. The values are normalized w.r.t. the first column. In the Table we distinguished between partition-oblivous and partition-aware heuristics.} \label{tab:comparison_ir}
+	\caption{Comparison of the geometric means of the communication volume for each heuristic, with and without iterative refinement. The values are normalized w.r.t. the first column. In the Table we distinguished between partition-oblivious and partition-aware heuristics.} \label{tab:comparison_ir}
 \end{table}
 
 Also from this table, the effectiveness of the iterative refinement procedure is clear, as all the results are lower than 1. Moreover, it is interesting to observe how the various heuristics benefit differently from such iterative refinement. To this extent, the partition-oblivious heuristics are the ones that exhibits the most variability in the improvement: \verb|po_localview| is only marginally improved (1\% better), whereas \verb|po_is| has a communication volume 21\% lower than without iterative refinement of the final partitionings.
