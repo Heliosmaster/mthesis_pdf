@@ -91,15 +91,22 @@ A simple heuristic is the extension of the original algorithm used in medium-gra
 \only<1>{		\foreach \x / \y in {1/1,1/3,2/2,4/5,4/4,7/3,8/5,6/7,9/1} { \fill[myred] ({\y-1},{-\x+1}) rectangle +(1,-1);}
 		\foreach \x / \y in {1/2,2/3,3/6,3/9,6/6,5/1,7/8,8/7,9/2} { \fill[myblue] ({\y-1},{-\x+1}) rectangle +(1,-1);}
 	}
-\only<2>{		\foreach \x / \y in {1/1,1/3,2/2,7/3,6/7,9/1} { \fill[myred] ({\y-1},{-\x+1}) rectangle +(1,-1);}
-		\foreach \x / \y in {1/2,2/3,8/7,9/2} { \fill[myblue] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+\only<2>{		\foreach \x / \y in {1/1,1/3,2/2,4/5,4/4,7/3,8/5,6/7,9/1} { \fill[myred] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+		\foreach \x / \y in {1/2,2/3,3/6,3/9,5/1,7/8,8/7,9/2} { \fill[myblue] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+	\foreach \x / \y in {6/6} { \fill[mypurple] ({\y-1},{-\x+1}) rectangle +(1,-1);}
 	}
-\only<2->{		\foreach \x / \y in {4/4,3/9,7/8,8/5,6/6} { \fill[mypurple] ({\y-1},{-\x+1}) rectangle +(1,-1);}
-		\foreach \x / \y in {4/5,3/6,5/1} { \fill[mygreen] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+
+	
+	\only<3>{		\foreach \x / \y in {1/1,1/3,2/2,7/3,6/7,9/1,4/4,4/5} { \fill[myred] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+		\foreach \x / \y in {1/2,2/3,8/7,9/2,3/6,3/9} { \fill[myblue] ({\y-1},{-\x+1}) rectangle +(1,-1);}
 	}
-\only<3->{
+\only<3->{		\foreach \x / \y in {7/8,8/5,6/6} { \fill[mypurple] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+		\foreach \x / \y in {5/1} { \fill[mygreen] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+	}
+\only<4->{
 	\foreach \x / \y in {1/1,1/3,2/2,7/3,6/7,9/1} { \fill[mygreen] ({\y-1},{-\x+1}) rectangle +(1,-1);}
-		\foreach \x / \y in {1/2,2/3,8/7,9/2} { \fill[mygreen] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+		\foreach \x / \y in {1/2,2/3,8/7,9/2,4/5,3/6} { \fill[mygreen] ({\y-1},{-\x+1}) rectangle +(1,-1);}
+		\foreach \x / \y in {4/4,3/9} { \fill[mypurple] ({\y-1},{-\x+1}) rectangle +(1,-1);}
 	}
 
 		\draw[thick] (0,-9) rectangle (9,0);
